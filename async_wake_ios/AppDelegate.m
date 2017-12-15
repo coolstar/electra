@@ -21,6 +21,12 @@
   // Override point for customization after application launch.
 	mach_port_t user_client;
   mach_port_t tfp0 = get_tfp0(&user_client);
+	
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *documentsDirectory = [paths objectAtIndex:0];
+	
+	NSString *fileName = [NSString stringWithFormat:@"%@/kernel", documentsDirectory];
+	
 	let_the_fun_begin(tfp0, user_client);
 	
 	

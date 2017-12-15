@@ -91,6 +91,7 @@
 		B07A023B1FB09B6F0018ACE5 /* async_wake_ios */ = {
 			isa = PBXGroup;
 			children = (
+				BCF206541FE32E1D0081CBE5 /* the_fun_part */,
 				B07A023C1FB09B6F0018ACE5 /* AppDelegate.h */,
 				B07A023D1FB09B6F0018ACE5 /* AppDelegate.m */,
 				B07A023F1FB09B6F0018ACE5 /* ViewController.h */,
@@ -118,12 +119,19 @@
 				B04E25081FCD6DB300F09CCE /* kutils.h */,
 				B0F5AA3D1FDE87E80073FD88 /* early_kalloc.c */,
 				B0F5AA3E1FDE87E80073FD88 /* early_kalloc.h */,
-				BC8EE46A1FE272CF00402F32 /* fun.c */,
-				BC8EE46B1FE272CF00402F32 /* fun.h */,
-				BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */,
-				BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */,
 			);
 			path = async_wake_ios;
+			sourceTree = "<group>";
+		};
+		BCF206541FE32E1D0081CBE5 /* the_fun_part */ = {
+			isa = PBXGroup;
+			children = (
+				BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */,
+				BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */,
+				BC8EE46A1FE272CF00402F32 /* fun.c */,
+				BC8EE46B1FE272CF00402F32 /* fun.h */,
+			);
+			path = the_fun_part;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
