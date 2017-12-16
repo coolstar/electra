@@ -25,8 +25,6 @@ uint64_t find_cpacr_write(void);
 uint64_t find_str(const char *string);
 uint64_t find_amfiops(void);
 uint64_t find_sysbootnonce(void);
-uint64_t find_trustcache(void);
-uint64_t find_amficache(void);
 uint64_t find_symbol(const char *symbol);
 
 // Funnnn
@@ -35,5 +33,8 @@ uint64_t find_add_x0_x0_0x40_ret(void);
 uint64_t find_copyout(void);
 uint64_t find_bzero(void);
 uint64_t find_bcopy(void);
+uint64_t find_rootvnode(void);
+uint64_t find_trustcache(void); // TODO
+uint64_t find_amficache(void);
 
 #endif

