@@ -22,8 +22,13 @@
 		B0EF11141FCC6F9C00C1D14E /* kcall.c in Sources */ = {isa = PBXBuildFile; fileRef = B0EF11121FCC6F9C00C1D14E /* kcall.c */; };
 		B0EF11171FCC784B00C1D14E /* symbols.c in Sources */ = {isa = PBXBuildFile; fileRef = B0EF11151FCC784B00C1D14E /* symbols.c */; };
 		B0F5AA3F1FDE87E90073FD88 /* early_kalloc.c in Sources */ = {isa = PBXBuildFile; fileRef = B0F5AA3D1FDE87E80073FD88 /* early_kalloc.c */; };
+		BC8B64C41FE5252F00EDF749 /* fun_objc.m in Sources */ = {isa = PBXBuildFile; fileRef = BC8B64C31FE5252F00EDF749 /* fun_objc.m */; };
 		BC8EE46C1FE272CF00402F32 /* fun.c in Sources */ = {isa = PBXBuildFile; fileRef = BC8EE46A1FE272CF00402F32 /* fun.c */; };
 		BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */ = {isa = PBXBuildFile; fileRef = BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */; };
+		BC9969001FE663B700A4EDB9 /* launchctl in Resources */ = {isa = PBXBuildFile; fileRef = BC9968FF1FE663B700A4EDB9 /* launchctl */; };
+		BC9969021FE6659C00A4EDB9 /* test_fsigned.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC9969011FE6659C00A4EDB9 /* test_fsigned.plist */; };
+		BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC9969031FE66CE200A4EDB9 /* ent.plist */; };
+		BC99690E1FE673EF00A4EDB9 /* test_fsigned in Resources */ = {isa = PBXBuildFile; fileRef = BC99690D1FE673EE00A4EDB9 /* test_fsigned */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,10 +60,17 @@
 		B0EF11161FCC784B00C1D14E /* symbols.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = symbols.h; sourceTree = "<group>"; };
 		B0F5AA3D1FDE87E80073FD88 /* early_kalloc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = early_kalloc.c; sourceTree = "<group>"; };
 		B0F5AA3E1FDE87E80073FD88 /* early_kalloc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = early_kalloc.h; sourceTree = "<group>"; };
+		BC71C3741FE60FF0004C7C42 /* bootstrap.dmg */ = {isa = PBXFileReference; lastKnownFileType = file; path = bootstrap.dmg; sourceTree = "<group>"; };
+		BC8B64C31FE5252F00EDF749 /* fun_objc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = fun_objc.m; sourceTree = "<group>"; };
+		BC8B64C51FE5253B00EDF749 /* fun_objc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fun_objc.h; sourceTree = "<group>"; };
 		BC8EE46A1FE272CF00402F32 /* fun.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fun.c; sourceTree = "<group>"; };
 		BC8EE46B1FE272CF00402F32 /* fun.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fun.h; sourceTree = "<group>"; };
 		BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = patchfinder64.c; sourceTree = "<group>"; };
 		BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = patchfinder64.h; sourceTree = "<group>"; };
+		BC9968FF1FE663B700A4EDB9 /* launchctl */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = launchctl; sourceTree = "<group>"; };
+		BC9969011FE6659C00A4EDB9 /* test_fsigned.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = test_fsigned.plist; sourceTree = "<group>"; };
+		BC9969031FE66CE200A4EDB9 /* ent.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
+		BC99690D1FE673EE00A4EDB9 /* test_fsigned */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = test_fsigned; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,34 +103,39 @@
 		B07A023B1FB09B6F0018ACE5 /* async_wake_ios */ = {
 			isa = PBXGroup;
 			children = (
-				BCF206541FE32E1D0081CBE5 /* the_fun_part */,
+				BC71C3741FE60FF0004C7C42 /* bootstrap.dmg */,
 				B07A023C1FB09B6F0018ACE5 /* AppDelegate.h */,
+				BC99690D1FE673EE00A4EDB9 /* test_fsigned */,
 				B07A023D1FB09B6F0018ACE5 /* AppDelegate.m */,
-				B07A023F1FB09B6F0018ACE5 /* ViewController.h */,
-				B07A02401FB09B6F0018ACE5 /* ViewController.m */,
-				B07A02421FB09B6F0018ACE5 /* Main.storyboard */,
+				BC9969011FE6659C00A4EDB9 /* test_fsigned.plist */,
+				B04E250A1FCF083A00F09CCE /* arm64_state.h */,
 				B07A02451FB09B6F0018ACE5 /* Assets.xcassets */,
-				B07A02471FB09B6F0018ACE5 /* LaunchScreen.storyboard */,
-				B07A024A1FB09B6F0018ACE5 /* Info.plist */,
-				B07A024B1FB09B6F0018ACE5 /* main.m */,
 				B07A02521FB09C3D0018ACE5 /* async_wake.c */,
 				B07A02531FB09C3D0018ACE5 /* async_wake.h */,
-				B003EB331FC583CA00C58441 /* kmem.c */,
-				B003EB341FC583CA00C58441 /* kmem.h */,
-				B04E250A1FCF083A00F09CCE /* arm64_state.h */,
-				B003EB361FC5863800C58441 /* find_port.c */,
-				B003EB371FC5863800C58441 /* find_port.h */,
-				B003EB391FC58F4900C58441 /* kdbg.c */,
-				B003EB3A1FC58F4900C58441 /* kdbg.h */,
-				B0EF11151FCC784B00C1D14E /* symbols.c */,
-				B0EF11161FCC784B00C1D14E /* symbols.h */,
-				B0EF11121FCC6F9C00C1D14E /* kcall.c */,
-				B0D79D611FDED41000B4F233 /* README */,
-				B0EF11131FCC6F9C00C1D14E /* kcall.h */,
-				B04E25071FCD6DB300F09CCE /* kutils.c */,
-				B04E25081FCD6DB300F09CCE /* kutils.h */,
+				BC9968FF1FE663B700A4EDB9 /* launchctl */,
 				B0F5AA3D1FDE87E80073FD88 /* early_kalloc.c */,
 				B0F5AA3E1FDE87E80073FD88 /* early_kalloc.h */,
+				B003EB361FC5863800C58441 /* find_port.c */,
+				B003EB371FC5863800C58441 /* find_port.h */,
+				B07A024A1FB09B6F0018ACE5 /* Info.plist */,
+				B0EF11121FCC6F9C00C1D14E /* kcall.c */,
+				B0EF11131FCC6F9C00C1D14E /* kcall.h */,
+				B003EB391FC58F4900C58441 /* kdbg.c */,
+				B003EB3A1FC58F4900C58441 /* kdbg.h */,
+				B003EB331FC583CA00C58441 /* kmem.c */,
+				B003EB341FC583CA00C58441 /* kmem.h */,
+				B04E25071FCD6DB300F09CCE /* kutils.c */,
+				B04E25081FCD6DB300F09CCE /* kutils.h */,
+				B07A02471FB09B6F0018ACE5 /* LaunchScreen.storyboard */,
+				B07A024B1FB09B6F0018ACE5 /* main.m */,
+				B07A02421FB09B6F0018ACE5 /* Main.storyboard */,
+				B0D79D611FDED41000B4F233 /* README */,
+				B0EF11151FCC784B00C1D14E /* symbols.c */,
+				B0EF11161FCC784B00C1D14E /* symbols.h */,
+				BCF206541FE32E1D0081CBE5 /* the_fun_part */,
+				B07A023F1FB09B6F0018ACE5 /* ViewController.h */,
+				B07A02401FB09B6F0018ACE5 /* ViewController.m */,
+				BC9969031FE66CE200A4EDB9 /* ent.plist */,
 			);
 			path = async_wake_ios;
 			sourceTree = "<group>";
@@ -126,10 +143,12 @@
 		BCF206541FE32E1D0081CBE5 /* the_fun_part */ = {
 			isa = PBXGroup;
 			children = (
-				BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */,
-				BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */,
 				BC8EE46A1FE272CF00402F32 /* fun.c */,
 				BC8EE46B1FE272CF00402F32 /* fun.h */,
+				BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */,
+				BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */,
+				BC8B64C31FE5252F00EDF749 /* fun_objc.m */,
+				BC8B64C51FE5253B00EDF749 /* fun_objc.h */,
 			);
 			path = the_fun_part;
 			sourceTree = "<group>";
@@ -192,10 +211,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC9969021FE6659C00A4EDB9 /* test_fsigned.plist in Resources */,
 				B0D79D621FDED41000B4F233 /* README in Resources */,
+				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
+				BC99690E1FE673EF00A4EDB9 /* test_fsigned in Resources */,
 				B07A02491FB09B6F0018ACE5 /* LaunchScreen.storyboard in Resources */,
 				B07A02461FB09B6F0018ACE5 /* Assets.xcassets in Resources */,
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
+				BC9969001FE663B700A4EDB9 /* launchctl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,6 +234,7 @@
 				B07A02411FB09B6F0018ACE5 /* ViewController.m in Sources */,
 				BC8EE46C1FE272CF00402F32 /* fun.c in Sources */,
 				B04E25091FCD6DB300F09CCE /* kutils.c in Sources */,
+				BC8B64C41FE5252F00EDF749 /* fun_objc.m in Sources */,
 				B07A024C1FB09B6F0018ACE5 /* main.m in Sources */,
 				B003EB381FC5863800C58441 /* find_port.c in Sources */,
 				B07A02541FB09C3D0018ACE5 /* async_wake.c in Sources */,
@@ -354,9 +378,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 88R89D928E;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = async_wake_ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/async_wake_ios/the_fun_part",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,
@@ -373,9 +402,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 88R89D928E;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = async_wake_ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/async_wake_ios/the_fun_part",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,

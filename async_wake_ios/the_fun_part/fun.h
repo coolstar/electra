@@ -37,6 +37,8 @@
 #include "kdbg.h"
 #include "patchfinder64.h"
 
+#include "fun_objc.h"
+
 kern_return_t mach_vm_read(
 						   vm_map_t target_task,
 						   mach_vm_address_t address,
