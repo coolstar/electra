@@ -101,4 +101,7 @@ IOServiceOpen(
 
 void let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client);
 
+void inject_trusts(int pathc, const char *paths[]);
+int startprog(uint64_t kern_ucred, const char *prog, const char* args[]);
+
 #endif /* fun_h */

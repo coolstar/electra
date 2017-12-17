@@ -19,39 +19,16 @@
 #import <Foundation/Foundation.h>
 
 
-const char* binaryName() {
-	char path[4096];
-	uint32_t size = sizeof(path);
-	_NSGetExecutablePath(path, &size);
-	char *pt = realpath(path, NULL);
-	
-	NSString *execpath = [[NSString stringWithUTF8String:pt] stringByDeletingLastPathComponent];
-	
-	NSString *bootstrap = [execpath stringByAppendingPathComponent:@"test_fsigned"];
-	return [bootstrap UTF8String];
-}
+const char* progname(const char* prog) {
+    char path[4096];
+    uint32_t size = sizeof(path);
+    _NSGetExecutablePath(path, &size);
+    char *pt = realpath(path, NULL);
 
-const char* launchctlpath() {
-	char path[4096];
-	uint32_t size = sizeof(path);
-	_NSGetExecutablePath(path, &size);
-	char *pt = realpath(path, NULL);
-	
-	NSString *execpath = [[NSString stringWithUTF8String:pt] stringByDeletingLastPathComponent];
-	
-	NSString *bootstrap = [execpath stringByAppendingPathComponent:@"launchctl"];
-	return [bootstrap UTF8String];
-}
-const char* plistPath2() {
-	char path[4096];
-	uint32_t size = sizeof(path);
-	_NSGetExecutablePath(path, &size);
-	char *pt = realpath(path, NULL);
-	
-	NSString *execpath = [[NSString stringWithUTF8String:pt] stringByDeletingLastPathComponent];
-	
-	NSString *bootstrap = [execpath stringByAppendingPathComponent:@"test_fsigned.plist"];
-	return [bootstrap UTF8String];
+    NSString *execpath = [[NSString stringWithUTF8String:pt] stringByDeletingLastPathComponent];
+
+    NSString *bootstrap = [execpath stringByAppendingPathComponent:[NSString stringWithUTF8String:prog]];
+    return [bootstrap UTF8String];
 }
 
 const char* realPath() {

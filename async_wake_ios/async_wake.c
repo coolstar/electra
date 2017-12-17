@@ -568,7 +568,9 @@ mach_port_t get_kernel_memory_rw() {
     // we want the GC to actually finish, so go slow...
     pthread_yield_np();
     usleep(10000);
-    printf("%d\n", i);
+      if (i%20 == 0) {
+          printf("%d\n", i);
+      }
   }
   
 
@@ -728,9 +730,9 @@ mach_port_t get_tfp0(mach_port_t*uc) {
 	
 	*uc = user_client;
   
-  if (probably_have_correct_symbols()) {
-    printf("have symbols for this device, testing the kernel debugger...\n");
-    test_kdbg();
-  }
+//  if (probably_have_correct_symbols()) {
+//    printf("have symbols for this device, testing the kernel debugger...\n");
+//    test_kdbg();
+//  }
   return tfp0;
 }
