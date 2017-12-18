@@ -679,318 +679,6 @@ find_strref(const char *string, int n, int prelink)
     return find_reference(str - kernel + kerndumpbase, n, prelink);
 }
 
-addr_t
-find_gPhysBase(void)
-{
-    addr_t ret, val;
-    addr_t ref = find_strref("\"pmap_map_high_window_bd: insufficient pages", 1, 0);
-    if (!ref) {
-        return 0;
-    }
-    ref -= kerndumpbase;
-    ret = step64(kernel, ref, 64, INSN_RET);
-    if (!ret) {
-        return 0;
-    }
-    val = calc64(kernel, ref, ret, 8);
-    if (!val) {
-        return 0;
-    }
-    return val + kerndumpbase;
-}
-
-addr_t
-find_kernel_pmap(void)
-{
-    addr_t call, bof, val;
-    addr_t ref = find_strref("\"pmap_map_bd\"", 1, 0);
-    if (!ref) {
-        return 0;
-    }
-    ref -= kerndumpbase;
-    call = step64_back(kernel, ref, 64, INSN_CALL);
-    if (!call) {
-        return 0;
-    }
-    bof = bof64(kernel, xnucore_base, call);
-    if (!bof) {
-        return 0;
-    }
-    val = calc64(kernel, bof, call, 2);
-    if (!val) {
-        return 0;
-    }
-    return val + kerndumpbase;
-}
-
-addr_t
-find_amfiret(void)
-{
-    addr_t ret;
-    addr_t ref = find_strref("AMFI: hook..execve() killing pid %u: %s\n", 1, 1);
-    if (!ref) {
-        return 0;
-    }
-    ref -= kerndumpbase;
-    ret = step64(kernel, ref, 512, INSN_RET);
-    if (!ret) {
-        return 0;
-    }
-    return ret + kerndumpbase;
-}
-
-addr_t
-find_ret_0(void)
-{
-    addr_t off;
-    uint32_t *k;
-    k = (uint32_t *)(kernel + xnucore_base);
-    for (off = 0; off < xnucore_size - 4; off += 4, k++) {
-        if (k[0] == 0xAA1F03E0 && k[1] == 0xD65F03C0) {
-            return off + xnucore_base + kerndumpbase;
-        }
-    }
-    k = (uint32_t *)(kernel + prelink_base);
-    for (off = 0; off < prelink_size - 4; off += 4, k++) {
-        if (k[0] == 0xAA1F03E0 && k[1] == 0xD65F03C0) {
-            return off + prelink_base + kerndumpbase;
-        }
-    }
-    return 0;
-}
-
-addr_t
-find_amfi_memcmpstub(void)
-{
-    addr_t call, dest, reg;
-    addr_t ref = find_strref("%s: Possible race detected. Rejecting.", 1, 1);
-    if (!ref) {
-        return 0;
-    }
-    ref -= kerndumpbase;
-    call = step64_back(kernel, ref, 64, INSN_CALL);
-    if (!call) {
-        return 0;
-    }
-    dest = follow_call64(kernel, call);
-    if (!dest) {
-        return 0;
-    }
-    reg = calc64(kernel, dest, dest + 8, 16);
-    if (!reg) {
-        return 0;
-    }
-    return reg + kerndumpbase;
-}
-
-addr_t
-find_sbops(void)
-{
-    addr_t off, what;
-    uint8_t *str = boyermoore_horspool_memmem(kernel + pstring_base, pstring_size, (uint8_t *)"Seatbelt sandbox policy", sizeof("Seatbelt sandbox policy") - 1);
-    if (!str) {
-        return 0;
-    }
-    what = str - kernel + kerndumpbase;
-    for (off = 0; off < kernel_size - prelink_base; off += 8) {
-        if (*(uint64_t *)(kernel + prelink_base + off) == what) {
-            return *(uint64_t *)(kernel + prelink_base + off + 24);
-        }
-    }
-    return 0;
-}
-
-addr_t
-find_lwvm_mapio_patch(void)
-{
-    addr_t call, dest, reg;
-    addr_t ref = find_strref("_mapForIO", 1, 1);
-    if (!ref) {
-        return 0;
-    }
-    ref -= kerndumpbase;
-    call = step64(kernel, ref, 64, INSN_CALL);
-    if (!call) {
-        return 0;
-    }
-    call = step64(kernel, call + 4, 64, INSN_CALL);
-    if (!call) {
-        return 0;
-    }
-    dest = follow_call64(kernel, call);
-    if (!dest) {
-        return 0;
-    }
-    reg = calc64(kernel, dest, dest + 8, 16);
-    if (!reg) {
-        return 0;
-    }
-    return reg + kerndumpbase;
-}
-
-addr_t
-find_lwvm_mapio_newj(void)
-{
-    addr_t call;
-    addr_t ref = find_strref("_mapForIO", 1, 1);
-    if (!ref) {
-        return 0;
-    }
-    ref -= kerndumpbase;
-    call = step64(kernel, ref, 64, INSN_CALL);
-    if (!call) {
-        return 0;
-    }
-    call = step64(kernel, call + 4, 64, INSN_CALL);
-    if (!call) {
-        return 0;
-    }
-    call = step64(kernel, call + 4, 64, INSN_CALL);
-    if (!call) {
-        return 0;
-    }
-    call = step64_back(kernel, call, 64, INSN_B);
-    if (!call) {
-        return 0;
-    }
-    return call + 4 + kerndumpbase;
-}
-
-addr_t
-find_cpacr_write(void)
-{
-    addr_t off;
-    uint32_t *k;
-    k = (uint32_t *)(kernel + xnucore_base);
-    for (off = 0; off < xnucore_size - 4; off += 4, k++) {
-        if (k[0] == 0xd5181040) {
-            return off + xnucore_base + kerndumpbase;
-        }
-    }
-    return 0;
-}
-
-addr_t
-find_str(const char *string)
-{
-    uint8_t *str = boyermoore_horspool_memmem(kernel, kernel_size, (uint8_t *)string, strlen(string));
-    if (!str) {
-        return 0;
-    }
-    return str - kernel + kerndumpbase;
-}
-
-addr_t
-find_entry(void)
-{
-    /* XXX returns an unslid address */
-    return kernel_entry;
-}
-
-const unsigned char *
-find_mh(void)
-{
-    return kernel_mh;
-}
-
-addr_t
-find_amfiops(void)
-{
-    addr_t off, what;
-    uint8_t *str = boyermoore_horspool_memmem(kernel + pstring_base, pstring_size, (uint8_t *)"Apple Mobile File Integrity", sizeof("Apple Mobile File Integrity") - 1);
-    if (!str) {
-        return 0;
-    }
-    what = str - kernel + kerndumpbase;
-    /* XXX will only work on a dumped kernel */
-    for (off = 0; off < kernel_size - prelink_base; off += 8) {
-        if (*(uint64_t *)(kernel + prelink_base + off) == what) {
-            return *(uint64_t *)(kernel + prelink_base + off + 0x18);
-        }
-    }
-    return 0;
-}
-
-addr_t
-find_sysbootnonce(void)
-{
-    addr_t off, what;
-    uint8_t *str = boyermoore_horspool_memmem(kernel + cstring_base, cstring_size, (uint8_t *)"com.apple.System.boot-nonce", sizeof("com.apple.System.boot-nonce") - 1);
-    if (!str) {
-        return 0;
-    }
-    what = str - kernel + kerndumpbase;
-    for (off = 0; off < kernel_size - xnucore_base; off += 8) {
-        if (*(uint64_t *)(kernel + xnucore_base + off) == what) {
-            return xnucore_base + off + 8 + 4 + kerndumpbase;
-        }
-    }
-    return 0;
-}
-
-/* extra_recipe **************************************************************/
-
-#define INSN_STR8 0xF9000000 | 8, 0xFFC00000 | 0x1F
-
-addr_t
-find_AGXCommandQueue_vtable(void)
-{
-    addr_t val, str8;
-    addr_t ref = find_strref("AGXCommandQueue", 1, 1);
-    if (!ref) {
-        return 0;
-    }
-    val = find_register_value(ref, 0);
-    if (!val) {
-        return 0;
-    }
-    ref = find_reference(val, 1, 1);
-    if (!ref) {
-        return 0;
-    }
-    ref -= kerndumpbase;
-    str8 = step64(kernel, ref, 32, INSN_STR8);
-    if (!str8) {
-        return 0;
-    }
-    val = calc64(kernel, ref, str8, 8);
-    if (!val) {
-        return 0;
-    }
-    return val + kerndumpbase;
-}
-
-addr_t
-find_call5(void)
-{
-    addr_t bof;
-    uint8_t gadget[] = { 0x95, 0x5A, 0x40, 0xF9, 0x68, 0x02, 0x40, 0xF9, 0x88, 0x5A, 0x00, 0xF9, 0x60, 0xA2, 0x40, 0xA9 };
-    uint8_t *str = boyermoore_horspool_memmem(kernel + prelink_base, prelink_size, gadget, sizeof(gadget));
-    if (!str) {
-        return 0;
-    }
-    bof = bof64(kernel, prelink_base, str - kernel);
-    if (!bof) {
-        return 0;
-    }
-    return bof + kerndumpbase;
-}
-
-addr_t
-find_realhost(addr_t priv)
-{
-    addr_t val;
-    if (!priv) {
-        return 0;
-    }
-    priv -= kerndumpbase;
-    val = calc64(kernel, priv, priv + 12, 0);
-    if (!val) {
-        return 0;
-    }
-    return val + kerndumpbase;
-}
-
 /****** fun *******/
 
 addr_t find_add_x0_x0_0x40_ret(void) {
@@ -1137,7 +825,6 @@ uint64_t find_rootvnode(void) {
 	
 	uint64_t val = calc64(kernel, start, weird_instruction, 8);
 	if (!val) {
-		printf("Failed to calculate x8");
 		return 0;
 	}
 	
@@ -1148,19 +835,16 @@ addr_t find_trustcache(void) {
 	addr_t call, func, val;
 	addr_t ref = find_strref("com.apple.MobileFileIntegrity", 1, 1);
 	if (!ref) {
-		printf("didnt find string ref\n");
 		return 0;
 	}
 	ref -= kerndumpbase;
 	call = step64(kernel, ref, 32, INSN_CALL);
 	if (!call) {
-		printf("couldn't find the call\n");
 		return 0;
 	}
 	call = step64(kernel, call+4, 32, INSN_CALL);
 	func = follow_call64(kernel, call);
 	if (!func) {
-		printf("couldn't follow the call\n");
 		return 0;
 	}
 	val = calc64(kernel, func, func + 16, 8);
@@ -1174,117 +858,25 @@ addr_t find_amficache(void) {
 	addr_t call, func, bof, val;
 	addr_t ref = find_strref("com.apple.MobileFileIntegrity", 1, 1);
 	if (!ref) {
-		printf("didnt find string ref\n");
 		return 0;
 	}
 	ref -= kerndumpbase;
 	call = step64(kernel, ref, 32, INSN_CALL);
 	if (!call) {
-		printf("couldn't find the call\n");
 		return 0;
 	}
 	call = step64(kernel, call+4, 32, INSN_CALL);
 	func = follow_call64(kernel, call);
 	if (!func) {
-		printf("couldn't follow the call\n");
 		return 0;
 	}
 	bof = bof64(kernel, func - 256, func);
 	if (!bof) {
-		printf("couldn't find the start of the function\n");
 		return 0;
 	}
 	val = calc64(kernel, bof, func, 9);
 	if (!val) {
-		printf("couldn't find x9\n");
 		return 0;
 	}
 	return val + kerndumpbase;
 }
-
-
-/****** end of fun *******/
-
-#include <mach-o/nlist.h>
-
-uint64_t find_symbol(const char *symbol)
-{
-    unsigned i;
-    const struct mach_header *hdr = kernel_mh;
-    const uint8_t *q;
-    int is64 = 0;
-
-    if (IS64(hdr)) {
-        is64 = 4;
-    }
-
-    /* XXX will only work on a decrypted kernel */
-    if (!kernel_delta) {
-		printf("no delta :/\n");
-        return 0;
-    }
-
-    /* XXX I should cache these.  ohwell... */
-    q = (uint8_t *)(hdr + 1) + is64;
-    for (i = 0; i < hdr->ncmds; i++) {
-        const struct load_command *cmd = (struct load_command *)q;
-        if (cmd->cmd == LC_SYMTAB) {
-			printf("found the symbol table\n");
-            const struct symtab_command *sym = (struct symtab_command *)q;
-            const char *stroff = (const char *)kernel + sym->stroff + kernel_delta;
-            if (is64) {
-                uint32_t k;
-                const struct nlist_64 *s = (struct nlist_64 *)(kernel + sym->symoff + kernel_delta);
-                for (k = 0; k < sym->nsyms; k++) {
-                    if (s[k].n_type & N_STAB) {
-                        continue;
-                    }
-                    if (s[k].n_value && (s[k].n_type & N_TYPE) != N_INDR) {
-                        if (!strcmp(symbol, stroff + s[k].n_un.n_strx)) {
-                            /* XXX this is an unslid address */
-                            return s[k].n_value;
-                        }
-                    }
-                }
-            }
-        }
-        q = q + cmd->cmdsize;
-    }
-    return 0;
-}
-
-#ifdef HAVE_MAIN
-
-/* test **********************************************************************/
-
-int
-main(int argc, char **argv)
-{
-    int rv;
-    addr_t base = 0;
-    const addr_t vm_kernel_slide = 0;
-    rv = init_kernel(base, (argc > 1) ? argv[1] : "krnl");
-    assert(rv == 0);
-
-    addr_t AGXCommandQueue_vtable = find_AGXCommandQueue_vtable();
-    printf("\t\t\t<string>0x%llx</string>\n", AGXCommandQueue_vtable - vm_kernel_slide);
-    addr_t OSData_getMetaClass = find_symbol("__ZNK6OSData12getMetaClassEv");
-    printf("\t\t\t<string>0x%llx</string>\n", OSData_getMetaClass);
-    addr_t OSSerializer_serialize = find_symbol("__ZNK12OSSerializer9serializeEP11OSSerialize");
-    printf("\t\t\t<string>0x%llx</string>\n", OSSerializer_serialize);
-    addr_t k_uuid_copy = find_symbol("_uuid_copy");
-    printf("\t\t\t<string>0x%llx</string>\n", k_uuid_copy);
-    addr_t allproc = find_allproc();
-    printf("\t\t\t<string>0x%llx</string>\n", allproc);
-    addr_t realhost = find_realhost(find_symbol("_host_priv_self") + vm_kernel_slide);
-    printf("\t\t\t<string>0x%llx</string>\n", realhost - vm_kernel_slide);
-    addr_t call5 = find_call5();
-    printf("\t\t\t<string>0x%llx</string>\n", call5 - vm_kernel_slide);
-
-    assert(find_symbol("_rootvnode") == find_gPhysBase() + 0x38 - vm_kernel_slide);
-
-    term_kernel();
-    return 0;
-}
-
-#endif	/* HAVE_MAIN */
