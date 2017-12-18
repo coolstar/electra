@@ -126,7 +126,7 @@ uint8_t *getSHA256(const uint8_t* code_dir) {
 #include <mach-o/loader.h>
 uint8_t *getCodeDirectory(const char* name) {
     // Assuming it is a macho
-
+    
     FILE* fd = fopen(name, "r");
 
     uint32_t magic;
@@ -149,7 +149,7 @@ uint8_t *getCodeDirectory(const char* name) {
         off = sizeof(mh);
         ncmds = mh.ncmds;
     } else {
-        printf("%s is not a macho! (or has foreign endianness?)\n", name);
+        printf("%s is not a macho! (or has foreign endianness?) (magic: %x)\n", name, magic);
         return NULL;
     }
 
@@ -416,7 +416,7 @@ do { \
 		wk32(v_mount + 0x71, v_flag & ~(1 << 6));
 		
 		char *nmz = strdup("/dev/disk0s1s1");
-		int rv = mount("hfs", "/", MNT_UPDATE, (void *)&nmz);
+        int rv = mount("hfs", "/", MNT_UPDATE, (void *)&nmz);
 		printf("remounting: %d\n", rv);
 		
 		v_mount = rk64(rootfs_vnode + off);
@@ -429,6 +429,8 @@ do { \
 			printf("File already exists!\n");
 		}
 		close(fd);
+
+        rv = mount("hfs", "/Developer", MNT_UPDATE, (void *)&nmz);
 	}
 	
 	printf("Did we mount / as read+write? %s\n", file_exist("/.bit_of_fun") ? "yes" : "no");
@@ -451,11 +453,18 @@ do { \
     inject_trusts(1, (const char **)&(const char*[]){tar});
 
     int rv;
+
+    rv = startprog(kern_ucred, tar, (char **)&(const char*[]){ tar, "-xpf", progname("cydia.tar"), "-C", "/", NULL });
+    inject_trusts(1, (const char **)&(const char*[]){"/Applications/Cydia.app/Cydia"});
+
     rv = startprog(kern_ucred, tar, (char **)&(const char*[]){ tar, "-xpf", progname("binpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL });
     unlink(tar);
 
     int process_binlist(const char *path);
     rv = process_binlist("/" BOOTSTRAP_PREFIX "/binlist.txt");
+
+    const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
+    rv = startprog(kern_ucred, uicache, (char **)&(const char*[]){ uicache, NULL });
 
     if (rv == 0) {
         printf("Dropbear would be up soon\n");
@@ -650,6 +659,78 @@ int process_binlist(const char *path) {
     fclose(binlist);
 
     return 0;
+}
+
+void filltheshitup(void) {
+    uint64_t tc = find_trustcache();
+    printf("trust cache at: %016llx\n", rk64(tc));
+
+#define HASHES_PER_CHAIN 256
+
+#pragma pack(4)
+    struct dat_hash_t {
+        uint64_t a, b;
+        uint32_t c;
+    };
+#pragma pack()
+
+    static_assert(sizeof(struct dat_hash_t) == 20, "");
+
+    struct trust_chain {
+        uint64_t next;                 // +0x00 - the next struct trust_mem
+        unsigned char uuid[16];        // +0x08 - The uuid of the trust_mem (it doesn't seem important or checked apart from when importing a new trust chain)
+        unsigned int count;            // +0x18 - Number of hashes there are
+        struct dat_hash_t hash[HASHES_PER_CHAIN];                // +0x1C - The hashes
+    };
+
+    struct trust_chain fake_chain;
+    fake_chain.next = 0;
+
+    *(uint64_t *)&fake_chain.uuid[0] = 0xabadbabeabadbabe;
+    *(uint64_t *)&fake_chain.uuid[8] = 0xabadbabeabadbabe;
+
+    uint32_t i = 0;
+    uint64_t j = 0;
+    uint64_t k = 0;
+    int idx = 0;
+    uint64_t kernel_trust = kalloc(sizeof(fake_chain));
+    uint64_t initial_trust = kernel_trust;
+
+    do {
+        do {
+            do {
+                fake_chain.hash[idx].a = k;
+                fake_chain.hash[idx].b = j;
+                fake_chain.hash[idx].c = i;
+                ++idx;
+
+                if (idx == HASHES_PER_CHAIN) {
+                    if (i % 4096 == 0) {
+                        printf("copying at 0x%04x %08llx %08llx\n", i, j, k);
+                    }
+
+                    kwrite(kernel_trust, &fake_chain, sizeof(fake_chain));
+                    kwrite(kernel_trust, &fake_chain, sizeof(fake_chain));
+                    fake_chain.next = kernel_trust;
+                    kernel_trust = kalloc(sizeof(fake_chain));
+
+                    if (kernel_trust == -1) {
+                        printf("OUT OF MEMES!\n");
+                        exit(9);
+                    }
+
+                    idx = 0;
+                }
+
+                ++k;
+            } while (k != 0);
+            ++j;
+        } while (j != 0);
+        ++i;
+    } while (i != 0);
+
+    // Comment this line out to see `amfid` saying there is no signature on test_fsigned (or your binary)
+    wk64(tc, initial_trust);
 }
 
 
