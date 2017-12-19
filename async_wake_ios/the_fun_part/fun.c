@@ -404,6 +404,8 @@ do { \
 	} else {
 		printf("wrote test file: %p\n", f);
 	}
+    
+    unlink("/var/mobile/test.txt");
 	
 	// Remount / as rw - patch by xerub
 	{
@@ -434,7 +436,17 @@ do { \
 	}
 	
 	printf("Did we mount / as read+write? %s\n", file_exist("/.bit_of_fun") ? "yes" : "no");
-	
+    
+    unlink("/.bit_of_fun");
+    
+    FILE *fp = popen("/sbin/mount", "r");
+    
+    char *ln = NULL;
+    size_t len = 0;
+    
+    while (getline(&ln, &len, fp) != -1)
+        fputs(ln, stdout);
+    fclose(fp);
 //	uint8_t launchd[19];
 //	kread(find_amficache()+0x11358, launchd, 19);
 //
@@ -454,8 +466,8 @@ do { \
 
     int rv;
 
-    rv = startprog(kern_ucred, tar, (char **)&(const char*[]){ tar, "-xpf", progname("cydia.tar"), "-C", "/", NULL });
-    inject_trusts(1, (const char **)&(const char*[]){"/Applications/Cydia.app/Cydia"});
+    //rv = startprog(kern_ucred, tar, (char **)&(const char*[]){ tar, "-xpf", progname("cydia.tar"), "-C", "/", NULL });
+    //inject_trusts(1, (const char **)&(const char*[]){"/Applications/Cydia.app/Cydia"});
 
     rv = startprog(kern_ucred, tar, (char **)&(const char*[]){ tar, "-xpf", progname("binpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL });
     unlink(tar);
@@ -473,7 +485,7 @@ do { \
         printf("export PATH=\"$BOOTSTRAP_PREFIX/usr/local/bin:$BOOTSTRAP_PREFIX/usr/sbin:$BOOTSTRAP_PREFIX/usr/bin:$BOOTSTRAP_PREFIX/sbin:$BOOTSTRAP_PREFIX/bin\"\n");
         printf(" --- \n");
         const char *dbear = "/" BOOTSTRAP_PREFIX "/usr/local/bin/dropbear";
-        rv = startprog(kern_ucred, dbear, (char **)&(const char*[]){ dbear, "-E", "-m", "-F", "-S", "/" BOOTSTRAP_PREFIX, NULL });
+        rv = startprog(kern_ucred, dbear, (char **)&(const char*[]){ dbear, "-E", "-m", "-F", "-S", "/" BOOTSTRAP_PREFIX, "-p", "2222", NULL });
     }
 
 //	sleep(5);
