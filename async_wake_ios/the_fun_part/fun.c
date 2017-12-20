@@ -469,7 +469,7 @@ do { \
     //rv = startprog(kern_ucred, tar, (char **)&(const char*[]){ tar, "-xpf", progname("cydia.tar"), "-C", "/", NULL });
     //inject_trusts(1, (const char **)&(const char*[]){"/Applications/Cydia.app/Cydia"});
 
-    rv = startprog(kern_ucred, tar, (char **)&(const char*[]){ tar, "-xpf", progname("binpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL });
+    rv = startprog(kern_ucred, tar, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL });
     unlink(tar);
 
     int process_binlist(const char *path);
@@ -482,7 +482,7 @@ do { \
         printf("Dropbear would be up soon\n");
         printf("Please run after SSH: \n --- \n");
         printf("BOOTSTRAP_PREFIX=\"/" BOOTSTRAP_PREFIX "\"\n");
-        printf("export PATH=\"$BOOTSTRAP_PREFIX/usr/local/bin:$BOOTSTRAP_PREFIX/usr/sbin:$BOOTSTRAP_PREFIX/usr/bin:$BOOTSTRAP_PREFIX/sbin:$BOOTSTRAP_PREFIX/bin\"\n");
+        printf("export PATH=\"$BOOTSTRAP_PREFIX/usr/local/bin:$BOOTSTRAP_PREFIX/usr/sbin:$BOOTSTRAP_PREFIX/usr/bin:$BOOTSTRAP_PREFIX/sbin:$BOOTSTRAP_PREFIX/bin:/bin:/usr/bin:/sbin\"\n");
         printf(" --- \n");
         const char *dbear = "/" BOOTSTRAP_PREFIX "/usr/local/bin/dropbear";
         rv = startprog(kern_ucred, dbear, (char **)&(const char*[]){ dbear, "-E", "-m", "-F", "-S", "/" BOOTSTRAP_PREFIX, "-p", "2222", NULL });

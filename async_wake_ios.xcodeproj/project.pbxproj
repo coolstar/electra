@@ -32,6 +32,7 @@
 		BC9969021FE6659C00A4EDB9 /* test_fsigned.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC9969011FE6659C00A4EDB9 /* test_fsigned.plist */; };
 		BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC9969031FE66CE200A4EDB9 /* ent.plist */; };
 		BC99690E1FE673EF00A4EDB9 /* test_fsigned in Resources */ = {isa = PBXBuildFile; fileRef = BC99690D1FE673EE00A4EDB9 /* test_fsigned */; };
+		F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */ = {isa = PBXBuildFile; fileRef = F158610D1FEA002000795B90 /* gnubinpack.tar */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,6 +77,7 @@
 		BC9969011FE6659C00A4EDB9 /* test_fsigned.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = test_fsigned.plist; sourceTree = "<group>"; };
 		BC9969031FE66CE200A4EDB9 /* ent.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
 		BC99690D1FE673EE00A4EDB9 /* test_fsigned */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = test_fsigned; sourceTree = "<group>"; };
+		F158610D1FEA002000795B90 /* gnubinpack.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = gnubinpack.tar; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +110,7 @@
 		B07A023B1FB09B6F0018ACE5 /* async_wake_ios */ = {
 			isa = PBXGroup;
 			children = (
+				F158610D1FEA002000795B90 /* gnubinpack.tar */,
 				65F9D9651FE76113002F95F7 /* binpack.tar */,
 				65F9D9631FE7070A002F95F7 /* cydia.tar */,
 				65F9D95D1FE6E690002F95F7 /* tar */,
@@ -219,6 +222,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC9969021FE6659C00A4EDB9 /* test_fsigned.plist in Resources */,
+				F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */,
 				B0D79D621FDED41000B4F233 /* README in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
 				65F9D95E1FE6E690002F95F7 /* tar in Resources */,
@@ -387,7 +391,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6NYNW7W756;
+				DEVELOPMENT_TEAM = TCM49M8P5K;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = async_wake_ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -400,7 +404,7 @@
 					"-framework",
 					IOKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "rocks.stek29.async-wake-ios";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.coolstar.async-wake-ios";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -411,7 +415,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6NYNW7W756;
+				DEVELOPMENT_TEAM = TCM49M8P5K;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = async_wake_ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -424,7 +428,7 @@
 					"-framework",
 					IOKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "rocks.stek29.async-wake-ios";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.coolstar.async-wake-ios";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
