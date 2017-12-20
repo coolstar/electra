@@ -1,7 +1,6 @@
 #import "AppDelegate.h"
 #include "async_wake.h"
 #include "fun.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,19 +22,6 @@ typedef CFStringRef (*w)(int e);
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  // Override point for customization after application launch.
-	mach_port_t user_client;
-	mach_port_t tfp0 = get_tfp0(&user_client);
-	
-	let_the_fun_begin(tfp0, user_client);
-	
-	NSLog(@" ♫ KPP never bothered me anyway... ♫ ");
-	
-//	[@"test" writeToFile:@"/testingfiles" atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-	
-	// the app seems to remain even after stopped by xcode - we'll just force it to quit 
-	kill(getpid(), SIGKILL);
-	
   return YES;
 }
 
