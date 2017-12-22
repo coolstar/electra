@@ -474,6 +474,10 @@ do { \
 
     int process_binlist(const char *path);
     rv = process_binlist("/" BOOTSTRAP_PREFIX "/binlist.txt");
+    
+    printf("Checking custom list..\n");
+    
+    process_binlist("/" BOOTSTRAP_PREFIX "/customlist.txt");
 
     const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
     rv = startprog(kern_ucred, true, uicache, (char **)&(const char*[]){ uicache, NULL }, NULL);
@@ -625,50 +629,50 @@ void inject_trusts(int pathc, const char *paths[]) {
 
 
 int process_binlist(const char *path) {
-    // first line -- count since I'm too lazy
-
     FILE *binlist = fopen(path, "r");
 
     if (binlist == NULL) {
         printf("WTF no binlist?!\n");
         return -1;
     }
-
-    int pathcount;
-    fscanf(binlist, " %u", &pathcount);
-
-    char **paths = malloc(sizeof(char*) * pathcount);
-    size_t len = 4096;
-    ssize_t nread;
-    char readpath[4096];
-
-    strcpy(readpath, "/" BOOTSTRAP_PREFIX "/");
-    char *readto = readpath + strlen("/" BOOTSTRAP_PREFIX "/");
-
-    int i;
-    for (i = 0; i != pathcount;) {
-        // XXX can getline change readto?..
-        nread = getline(&readto, &len, binlist);
-
-        if (nread == -1) break;
-        if (readto[nread - 1] == '\n') readto[nread - 1] = '\0';
-
-        struct stat statmedaddy;
-        int rv = stat(readpath, &statmedaddy);
-        if (rv == 0 && S_ISREG(statmedaddy.st_mode)) {
-            paths[i] = strdup(readpath);
-            ++i;
+    
+    char **paths = NULL;
+    
+    int pathcount = 0;
+    
+    char *filePath = NULL;
+    size_t len = 0;
+    while (getline(&filePath, &len, binlist) != -1){
+        if (filePath[strlen(filePath) - 1] == '\n')
+            filePath[strlen(filePath) - 1] = 0;
+        
+        char *fullPath = (char *)malloc(strlen(BOOTSTRAP_PREFIX) + 3 + strlen(filePath));
+        sprintf(fullPath, "/"BOOTSTRAP_PREFIX"/%s",filePath);
+        fullPath[strlen(BOOTSTRAP_PREFIX) + 2 + strlen(filePath)] = 0;
+        
+        printf("%s\n",fullPath);
+        
+        struct stat fileStat;
+        int rv = stat(fullPath, &fileStat);
+        if (rv == 0 && S_ISREG(fileStat.st_mode)) {
+            if (paths != NULL)
+                paths = realloc((void *)paths, sizeof(char *) * (pathcount+1));
+            else
+                paths = malloc(sizeof(char *));
+            paths[pathcount] = strdup(fullPath);
+            ++pathcount;
         } else {
-            printf("(/" BOOTSTRAP_PREFIX "/)'%s' in binlist but isn't file/doesn't exist\n", readto);
+            printf("'%s' in binlist but isn't file/doesn't exist\n", fullPath);
         }
+        
+        free(fullPath);
+        free(filePath);
+        filePath = NULL;
     }
-
-    // XXX can be negative huh
-    pathcount = i - 1;
-
+    
     inject_trusts(pathcount, (const char**)paths);
-
-    for (i = 0; i != pathcount; ++i) {
+    
+    for (int i = 0; i != pathcount; ++i) {
         free(paths[i]);
     }
     free(paths);
