@@ -41,7 +41,8 @@
 }
 
 - (IBAction)exit:(id)sender {
-    kill(getpid(), SIGKILL);
+    exit(0);
+    
 }
 
 @end

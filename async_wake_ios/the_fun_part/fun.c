@@ -480,6 +480,7 @@ do { \
 
     if (rv == 0) {
         printf("Dropbear would be up soon\n");
+        printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
         char *environ[] = {
             "BOOTSTRAP_PREFIX=/"BOOTSTRAP_PREFIX"",
             "PATH=/"BOOTSTRAP_PREFIX"/usr/local/bin:/"BOOTSTRAP_PREFIX"/usr/sbin:/"BOOTSTRAP_PREFIX"/usr/bin:/"BOOTSTRAP_PREFIX"/sbin:/"BOOTSTRAP_PREFIX"/bin:/bin:/usr/bin:/sbin",
@@ -488,7 +489,7 @@ do { \
         };
         
         const char *dbear = "/" BOOTSTRAP_PREFIX "/usr/local/bin/dropbear";
-        rv = startprog(kern_ucred, false, dbear, (char **)&(const char*[]){ dbear, "-S", "/" BOOTSTRAP_PREFIX, "-p", "2222", NULL }, &environ);
+        rv = startprog(kern_ucred, true, dbear, (char **)&(const char*[]){ dbear, "-S", "/" BOOTSTRAP_PREFIX, "-p", "2222", NULL }, &environ);
     }
 
 //	sleep(5);
