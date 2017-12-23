@@ -463,7 +463,10 @@ do { \
     cp(tar, progname("tar"));
     chmod(tar, 0777);
     inject_trusts(1, (const char **)&(const char*[]){tar});
-
+    
+    //inject_trusts(1, (char **)&(const char*[]){"/System/Library/ControlCenter/Bundles/ControlCenterInject.bundle/ControlCenterInject"});
+    //inject_trusts(1, (char **)&(const char*[]){"/Applications/Anemone.app/Anemone"});
+    
     int rv;
 
     //rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("cydia.tar"), "-C", "/", NULL });
@@ -485,6 +488,7 @@ do { \
     if (rv == 0) {
         printf("Dropbear would be up soon\n");
         printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
+        printf("Note: to use clear/nano/reset (or other ncurses commands) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/share/terminfo /usr/share/terminfo'\n");
         char *environ[] = {
             "BOOTSTRAP_PREFIX=/"BOOTSTRAP_PREFIX"",
             "PATH=/"BOOTSTRAP_PREFIX"/usr/local/bin:/"BOOTSTRAP_PREFIX"/usr/sbin:/"BOOTSTRAP_PREFIX"/usr/bin:/"BOOTSTRAP_PREFIX"/sbin:/"BOOTSTRAP_PREFIX"/bin:/bin:/usr/bin:/sbin",
