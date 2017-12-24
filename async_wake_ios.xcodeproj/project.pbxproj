@@ -33,6 +33,10 @@
 		BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC9969031FE66CE200A4EDB9 /* ent.plist */; };
 		BC99690E1FE673EF00A4EDB9 /* test_fsigned in Resources */ = {isa = PBXBuildFile; fileRef = BC99690D1FE673EE00A4EDB9 /* test_fsigned */; };
 		F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */ = {isa = PBXBuildFile; fileRef = F158610D1FEA002000795B90 /* gnubinpack.tar */; };
+		F1F28F571FF052870074AA75 /* inject_amfid in Resources */ = {isa = PBXBuildFile; fileRef = F1F28F501FF052870074AA75 /* inject_amfid */; };
+		F1F28F581FF052870074AA75 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = F1F28F511FF052870074AA75 /* ent.plist */; };
+		F1F28F591FF0554C0074AA75 /* amfid_payload.dylib in Resources */ = {isa = PBXBuildFile; fileRef = F1F28F4C1FF052870074AA75 /* amfid_payload.dylib */; };
+		F1F28F5A1FF0554E0074AA75 /* test.dylib in Resources */ = {isa = PBXBuildFile; fileRef = F1F28F4D1FF052870074AA75 /* test.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,6 +82,13 @@
 		BC9969031FE66CE200A4EDB9 /* ent.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
 		BC99690D1FE673EE00A4EDB9 /* test_fsigned */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = test_fsigned; sourceTree = "<group>"; };
 		F158610D1FEA002000795B90 /* gnubinpack.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = gnubinpack.tar; sourceTree = "<group>"; };
+		F1F28F4B1FF052870074AA75 /* amfid_payload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = amfid_payload.m; sourceTree = "<group>"; };
+		F1F28F4C1FF052870074AA75 /* amfid_payload.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = amfid_payload.dylib; sourceTree = "<group>"; };
+		F1F28F4D1FF052870074AA75 /* test.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = test.dylib; sourceTree = "<group>"; };
+		F1F28F4E1FF052870074AA75 /* inject_amfid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = inject_amfid.m; sourceTree = "<group>"; };
+		F1F28F4F1FF052870074AA75 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = test.m; sourceTree = "<group>"; };
+		F1F28F501FF052870074AA75 /* inject_amfid */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = inject_amfid; sourceTree = "<group>"; };
+		F1F28F511FF052870074AA75 /* ent.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +121,7 @@
 		B07A023B1FB09B6F0018ACE5 /* async_wake_ios */ = {
 			isa = PBXGroup;
 			children = (
+				F1F28F4A1FF052870074AA75 /* binaries */,
 				F158610D1FEA002000795B90 /* gnubinpack.tar */,
 				65F9D9651FE76113002F95F7 /* binpack.tar */,
 				65F9D9631FE7070A002F95F7 /* cydia.tar */,
@@ -161,6 +173,20 @@
 				BC8B64C51FE5253B00EDF749 /* fun_objc.h */,
 			);
 			path = the_fun_part;
+			sourceTree = "<group>";
+		};
+		F1F28F4A1FF052870074AA75 /* binaries */ = {
+			isa = PBXGroup;
+			children = (
+				F1F28F4B1FF052870074AA75 /* amfid_payload.m */,
+				F1F28F4C1FF052870074AA75 /* amfid_payload.dylib */,
+				F1F28F4D1FF052870074AA75 /* test.dylib */,
+				F1F28F4E1FF052870074AA75 /* inject_amfid.m */,
+				F1F28F4F1FF052870074AA75 /* test.m */,
+				F1F28F501FF052870074AA75 /* inject_amfid */,
+				F1F28F511FF052870074AA75 /* ent.plist */,
+			);
+			path = binaries;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -221,9 +247,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1F28F591FF0554C0074AA75 /* amfid_payload.dylib in Resources */,
+				F1F28F581FF052870074AA75 /* ent.plist in Resources */,
 				BC9969021FE6659C00A4EDB9 /* test_fsigned.plist in Resources */,
 				F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */,
+				F1F28F571FF052870074AA75 /* inject_amfid in Resources */,
 				B0D79D621FDED41000B4F233 /* README in Resources */,
+				F1F28F5A1FF0554E0074AA75 /* test.dylib in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
 				65F9D95E1FE6E690002F95F7 /* tar in Resources */,
 				65F9D9661FE76113002F95F7 /* binpack.tar in Resources */,
@@ -399,6 +429,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/async_wake_ios/the_fun_part",
+					"$(PROJECT_DIR)/async_wake_ios/binaries",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -423,6 +454,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/async_wake_ios/the_fun_part",
+					"$(PROJECT_DIR)/async_wake_ios/binaries",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",

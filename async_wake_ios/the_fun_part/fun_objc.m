@@ -18,7 +18,6 @@
 #include <sys/utsname.h>
 #import <Foundation/Foundation.h>
 
-
 const char* progname(const char* prog) {
     char path[4096];
     uint32_t size = sizeof(path);
