@@ -464,9 +464,6 @@ do { \
     chmod(tar, 0777);
     inject_trusts(1, (const char **)&(const char*[]){tar});
     
-    //inject_trusts(1, (char **)&(const char*[]){"/System/Library/ControlCenter/Bundles/ControlCenterInject.bundle/ControlCenterInject"});
-    //inject_trusts(1, (char **)&(const char*[]){"/Applications/Anemone.app/Anemone"});
-    
     int rv;
 
     //rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("cydia.tar"), "-C", "/", NULL });
