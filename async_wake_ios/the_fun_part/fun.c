@@ -525,19 +525,18 @@ do { \
     const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
     rv = startprog(kern_ucred, true, uicache, (char **)&(const char*[]){ uicache, NULL }, NULL);
 
+    unlink("/"BOOTSTRAP_PREFIX"/launchjailbreak");
+    const char *launchjailbreak = "/" BOOTSTRAP_PREFIX "/launchjailbreak";
+    cp(launchjailbreak, progname("launchjailbreak"));
+    chmod(launchjailbreak, 0777);
+    
     if (rv == 0) {
         printf("Dropbear would be up soon\n");
         printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
         printf("Note: to use clear/nano/reset (or other ncurses commands) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/share/terminfo /usr/share/terminfo'\n");
-        char *environ[] = {
-            "BOOTSTRAP_PREFIX=/"BOOTSTRAP_PREFIX"",
-            "PATH=/"BOOTSTRAP_PREFIX"/usr/local/bin:/"BOOTSTRAP_PREFIX"/usr/sbin:/"BOOTSTRAP_PREFIX"/usr/bin:/"BOOTSTRAP_PREFIX"/sbin:/"BOOTSTRAP_PREFIX"/bin:/bin:/usr/bin:/sbin",
-            "PS1=\\h:\\w \\u\\$ ",
-            NULL
-        };
         
-        const char *dbear = "/" BOOTSTRAP_PREFIX "/usr/local/bin/dropbear";
-        rv = startprog(kern_ucred, true, dbear, (char **)&(const char*[]){ dbear, "-S", "/" BOOTSTRAP_PREFIX, "-p", "2222", NULL }, &environ);
+        char *launchjailbreak = "/"BOOTSTRAP_PREFIX"/launchjailbreak";
+        rv = startprog(kern_ucred, true, launchjailbreak, (char **)&(const char*[]){launchjailbreak, NULL}, NULL);
     }
 	
 	
