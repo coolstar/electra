@@ -518,10 +518,8 @@ do { \
     unlink(tar);
 
     int process_binlist(const char *path);
-    rv = process_binlist("/" BOOTSTRAP_PREFIX "/binlist.txt");
     
     printf("Checking custom list..\n");
-    
     process_binlist("/" BOOTSTRAP_PREFIX "/customlist.txt");
 
     const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
