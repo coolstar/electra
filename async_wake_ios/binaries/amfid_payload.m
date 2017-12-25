@@ -283,7 +283,7 @@ uint8_t *get_code_directory(const char* name, uint64_t file_off) {
 			fread(&size_cs, sizeof(uint32_t), 1, fd);
 
 			uint8_t *cd = malloc(size_cs);
-			fseek(fd, off_cs, SEEK_SET);
+			fseek(fd, off_cs+file_off, SEEK_SET);
 			fread(cd, size_cs, 1, fd);
 			return cd;
 		} else {
