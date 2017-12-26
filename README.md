@@ -8,9 +8,9 @@ Currently implemented:
 - mount / as rw
 - amfi bypass? well, run unsigned code (temporary until i figure out a master process which gives everyone everything with the right entitlements etc.)
 - amfi**d** fixing up
+- jailbreakd that keeps tfp0 task port open and runs a local server listening for commands
 
 Planned:
-- jailbreakd that keeps tfp0 task port open and entitles processes as they're run
 - Basic dylib injection into running process
 
 If libproc.h doesn't exist, delete the line
