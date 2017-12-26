@@ -183,9 +183,18 @@
 			path = the_fun_part;
 			sourceTree = "<group>";
 		};
+		F1C524DA1FF3070F00A4B25E /* jailbreakd */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = jailbreakd;
+			path = "New Group";
+			sourceTree = "<group>";
+		};
 		F1F28F4A1FF052870074AA75 /* binaries */ = {
 			isa = PBXGroup;
 			children = (
+				F1C524DA1FF3070F00A4B25E /* jailbreakd */,
 				F14B5F911FF1735700E62599 /* launchjailbreak */,
 				F14B5F931FF1736000E62599 /* launchjailbreak.m */,
 				F1F28F4B1FF052870074AA75 /* amfid_payload.m */,

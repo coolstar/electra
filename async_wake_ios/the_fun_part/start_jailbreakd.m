@@ -147,13 +147,13 @@ int start_jailbreakd(uint64_t kern_ucred, mach_port_t *pass_port, mach_port_t ta
         usleep(300 * 1000);
     }
     
+    usleep(100 * 1000);
+    
     FILE *f = fopen("/var/tmp/jailbreakd.pid", "r");
     fscanf(f, "%d", &pid);
     fclose(f);
     
     printf("Found jailbreakd at PID %d. Continuing...\n", pid);
-    
-    usleep(100 * 1000);
     
     task_t childPidTask;
     err = task_for_pid(mach_task_self(), pid, &childPidTask);

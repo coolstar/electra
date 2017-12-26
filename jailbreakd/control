@@ -1,0 +1,10 @@
+Package: org.coolstar.jailbreakd
+Name: jailbreakd
+Depends: 
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: An awesome tool of some sort!!
+Maintainer: CoolStar
+Author: CoolStar
+Section: System
+Tag: role::hacker

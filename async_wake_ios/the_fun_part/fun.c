@@ -185,6 +185,10 @@ unsigned offsetof_itk_sself = 0xE8;           // task_t::itk_sself (task_get_spe
 unsigned offsetof_itk_bootstrap = 0x2b8;      // task_t::itk_bootstrap (task_get_special_port)
 unsigned offsetof_ip_mscount = 0x9C;          // ipc_port_t::ip_mscount (ipc_port_make_send)
 unsigned offsetof_ip_srights = 0xA0;          // ipc_port_t::ip_srights (ipc_port_make_send)
+unsigned offsetof_p_textvp = 0x248;
+unsigned offsetof_p_textoff = 0x250;
+unsigned offsetof_p_cputype = 0x2c0;
+unsigned offsetof_p_cpu_subtype = 0x2c4;
 unsigned offsetof_special = 2 * sizeof(long); // host::special
 
 #define	CS_VALID		0x0000001	/* dynamically valid */
@@ -363,7 +367,7 @@ do { \
 	
 	uint64_t proc = rk64(find_allproc());
 	while (proc) {
-		uint32_t pid = (uint32_t)rk32(proc + 0x10);
+		uint32_t pid = (uint32_t)rk32(proc + offsetof_p_pid);
 		char name[40] = {0};
 		kread(proc+0x268, name, 20);
 //		printf("%s\n",name);
@@ -381,7 +385,12 @@ do { \
 		}
 		if (pid != 0) {
 			uint32_t csflags = rk32(proc + offsetof_p_csflags);
-            printf("CSFlags for %s (PID: %d): 0x%x\n", name, pid, csflags);
+            printf("CSFlags for %s (PID: %d): 0x%x; ", name, pid, csflags);
+            
+            cpu_type_t cputype = rk32(proc + offsetof_p_cputype);
+            cpu_subtype_t cpusubtype = rk32(proc + offsetof_p_cpu_subtype);
+            
+            printf("CPU Type: 0x%x. Subtype: 0x%x\n", cputype, cpusubtype);
 		}
 		proc = rk64(proc);
 	}
