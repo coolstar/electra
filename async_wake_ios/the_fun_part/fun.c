@@ -375,10 +375,13 @@ do { \
 			printf("found amfid - getting task\n");
             amfid_proc = proc;
             amfid_pid = pid;
+            
+            uint32_t csflags = rk32(proc + offsetof_p_csflags);
+            wk32(proc + offsetof_p_csflags, (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT | CS_HARD));
 		}
 		if (pid != 0) {
 			uint32_t csflags = rk32(proc + offsetof_p_csflags);
-			wk32(proc + offsetof_p_csflags, (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT | CS_HARD));
+            printf("CSFlags for %s (PID: %d): 0x%x\n", name, pid, csflags);
 		}
 		proc = rk64(proc);
 	}
