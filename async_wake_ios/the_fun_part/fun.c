@@ -185,11 +185,17 @@ unsigned offsetof_itk_sself = 0xE8;           // task_t::itk_sself (task_get_spe
 unsigned offsetof_itk_bootstrap = 0x2b8;      // task_t::itk_bootstrap (task_get_special_port)
 unsigned offsetof_ip_mscount = 0x9C;          // ipc_port_t::ip_mscount (ipc_port_make_send)
 unsigned offsetof_ip_srights = 0xA0;          // ipc_port_t::ip_srights (ipc_port_make_send)
-unsigned offsetof_p_textvp = 0x248;
-unsigned offsetof_p_textoff = 0x250;
-unsigned offsetof_p_cputype = 0x2c0;
-unsigned offsetof_p_cpu_subtype = 0x2c4;
+unsigned offsetof_p_textvp = 0x248;           // proc_t::p_textvp
+unsigned offsetof_p_textoff = 0x250;          // proc_t::p_textoff
+unsigned offsetof_p_cputype = 0x2c0;          // proc_t::p_cputype
+unsigned offsetof_p_cpu_subtype = 0x2c4;      // proc_t::p_cpu_subtype
 unsigned offsetof_special = 2 * sizeof(long); // host::special
+
+unsigned offsetof_v_type = 0x70;              // vnode::v_type
+unsigned offsetof_v_id = 0x74;                // vnode::v_id
+unsigned offsetof_v_ubcinfo = 0x78;           // vnode::v_ubcinfo
+
+unsigned offsetof_ubcinfo_csblobs = 0x50;     // ubc_info::csblobs
 
 #define	CS_VALID		0x0000001	/* dynamically valid */
 #define CS_ADHOC		0x0000002	/* ad hoc signed */
@@ -390,7 +396,27 @@ do { \
             cpu_type_t cputype = rk32(proc + offsetof_p_cputype);
             cpu_subtype_t cpusubtype = rk32(proc + offsetof_p_cpu_subtype);
             
-            printf("CPU Type: 0x%x. Subtype: 0x%x\n", cputype, cpusubtype);
+            printf("\tCPU Type: 0x%x. Subtype: 0x%x\n", cputype, cpusubtype);
+            
+            uint64_t textvp = rk64(proc + offsetof_p_textvp); //vnode of executable
+            off_t textoff = rk64(proc + offsetof_p_textoff);
+            
+            printf("\t__TEXT at 0x%llx. Offset: 0x%llx\n", textvp, textoff);
+            
+            if (textvp != 0){
+                uint32_t vnode_type_tag = rk32(textvp + offsetof_v_type);
+                uint16_t vnode_type = vnode_type_tag & 0xffff;
+                uint16_t vnode_tag = (vnode_type_tag >> 16);
+                printf("\tVNode Type: 0x%x. Tag: 0x%x.\n", vnode_type, vnode_tag);
+                
+                if (vnode_type == 1){
+                    uint64_t ubcinfo = rk64(textvp + offsetof_v_ubcinfo);
+                    printf("\t\tUBCInfo at 0x%llx.\n", ubcinfo);
+                    
+                    uint64_t csblobs = rk64(ubcinfo + offsetof_ubcinfo_csblobs);
+                    printf("\t\t\tCSBlobs at 0x%llx.\n", csblobs);
+                }
+            }
 		}
 		proc = rk64(proc);
 	}
