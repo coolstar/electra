@@ -292,6 +292,38 @@ static uint64_t kalloc(vm_size_t size){
 	return address;
 }
 
+#define OSDictionary_ItemCount(dict) rk32(dict+20)
+#define OSDictionary_ItemBuffer(dict) rk64(dict+32)
+#define OSDictionary_ItemKey(buffer, idx) rk64(buffer+16*idx)
+#define OSDictionary_ItemValue(buffer, idx) rk64(buffer+16*idx+8)
+uint32_t SetObjectWithCharP = 8*31;
+#define OSDictionary_SetItem(dict, str, val) {\
+uint64_t s = kalloc(strlen(str)+1); kwrite(s, str, strlen(str)); \
+kexecute(rk64(rk(dict)+SetObjectWithCharP), dict, s, val, 0, 0, 0, 0); \
+}
+#define OSString_CStringPtr(str) rk64(str+0x10)
+
+uint64_t kexecute(mach_port_t user_client, uint64_t fake_client, uint64_t addr, uint64_t x0, uint64_t x1, uint64_t x2, uint64_t x3, uint64_t x4, uint64_t x5, uint64_t x6) {
+    // When calling IOConnectTrapX, this makes a call to iokit_user_client_trap, which is the user->kernel call (MIG). This then calls IOUserClient::getTargetAndTrapForIndex
+    // to get the trap struct (which contains an object and the function pointer itself). This function calls IOUserClient::getExternalTrapForIndex, which is expected to return a trap.
+    // This jumps to our gadget, which returns +0x40 into our fake user_client, which we can modify. The function is then called on the object. But how C++ actually works is that the
+    // function is called with the first arguement being the object (referenced as `this`). Because of that, the first argument of any function we call is the object, and everything else is passed
+    // through like normal.
+    
+    // Because the gadget gets the trap at user_client+0x40, we have to overwrite the contents of it
+    // We will pull a switch when doing so - retrieve the current contents, call the trap, put back the contents
+    // (i'm not actually sure if the switch back is necessary but meh)
+    
+    uint64_t offx20 = rk64(fake_client+0x40);
+    uint64_t offx28 = rk64(fake_client+0x48);
+    wk64(fake_client+0x40, x0);
+    wk64(fake_client+0x48, addr);
+    uint64_t returnval = IOConnectTrap6(user_client, 0, (uint64_t)(x1), (uint64_t)(x2), (uint64_t)(x3), (uint64_t)(x4), (uint64_t)(x5), (uint64_t)(x6));
+    wk64(fake_client+0x40, offx20);
+    wk64(fake_client+0x48, offx28);
+    return returnval;
+}
+
 void let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client) {
 	
 	kern_return_t err;
@@ -433,6 +465,16 @@ do { \
                         
                         printf("\t\t\tCSBlob CPU Type: 0x%x. Flags: 0x%x. Offset: 0x%llx\n", csblob_cputype, csblob_flags, csb_base_offset);
                         printf("\t\t\t\tEntitlements at 0x%llx.\n", csb_entitlements);
+                        
+                        for (int idx = 0; idx < OSDictionary_ItemCount(csb_entitlements); idx++) {
+                            uint64_t key = OSDictionary_ItemKey(OSDictionary_ItemBuffer(csb_entitlements), idx);
+                            uint64_t keyOSStr = OSString_CStringPtr(key);
+                            size_t length = kexecute(user_client, fake_client, 0xFFFFFFF00709BDE0+slide, keyOSStr, 0, 0, 0, 0, 0, 0); //strlen
+                            char* s = (char*)calloc(length+1, 1);
+                            kread(keyOSStr, s, length);
+                            printf("\t\t\t\t\tEntitlement: %s\n", s);
+                            free(s);
+                        }
                         
                         csblobs = rk64(csblobs);
                     }
@@ -594,14 +636,10 @@ do { \
     cp(launchjailbreak, progname("launchjailbreak"));
     chmod(launchjailbreak, 0755);
     
-    if (rv == 0) {
-        printf("Dropbear would be up soon\n");
-        printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
-        printf("Note: to use clear/nano/reset (or other ncurses commands) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/share/terminfo /usr/share/terminfo'\n");
-        
-        char *launchjailbreak = "/"BOOTSTRAP_PREFIX"/launchjailbreak";
-        rv = startprog(kern_ucred, true, launchjailbreak, (char **)&(const char*[]){launchjailbreak, NULL}, NULL);
-    }
+    printf("Dropbear would be up soon\n");
+    printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
+    printf("Note: to use clear/nano/reset (or other ncurses commands) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/share/terminfo /usr/share/terminfo'\n");
+    rv = startprog(kern_ucred, true, launchjailbreak, (char **)&(const char*[]){launchjailbreak, NULL}, NULL);
 	
 	
 	// zzz AMFI sucks..
@@ -640,11 +678,11 @@ do { \
 	
 	// Cleanup
     
+    wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
+    
     printf("Starting server...\n");
     mach_port_t pass_port = MACH_PORT_NULL;
     start_jailbreakd(kern_ucred, &pass_port, tfp0, kernel_base);
-
-	wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
 	wk64(rk64(kern_ucred+0x78)+0x8, 0);
 }
 

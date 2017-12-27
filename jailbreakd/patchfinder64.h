@@ -13,5 +13,7 @@ uint64_t find_bcopy(void);
 uint64_t find_rootvnode(void);
 uint64_t find_trustcache(void);
 uint64_t find_amficache(void);
+uint64_t find_OSBoolean_True(void);
+uint64_t find_OSBoolean_False(void);
 
 #endif

@@ -3,7 +3,8 @@ GO_EASY_ON_ME=1
 include $(THEOS)/makefiles/common.mk
 
 TOOL_NAME = jailbreakd
-jailbreakd_FILES = main.m patchfinder64.c kern_utils.m
+jailbreakd_FILES = main.m patchfinder64.c kern_utils.m offsets.m find_port.c
+jailbreakd_FRAMEWORKS = IOKit
 jailbreakd_CFLAGS = -I.
 jailbreakd_CODESIGN_FLAGS=-SEnt.plist
 

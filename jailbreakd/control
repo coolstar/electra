@@ -1,5 +1,5 @@
-Package: org.coolstar.jailbreakd
-Name: jailbreakd
+Package: com.yourcompany.taskporttest
+Name: TaskPortTest
 Depends: 
 Version: 0.0.1
 Architecture: iphoneos-arm

@@ -420,7 +420,9 @@ follow_cbz(const uint8_t *buf, addr_t cbz)
 #include <unistd.h>
 #include <mach-o/loader.h>
 
-#define __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
+#ifndef __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
+    #define __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
+#endif
 
 #ifdef __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
 #include <mach/mach.h>
@@ -885,4 +887,42 @@ addr_t find_amficache(void) {
 		return 0;
 	}
 	return val + kerndumpbase;
+}
+
+uint64_t _kread64(uint64_t where) {
+    uint64_t out;
+    kread(where, &out, sizeof(uint64_t));
+    return out;
+}
+
+addr_t find_OSBoolean_True(void) {
+    addr_t val;
+    addr_t ref = find_strref("Delay Autounload", 0, 0);
+    if (!ref) {
+        return 0;
+    }
+    ref -= kerndumpbase;
+    
+    addr_t weird_instruction = 0;
+    for (int i = 4; i < 4*0x100; i+=4) {
+        uint32_t op = *(uint32_t *)(kernel + ref + i);
+        if (op == 0x320003E0) {
+            weird_instruction = ref+i;
+            break;
+        }
+    }
+    if (!weird_instruction) {
+        return 0;
+    }
+    
+    val = calc64(kernel, ref, weird_instruction, 8);
+    if (!val) {
+        return 0;
+    }
+    
+    return _kread64(val + kerndumpbase);
+}
+
+addr_t find_OSBoolean_False(void) {
+    return find_OSBoolean_True()+8;
 }

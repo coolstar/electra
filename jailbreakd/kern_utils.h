@@ -71,4 +71,11 @@ kern_return_t mach_vm_allocate(vm_map_t target, mach_vm_address_t *address, mach
 uint64_t kalloc(vm_size_t size);
 uint32_t rk32(uint64_t kaddr);
 uint64_t rk64(uint64_t kaddr);
+void wk64(uint64_t kaddr, uint64_t val);
+
+mach_port_t prepare_user_client();
+uint64_t task_self_addr();
+uint64_t find_port(mach_port_name_t port);
+uint64_t find_port_address(mach_port_name_t port, int disposition);
+
 int setcsflags(int pd);

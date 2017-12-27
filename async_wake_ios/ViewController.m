@@ -42,7 +42,6 @@
 
 - (IBAction)exit:(id)sender {
     exit(0);
-    
 }
 
 @end
