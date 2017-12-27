@@ -197,6 +197,11 @@ unsigned offsetof_v_ubcinfo = 0x78;           // vnode::v_ubcinfo
 
 unsigned offsetof_ubcinfo_csblobs = 0x50;     // ubc_info::csblobs
 
+unsigned offsetof_csb_cputype = 0x8;          // cs_blob::csb_cputype
+unsigned offsetof_csb_flags = 0x12;           // cs_blob::csb_flags
+unsigned offsetof_csb_base_offset = 0x16;     // cs_blob::csb_base_offset
+unsigned offsetof_csb_entitlements_offset = 0x98; // cs_blob::csb_entitlements
+
 #define	CS_VALID		0x0000001	/* dynamically valid */
 #define CS_ADHOC		0x0000002	/* ad hoc signed */
 #define CS_GET_TASK_ALLOW	0x0000004	/* has get-task-allow entitlement */
@@ -398,6 +403,10 @@ do { \
             
             printf("\tCPU Type: 0x%x. Subtype: 0x%x\n", cputype, cpusubtype);
             
+            uint64_t ucreds = rk64(proc + offsetof_p_ucred);
+            uint64_t amfi_entitlements = rk64(rk64(ucreds + 0x78) + 0x8);
+            printf("\tAMFI Entitlements at 0x%llx\n", amfi_entitlements);
+            
             uint64_t textvp = rk64(proc + offsetof_p_textvp); //vnode of executable
             off_t textoff = rk64(proc + offsetof_p_textoff);
             
@@ -414,7 +423,19 @@ do { \
                     printf("\t\tUBCInfo at 0x%llx.\n", ubcinfo);
                     
                     uint64_t csblobs = rk64(ubcinfo + offsetof_ubcinfo_csblobs);
-                    printf("\t\t\tCSBlobs at 0x%llx.\n", csblobs);
+                    while (csblobs != 0){
+                        printf("\t\t\tCSBlobs at 0x%llx.\n", csblobs);
+                        
+                        cpu_type_t csblob_cputype = rk32(csblobs + offsetof_csb_cputype);
+                        unsigned int csblob_flags = rk32(csblobs + offsetof_csb_flags);
+                        off_t csb_base_offset = rk64(csblobs + offsetof_csb_base_offset);
+                        uint64_t csb_entitlements = rk64(csblobs + offsetof_csb_entitlements_offset);
+                        
+                        printf("\t\t\tCSBlob CPU Type: 0x%x. Flags: 0x%x. Offset: 0x%llx\n", csblob_cputype, csblob_flags, csb_base_offset);
+                        printf("\t\t\t\tEntitlements at 0x%llx.\n", csb_entitlements);
+                        
+                        csblobs = rk64(csblobs);
+                    }
                 }
             }
 		}
