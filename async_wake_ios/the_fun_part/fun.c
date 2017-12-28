@@ -429,7 +429,7 @@ do { \
             uint32_t csflags = rk32(proc + offsetof_p_csflags);
             wk32(proc + offsetof_p_csflags, (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT | CS_HARD));
 		}
-		if (pid != 0) {
+		/*if (pid != 0) {
 			uint32_t csflags = rk32(proc + offsetof_p_csflags);
             printf("CSFlags for %s (PID: %d): 0x%x; ", name, pid, csflags);
             
@@ -489,7 +489,7 @@ do { \
                     }
                 }
             }
-		}
+		}*/
 		proc = rk64(proc);
 	}
 	
