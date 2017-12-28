@@ -10,6 +10,7 @@
 #define BUFSIZE 1024
 
 #define JAILBREAKD_COMMAND_ENTITLE 1
+#define JAILBREAKD_COMMAND_PLATFORMIZE 2
 
 struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
     uint8_t Command;
@@ -17,6 +18,21 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
 };
 
 int main(int argc, char **argv, char **envp) {
+    if (argc < 3){
+        printf("Usage: \n");
+        printf("jailbreakd_client <pid> <1 | 2>\n");
+        printf("\t1 = entitle the target PID\n");
+        printf("\t2 = platformize the target PID\n");
+        return 0;
+    }
+    if (atoi(argv[2]) != 1 && atoi(argv[2]) != 2){
+        printf("Usage: \n");
+        printf("jailbreakd_client <pid> <1 | 2>\n");
+        printf("\t1 = entitle the target PID\n");
+        printf("\t2 = platformize the target PID\n");
+        return 0;
+    }
+
     int sockfd, portno, n;
     int serverlen;
     struct sockaddr_in serveraddr;
@@ -25,7 +41,7 @@ int main(int argc, char **argv, char **envp) {
     char buf[BUFSIZE];
     
     hostname = "127.0.0.1";
-    portno = 2023;
+    portno = 5;
     
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0)
@@ -49,8 +65,13 @@ int main(int argc, char **argv, char **envp) {
     bzero(buf, BUFSIZE);
 
     struct JAILBREAKD_ENTITLE_PID entitlePacket;
-    entitlePacket.Command = JAILBREAKD_COMMAND_ENTITLE;
     entitlePacket.Pid = atoi(argv[1]);
+
+    int arg = atoi(argv[2]);
+    if (arg == 1)
+        entitlePacket.Command = JAILBREAKD_COMMAND_ENTITLE;
+    else if (arg == 2)
+        entitlePacket.Command = JAILBREAKD_COMMAND_PLATFORMIZE;
 
     memcpy(buf, &entitlePacket, sizeof(struct JAILBREAKD_ENTITLE_PID));
     

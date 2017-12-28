@@ -141,8 +141,6 @@ int start_jailbreakd(uint64_t kern_ucred, mach_port_t *pass_port, mach_port_t ta
     
     printf("Waiting for jailbreakd...\n");
     
-    usleep(2000 * 1000);
-    
     while (!file_exist("/var/tmp/jailbreakd.pid")){
         usleep(300 * 1000);
     }

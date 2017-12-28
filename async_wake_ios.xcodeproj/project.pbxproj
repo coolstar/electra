@@ -36,6 +36,7 @@
 		F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */ = {isa = PBXBuildFile; fileRef = F14B5F951FF2265900E62599 /* start_jailbreakd.m */; };
 		F14B5F981FF2D52000E62599 /* jailbreakd in Resources */ = {isa = PBXBuildFile; fileRef = F14B5F971FF2D52000E62599 /* jailbreakd */; };
 		F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */ = {isa = PBXBuildFile; fileRef = F158610D1FEA002000795B90 /* gnubinpack.tar */; };
+		F1C524DD1FF350E200A4B25E /* jailbreakd_client in Resources */ = {isa = PBXBuildFile; fileRef = F1C524DB1FF350E100A4B25E /* jailbreakd_client */; };
 		F1F28F571FF052870074AA75 /* inject_amfid in Resources */ = {isa = PBXBuildFile; fileRef = F1F28F501FF052870074AA75 /* inject_amfid */; };
 		F1F28F581FF052870074AA75 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = F1F28F511FF052870074AA75 /* ent.plist */; };
 		F1F28F591FF0554C0074AA75 /* amfid_payload.dylib in Resources */ = {isa = PBXBuildFile; fileRef = F1F28F4C1FF052870074AA75 /* amfid_payload.dylib */; };
@@ -89,6 +90,8 @@
 		F14B5F951FF2265900E62599 /* start_jailbreakd.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = start_jailbreakd.m; sourceTree = "<group>"; };
 		F14B5F971FF2D52000E62599 /* jailbreakd */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = jailbreakd; sourceTree = "<group>"; };
 		F158610D1FEA002000795B90 /* gnubinpack.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = gnubinpack.tar; sourceTree = "<group>"; };
+		F1C524DB1FF350E100A4B25E /* jailbreakd_client */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = jailbreakd_client; sourceTree = "<group>"; };
+		F1C524DC1FF350E100A4B25E /* jailbreakd_client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = jailbreakd_client.m; sourceTree = "<group>"; };
 		F1F28F4B1FF052870074AA75 /* amfid_payload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = amfid_payload.m; sourceTree = "<group>"; };
 		F1F28F4C1FF052870074AA75 /* amfid_payload.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = amfid_payload.dylib; sourceTree = "<group>"; };
 		F1F28F4D1FF052870074AA75 /* test.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = test.dylib; sourceTree = "<group>"; };
@@ -196,6 +199,8 @@
 				F1F28F501FF052870074AA75 /* inject_amfid */,
 				F14B5F971FF2D52000E62599 /* jailbreakd */,
 				F1F28F511FF052870074AA75 /* ent.plist */,
+				F1C524DB1FF350E100A4B25E /* jailbreakd_client */,
+				F1C524DC1FF350E100A4B25E /* jailbreakd_client.m */,
 			);
 			path = binaries;
 			sourceTree = "<group>";
@@ -274,6 +279,7 @@
 				B07A02491FB09B6F0018ACE5 /* LaunchScreen.storyboard in Resources */,
 				F14B5F921FF1735700E62599 /* launchjailbreak in Resources */,
 				B07A02461FB09B6F0018ACE5 /* Assets.xcassets in Resources */,
+				F1C524DD1FF350E200A4B25E /* jailbreakd_client in Resources */,
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
 				BC9969001FE663B700A4EDB9 /* launchctl in Resources */,
 			);

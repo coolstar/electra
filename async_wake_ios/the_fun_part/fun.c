@@ -201,6 +201,9 @@ unsigned offsetof_csb_cputype = 0x8;          // cs_blob::csb_cputype
 unsigned offsetof_csb_flags = 0x12;           // cs_blob::csb_flags
 unsigned offsetof_csb_base_offset = 0x16;     // cs_blob::csb_base_offset
 unsigned offsetof_csb_entitlements_offset = 0x98; // cs_blob::csb_entitlements
+unsigned offsetof_csb_signer_type = 0xA0;     // cs_blob::csb_signer_type
+unsigned offsetof_csb_platform_binary = 0xA4; // cs_blob::csb_platform_binary
+unsigned offsetof_csb_platform_path = 0xA8;   // cs_blob::csb_platform_path
 
 #define	CS_VALID		0x0000001	/* dynamically valid */
 #define CS_ADHOC		0x0000002	/* ad hoc signed */
@@ -462,8 +465,14 @@ do { \
                         unsigned int csblob_flags = rk32(csblobs + offsetof_csb_flags);
                         off_t csb_base_offset = rk64(csblobs + offsetof_csb_base_offset);
                         uint64_t csb_entitlements = rk64(csblobs + offsetof_csb_entitlements_offset);
+                        unsigned int csb_signer_type = rk32(csblobs + offsetof_csb_signer_type);
+                        unsigned int csb_platform_binary = rk32(csblobs + offsetof_csb_platform_binary);
+                        unsigned int csb_platform_path = rk32(csblobs + offsetof_csb_platform_path);
                         
                         printf("\t\t\tCSBlob CPU Type: 0x%x. Flags: 0x%x. Offset: 0x%llx\n", csblob_cputype, csblob_flags, csb_base_offset);
+                        
+                        printf("\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d\n", csb_signer_type, csb_platform_binary, csb_platform_path);
+                        
                         printf("\t\t\t\tEntitlements at 0x%llx.\n", csb_entitlements);
                         
                         for (int idx = 0; idx < OSDictionary_ItemCount(csb_entitlements); idx++) {
@@ -494,7 +503,7 @@ do { \
 	// Properly copy the kernel's credentials so setuid(0) doesn't crash
 	uint64_t kern_ucred = 0;
 	KCALL(find_copyout(), kern_proc+0x100, &kern_ucred, sizeof(kern_ucred), 0, 0, 0, 0);
-	
+    
 	uint64_t self_ucred = 0;
 	KCALL(find_copyout(), our_proc+0x100, &self_ucred, sizeof(self_ucred), 0, 0, 0, 0);
 
@@ -595,6 +604,7 @@ do { \
     
     const char* args[] = {BinaryLocation, itoa(amfid_pid), NULL};
     int rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&args, NULL);
+    waitpid(pd, NULL, 0);
     
 //	uint8_t launchd[19];
 //	kread(find_amficache()+0x11358, launchd, 19);
@@ -617,16 +627,8 @@ do { \
     cp("/"BOOTSTRAP_PREFIX"/jailbreakd", progname("jailbreakd"));
     chmod("/"BOOTSTRAP_PREFIX"/jailbreakd", 0755);
 
-    //rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("cydia.tar"), "-C", "/", NULL });
-    //inject_trusts(1, (const char **)&(const char*[]){"/Applications/Cydia.app/Cydia"});
-
     rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
     unlink(tar);
-
-    int process_binlist(const char *path);
-    
-    printf("Checking custom list..\n");
-    process_binlist("/" BOOTSTRAP_PREFIX "/customlist.txt");
 
     const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
     rv = startprog(kern_ucred, true, uicache, (char **)&(const char*[]){ uicache, NULL }, NULL);
@@ -639,8 +641,10 @@ do { \
     printf("Dropbear would be up soon\n");
     printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
     printf("Note: to use clear/nano/reset (or other ncurses commands) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/share/terminfo /usr/share/terminfo'\n");
-    rv = startprog(kern_ucred, true, launchjailbreak, (char **)&(const char*[]){launchjailbreak, NULL}, NULL);
-	
+    
+    pid_t launchjailbreak_pid;
+    rv = posix_spawn(&launchjailbreak_pid, launchjailbreak, NULL, NULL, (char **)&(const char*[]){launchjailbreak, NULL}, NULL);
+	waitpid(launchjailbreak_pid, NULL, 0);
 	
 	// zzz AMFI sucks..
 	/*
@@ -683,6 +687,7 @@ do { \
     printf("Starting server...\n");
     mach_port_t pass_port = MACH_PORT_NULL;
     start_jailbreakd(kern_ucred, &pass_port, tfp0, kernel_base);
+    
 	wk64(rk64(kern_ucred+0x78)+0x8, 0);
 }
 

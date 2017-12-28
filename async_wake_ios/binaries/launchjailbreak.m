@@ -1,18 +1,13 @@
 #define BOOTSTRAP_PREFIX "bootstrap"
 
 int main(int argc, char **argv, char **envp) {
-    NSLog(@"%@",@"Waiting for Empowerment...\n");
-    usleep(3000 * 1000);
-    NSLog(@"%@",@"Setting pguid...\n");
     setpgid(getpid(), 0);
     
-    NSLog(@"%@",@"Forking once... (output will now be in syslog)\n");
     pid_t p1 = fork();
     if (p1 != 0){
         int status;
         waitpid(p1, &status, 0);
     } else {
-        NSLog(@"%@",@"Forking twice...");
         pid_t p2 = fork();
         if (p2 != 0){
             exit(0);
@@ -28,7 +23,8 @@ int main(int argc, char **argv, char **envp) {
             execve(dbear, (char **)&(const char*[]){dbear, "-S", "/bootstrap", "-p", "2222", NULL}, (char **)&environ);
         }
     }
-	return 0;
+    return 0;
 }
 
 // vim:ft=objc
+
