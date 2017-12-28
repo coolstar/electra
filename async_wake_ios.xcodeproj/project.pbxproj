@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		65F9D95E1FE6E690002F95F7 /* tar in Resources */ = {isa = PBXBuildFile; fileRef = 65F9D95D1FE6E690002F95F7 /* tar */; };
 		65F9D9641FE7070A002F95F7 /* cydia.tar in Resources */ = {isa = PBXBuildFile; fileRef = 65F9D9631FE7070A002F95F7 /* cydia.tar */; };
-		65F9D9661FE76113002F95F7 /* binpack.tar in Resources */ = {isa = PBXBuildFile; fileRef = 65F9D9651FE76113002F95F7 /* binpack.tar */; };
 		B003EB351FC583CB00C58441 /* kmem.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB331FC583CA00C58441 /* kmem.c */; };
 		B003EB381FC5863800C58441 /* find_port.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB361FC5863800C58441 /* find_port.c */; };
 		B003EB3B1FC58F4900C58441 /* kdbg.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB391FC58F4900C58441 /* kdbg.c */; };
@@ -46,7 +45,6 @@
 /* Begin PBXFileReference section */
 		65F9D95D1FE6E690002F95F7 /* tar */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = tar; sourceTree = "<group>"; };
 		65F9D9631FE7070A002F95F7 /* cydia.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = cydia.tar; sourceTree = "<group>"; };
-		65F9D9651FE76113002F95F7 /* binpack.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = binpack.tar; sourceTree = "<group>"; };
 		B003EB331FC583CA00C58441 /* kmem.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = kmem.c; sourceTree = "<group>"; };
 		B003EB341FC583CA00C58441 /* kmem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kmem.h; sourceTree = "<group>"; };
 		B003EB361FC5863800C58441 /* find_port.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = find_port.c; sourceTree = "<group>"; };
@@ -133,7 +131,6 @@
 			children = (
 				F1F28F4A1FF052870074AA75 /* binaries */,
 				F158610D1FEA002000795B90 /* gnubinpack.tar */,
-				65F9D9651FE76113002F95F7 /* binpack.tar */,
 				65F9D9631FE7070A002F95F7 /* cydia.tar */,
 				65F9D95D1FE6E690002F95F7 /* tar */,
 				B07A023C1FB09B6F0018ACE5 /* AppDelegate.h */,
@@ -273,7 +270,6 @@
 				F14B5F981FF2D52000E62599 /* jailbreakd in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
 				65F9D95E1FE6E690002F95F7 /* tar in Resources */,
-				65F9D9661FE76113002F95F7 /* binpack.tar in Resources */,
 				BC99690E1FE673EF00A4EDB9 /* test_fsigned in Resources */,
 				65F9D9641FE7070A002F95F7 /* cydia.tar in Resources */,
 				B07A02491FB09B6F0018ACE5 /* LaunchScreen.storyboard in Resources */,
