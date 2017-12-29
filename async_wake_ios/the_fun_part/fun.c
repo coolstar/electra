@@ -574,7 +574,6 @@ do { \
         /* uncomment if you need to replace the binaries */
         unlink("/fun_bins/inject_amfid");
         unlink("/fun_bins/amfid_payload.dylib");
-        //        unlink("/fun_bins/test.dylib");
         
         if (!file_exist("/fun_bins/inject_amfid")) {
             printf("copy /fun_bins/inject_amfid\n");
@@ -585,11 +584,6 @@ do { \
             printf("copy /fun_bins/amfid_payload.dylib\n");
             cp("/fun_bins/amfid_payload.dylib", progname("amfid_payload.dylib"));
             chmod("/fun_bins/amfid_payload.dylib", 0755);
-        }
-        if (!file_exist("/fun_bins/test.dylib")) {
-            printf("copy /fun_bins/test.dylib\n");
-            cp("/fun_bins/test.dylib", progname("test.dylib"));
-            chmod("/fun_bins/test.dylib", 0755);
         }
         
         printf("[fun] copied the required binaries into the right places\n");

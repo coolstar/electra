@@ -18,7 +18,6 @@
 #include <spawn.h>
 #include <sys/stat.h>
 #include <pthread.h>
-#include <xpc/xpc.h>
  #include <signal.h>
 
 #import <Foundation/Foundation.h>
@@ -499,9 +498,6 @@ uint64_t binary_load_address(mach_port_t tp) {
 }
 
 int main(int argc, char* argv[]) {
-	NSLog(@"Hi there - sleeping for some csflags");
-	sleep(2);
-
 	task_t remoteTask;
 	kern_return_t kr = task_for_pid(mach_task_self(), atoi(argv[1]), &remoteTask);
 	if (kr != KERN_SUCCESS) {
