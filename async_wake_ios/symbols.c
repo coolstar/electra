@@ -64,8 +64,8 @@ uint64_t kernel_base = 0;
 uint64_t* symbols = NULL;
 uint64_t kaslr_slide = 0;
 
-// ip x
-uint64_t ksymbols_iphone_x_15B202[] = {
+// ip 10.x
+uint64_t ksymbols_iphone_10_15B202[] = {
   0xfffffff0074f9948, // KSYMBOL_OSARRAY_GET_META_CLASS,
   0xfffffff00758b03c, // KSYMBOL_IOUSERCLIENT_GET_META_CLASS
   0xfffffff00758c7b0, // KSYMBOL_IOUSERCLIENT_GET_TARGET_AND_TRAP_FOR_INDEX
@@ -247,9 +247,9 @@ void offsets_init() {
     printf("this is iPhone 7/7+, should work!\n");
     symbols = ksymbols_iphone_7_15B202;
     have_syms = 1;
-  } else if (strstr(u.machine, "iPhone10,6")) {
-      printf("this is iPhone X, should work!\n");
-      symbols = ksymbols_iphone_x_15B202;
+  } else if (strstr(u.machine, "iPhone10,6") || strstr(u.machine, "iPhone10,1") || strstr(u.machine, "iPhone10,2") || strstr(u.machine, "iPhone10,4") || strstr(u.machine, "iPhone10,5")) {
+      printf("this is iPhone X / 8, should work!\n");
+      symbols = ksymbols_iphone_10_15B202;
       have_syms = 1;
   } else {
     printf("no symbols for this device yet\n");
