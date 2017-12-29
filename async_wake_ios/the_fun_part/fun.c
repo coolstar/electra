@@ -194,6 +194,9 @@ unsigned offsetof_special = 2 * sizeof(long); // host::special
 unsigned offsetof_v_type = 0x70;              // vnode::v_type
 unsigned offsetof_v_id = 0x74;                // vnode::v_id
 unsigned offsetof_v_ubcinfo = 0x78;           // vnode::v_ubcinfo
+unsigned offsetof_v_mount = 0xd8;             // vnode::v_mount
+
+unsigned offsetof_mnt_flag = 0x70;            // mount::mnt_flag
 
 unsigned offsetof_ubcinfo_csblobs = 0x50;     // ubc_info::csblobs
 
@@ -523,22 +526,24 @@ do { \
     
     unlink("/var/mobile/test.txt");
 	
-	// Remount / as rw - patch by xerub
+	// Remount / as rw - patch by xerub with nosuid patch added by coolstar
 	{
-		vm_offset_t off = 0xd8;
 		uint64_t _rootvnode = find_rootvnode();
 		uint64_t rootfs_vnode = rk64(_rootvnode);
-		uint64_t v_mount = rk64(rootfs_vnode + off);
-		uint32_t v_flag = rk32(v_mount + 0x71);
+		uint64_t v_mount = rk64(rootfs_vnode + offsetof_v_mount);
+		uint32_t v_flag = rk32(v_mount + offsetof_mnt_flag);
 		
-		wk32(v_mount + 0x71, v_flag & ~(1 << 6));
+        v_flag = v_flag & ~MNT_NOSUID;
+        v_flag = v_flag & ~MNT_RDONLY;
+        
+		wk32(v_mount + offsetof_mnt_flag, v_flag & ~MNT_ROOTFS);
 		
 		char *nmz = strdup("/dev/disk0s1s1");
-        int rv = mount("hfs", "/", MNT_UPDATE, (void *)&nmz);
+        int rv = mount("apfs", "/", MNT_UPDATE, (void *)&nmz);
 		printf("remounting: %d\n", rv);
 		
-		v_mount = rk64(rootfs_vnode + off);
-		wk32(v_mount + 0x71, v_flag);
+		v_mount = rk64(rootfs_vnode + offsetof_v_mount);
+		wk32(v_mount + offsetof_mnt_flag, v_flag);
 		
 		int fd = open("/.bit_of_fun", O_RDONLY);
 		if (fd == -1) {
