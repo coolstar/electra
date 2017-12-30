@@ -552,8 +552,6 @@ do { \
 			printf("File already exists!\n");
 		}
 		close(fd);
-
-        rv = mount("hfs", "/Developer", MNT_UPDATE, (void *)&nmz);
 	}
 	
 	printf("Did we mount / as read+write? %s\n", file_exist("/.bit_of_fun") ? "yes" : "no");
