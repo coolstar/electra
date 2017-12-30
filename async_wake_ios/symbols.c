@@ -243,7 +243,7 @@ void offsets_init() {
       printf("this is iPhone 6s/6s+, should work!\n");
       symbols = ksymbols_iphone_6s_15b202;
       have_syms = 1;
-  } else if (strstr(u.machine, "iPhone9,3") || strstr(u.machine, "iPhone9,4")) {
+  } else if (strstr(u.machine, "iPhone9,3") || strstr(u.machine, "iPhone9,4") || strstr(u.machine, "iPhone9,2")) {
     printf("this is iPhone 7/7+, should work!\n");
     symbols = ksymbols_iphone_7_15B202;
     have_syms = 1;
