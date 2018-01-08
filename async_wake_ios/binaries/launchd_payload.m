@@ -92,6 +92,18 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
         }
     }
     
+    if (strcmp(file, "/usr/libexec/xpcproxy") == 0) {
+        if (argv[1] != NULL) {
+            if (strstr(argv[1], "com.apple.diagnosticd")
+                ||strstr(argv[1], "com.apple.ReportCrash")
+                ) {
+                fprintf(f, "xpcproxy for diagnosticd or ReportCrash -- no hooking!\n\n");
+                fclose(f);
+                return old_pspawnp(pid, file, file_actions, attrp, argv, envp);
+            }
+        }
+    }
+    
     int envcount = 0;
     
     if (envp != NULL){

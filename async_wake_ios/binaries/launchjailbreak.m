@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <unistd.h>
 #define BOOTSTRAP_PREFIX "bootstrap"
 
 int main(int argc, char **argv, char **envp) {
@@ -20,7 +22,7 @@ int main(int argc, char **argv, char **envp) {
             };
             
             char *dbear = "/"BOOTSTRAP_PREFIX"/usr/local/bin/dropbear";
-            execve(dbear, (char **)&(const char*[]){dbear, "-S", "/bootstrap", "-p", "2222", NULL}, (char **)&environ);
+            execve(dbear, (char **)&(const char*[]){dbear, "-S", "/bootstrap", "-p", "2222", "-p", "22", NULL}, (char **)&environ);
         }
     }
     return 0;
