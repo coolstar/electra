@@ -11,6 +11,7 @@
 
 #define JAILBREAKD_COMMAND_ENTITLE 1
 #define JAILBREAKD_COMMAND_PLATFORMIZE 2
+#define JAILBREAKD_COMMAND_DUMP_CRED 7
 
 struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
     uint8_t Command;
@@ -21,15 +22,15 @@ int main(int argc, char **argv, char **envp) {
     if (argc < 3){
         printf("Usage: \n");
         printf("jailbreakd_client <pid> <1 | 2>\n");
-        printf("\t1 = entitle the target PID\n");
-        printf("\t2 = platformize the target PID\n");
+        printf("\t1 = entitle+platformize the target PID\n");
+        printf("\t2 = entitle+platformize the target PID and subsequently sent SIGCONT\n");
         return 0;
     }
-    if (atoi(argv[2]) != 1 && atoi(argv[2]) != 2){
+    if (atoi(argv[2]) != 1 && atoi(argv[2]) != 2 && atoi(argv[2]) != 7){
         printf("Usage: \n");
         printf("jailbreakd_client <pid> <1 | 2>\n");
         printf("\t1 = entitle the target PID\n");
-        printf("\t2 = platformize the target PID\n");
+        printf("\t2 = entitle+platformize the target PID and subsequently sent SIGCONT\n");
         return 0;
     }
 
@@ -72,6 +73,8 @@ int main(int argc, char **argv, char **envp) {
         entitlePacket.Command = JAILBREAKD_COMMAND_ENTITLE;
     else if (arg == 2)
         entitlePacket.Command = JAILBREAKD_COMMAND_PLATFORMIZE;
+    else if (arg == 7)
+        entitlePacket.Command = JAILBREAKD_COMMAND_DUMP_CRED;
 
     memcpy(buf, &entitlePacket, sizeof(struct JAILBREAKD_ENTITLE_PID));
     

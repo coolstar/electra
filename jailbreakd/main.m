@@ -108,8 +108,10 @@ start(mach_port_t port, void *arg)
 }
 
 #define JAILBREAKD_COMMAND_ENTITLE 1
-#define JAILBREAKD_COMMAND_PLATFORMIZE 2
+#define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT 2
 #define JAILBREAKD_COMMAND_ENTITLE_PLATFORMIZE 3
+#define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY 4
+#define JAILBREAKD_COMMAND_DUMP_CRED 7
 #define JAILBREAKD_COMMAND_EXIT 13
 
 struct __attribute__((__packed__)) JAILBREAKD_PACKET {
@@ -121,7 +123,7 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
     int32_t Pid;
 };
 
-struct __attribute__((__packed__)) JAILBREAKD_PLATFORMIZE_PID {
+struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID_AND_SIGCONT {
     uint8_t Command;
     int32_t Pid;
 };
@@ -130,6 +132,11 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PLATFORMIZE_PID {
     uint8_t Command;
     int32_t EntitlePID;
     int32_t PlatformizePID;
+};
+
+struct __attribute__((__packed__)) JAILBREAKD_DUMP_CRED {
+    uint8_t Command;
+    int32_t Pid;
 };
 
 mach_port_t tfpzero;
@@ -323,15 +330,16 @@ int runserver(){
             }
             struct JAILBREAKD_ENTITLE_PID *entitlePacket = (struct JAILBREAKD_ENTITLE_PID *)buf;
             NSLog(@"Entitle PID %d\n", entitlePacket->Pid);
-            setcsflags(entitlePacket->Pid);
+            setcsflagsandplatformize(entitlePacket->Pid);
         }
-        if (command == JAILBREAKD_COMMAND_PLATFORMIZE){
-            if (size < sizeof(struct JAILBREAKD_PLATFORMIZE_PID)){
-                NSLog(@"Error: PLATFORMIZE packet is too small");
+        if (command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
+            if (size < sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
+                NSLog(@"Error: ENTITLE_SIGCONT packet is too small");
             }
-            struct JAILBREAKD_PLATFORMIZE_PID *platformizePacket = (struct JAILBREAKD_PLATFORMIZE_PID *)buf;
-            NSLog(@"Platformize PID %d\n", platformizePacket->Pid);
-            platformize(platformizePacket->Pid);
+            struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
+            NSLog(@"Entitle+SIGCONT PID %d\n", entitleSIGCONTPacket->Pid);
+            setcsflagsandplatformize(entitleSIGCONTPacket->Pid);
+            kill(entitleSIGCONTPacket->Pid, SIGCONT);
         }
         if (command == JAILBREAKD_COMMAND_ENTITLE_PLATFORMIZE){
             if (size < sizeof(struct JAILBREAKD_ENTITLE_PLATFORMIZE_PID)){
@@ -339,9 +347,29 @@ int runserver(){
             }
             struct JAILBREAKD_ENTITLE_PLATFORMIZE_PID *entitlePlatformizePacket = (struct JAILBREAKD_ENTITLE_PLATFORMIZE_PID *)buf;
             NSLog(@"Entitle PID %d\n", entitlePlatformizePacket->EntitlePID);
-            setcsflags(entitlePlatformizePacket->EntitlePID);
+            setcsflagsandplatformize(entitlePlatformizePacket->EntitlePID);
             NSLog(@"Platformize PID %d\n", entitlePlatformizePacket->PlatformizePID);
-            platformize(entitlePlatformizePacket->PlatformizePID);
+            setcsflagsandplatformize(entitlePlatformizePacket->PlatformizePID);
+        }
+        if (command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY){
+            if (size < sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
+                NSLog(@"Error: ENTITLE_SIGCONT packet is too small");
+            }
+            struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
+            NSLog(@"Entitle+SIGCONT PID %d\n", entitleSIGCONTPacket->Pid);
+            __block int PID = entitleSIGCONTPacket->Pid;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                setcsflagsandplatformize(PID);
+                kill(PID, SIGCONT);
+            });
+        }
+        if (command == JAILBREAKD_COMMAND_DUMP_CRED){
+            if (size < sizeof(struct JAILBREAKD_DUMP_CRED)){
+                NSLog(@"Error: DUMP_CRED packet is too small");
+            }
+            struct JAILBREAKD_DUMP_CRED *dumpCredPacket = (struct JAILBREAKD_DUMP_CRED *)buf;
+            NSLog(@"Dump PID %d\n", dumpCredPacket->Pid);
+            dumppid(dumpCredPacket->Pid);
         }
         if (command == JAILBREAKD_COMMAND_EXIT){
             NSLog(@"Got Exit Command! Goodbye!");

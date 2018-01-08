@@ -577,6 +577,9 @@ do { \
         /* uncomment if you need to replace the binaries */
         unlink("/fun_bins/inject_amfid");
         unlink("/fun_bins/amfid_payload.dylib");
+        unlink("/fun_bins/inject_launchd");
+        unlink("/fun_bins/launchd_payload.dylib");
+        unlink("/fun_bins/xpcproxy_payload.dylib");
         
         if (!file_exist("/fun_bins/inject_amfid")) {
             printf("copy /fun_bins/inject_amfid\n");
@@ -588,20 +591,42 @@ do { \
             cp("/fun_bins/amfid_payload.dylib", progname("amfid_payload.dylib"));
             chmod("/fun_bins/amfid_payload.dylib", 0755);
         }
+        if (!file_exist("/fun_bins/inject_launchd")) {
+            printf("copy /fun_bins/inject_launchd\n");
+            cp("/fun_bins/inject_launchd", progname("inject_launchd"));
+            chmod("/fun_bins/inject_launchd", 0755);
+        }
+        if (!file_exist("/fun_bins/launchd_payload.dylib")) {
+            printf("copy /fun_bins/launchd_payload.dylib\n");
+            cp("/fun_bins/launchd_payload.dylib", progname("launchd_payload.dylib"));
+            chmod("/fun_bins/launchd_payload.dylib", 0755);
+        }
+        if (!file_exist("/fun_bins/xpcproxy_payload.dylib")) {
+            printf("copy /fun_bins/xpcproxy_payload.dylib\n");
+            cp("/fun_bins/xpcproxy_payload.dylib", progname("xpcproxy_payload.dylib"));
+            chmod("/fun_bins/xpcproxy_payload.dylib", 0755);
+        }
         
         printf("[fun] copied the required binaries into the right places\n");
     }
     
     inject_trusts(1, (const char **)&(const char*[]){"/fun_bins/inject_amfid"});
     inject_trusts(1, (const char **)&(const char*[]){"/fun_bins/amfid_payload.dylib"});
+    inject_trusts(1, (const char **)&(const char*[]){"/fun_bins/inject_launchd"});
     
-#define BinaryLocation "/fun_bins/inject_amfid"
+#define BinaryLocation_amfid "/fun_bins/inject_amfid"
     
     pid_t pd;
     
-    const char* args[] = {BinaryLocation, itoa(amfid_pid), NULL};
-    int rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&args, NULL);
+    const char* args_amfid[] = {BinaryLocation_amfid, itoa(amfid_pid), NULL};
+    int rv = posix_spawn(&pd, BinaryLocation_amfid, NULL, NULL, (char **)&args_amfid, NULL);
     waitpid(pd, NULL, 0);
+    
+#define BinaryLocation_launchd "/fun_bins/inject_launchd"
+    
+    /*const char* args_launchd[] = {BinaryLocation_launchd, itoa(1), NULL};
+    rv = posix_spawn(&pd, BinaryLocation_launchd, NULL, NULL, (char **)&args_launchd, NULL);
+    waitpid(pd, NULL, 0);*/
     
 //	uint8_t launchd[19];
 //	kread(find_amficache()+0x11358, launchd, 19);
