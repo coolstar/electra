@@ -319,7 +319,6 @@ int setcsflagsandplatformize(int pd){
 
               OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
               OSDictionary_SetItem(amfi_entitlements, "com.apple.private.skip-library-validation", find_OSBoolean_True());
-              OSDictionary_SetItem(amfi_entitlements, "com.apple.private.security.no-sandbox", find_OSBoolean_True());
 
               NSLog(@"Set Entitlements on PID %d", pd);
 
