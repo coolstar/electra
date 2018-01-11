@@ -358,7 +358,7 @@ int runserver(){
             struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
             NSLog(@"Entitle+SIGCONT PID %d\n", entitleSIGCONTPacket->Pid);
             __block int PID = entitleSIGCONTPacket->Pid;
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 setcsflagsandplatformize(PID);
                 kill(PID, SIGCONT);
             });

