@@ -20,6 +20,8 @@
 #include <Foundation/Foundation.h>
 #include "fishhook.h"
 
+#define XPCPROXY_DEBUG 0
+
 int file_exist(char *filename) {
     struct stat buffer;
     int r = stat(filename, &buffer);
@@ -86,6 +88,7 @@ int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actio
         return old_pspawn(pid, path, file_actions, attrp, argv, envp);
     }
     
+#if XPCPROXY_DEBUG
     FILE *f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
     fprintf(f, "We got called (fake_posix_spawn)! %s\n", path);
     
@@ -100,14 +103,19 @@ int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actio
     
     fclose(f);
     f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
+#endif
     
     int envcount = 0;
     
     if (envp != NULL){
+#if XPCPROXY_DEBUG
         fprintf(f, "Env: \n");
+#endif
         char** currentenv = envp;
         while (*currentenv != NULL){
+#if XPCPROXY_DEBUG
             fprintf(f,"\t%s\n", *currentenv);
+#endif
             if (strstr(*currentenv, "DYLD_INSERT_LIBRARIES") == NULL){
                 envcount++;
             }
@@ -115,8 +123,10 @@ int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actio
         }
     }
     
+#if XPCPROXY_DEBUG
     fclose(f);
     f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
+#endif
     
     char **newenvp = malloc((envcount+2) * sizeof(char **));
     int j = 0;
@@ -130,6 +140,7 @@ int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actio
     newenvp[j] = "DYLD_INSERT_LIBRARIES=/usr/lib/SBInject.dylib";
     newenvp[j+1] = NULL;
     
+#if XPCPROXY_DEBUG
     fprintf(f, "New Env: \n");
     char** currentenv = newenvp;
     while (*currentenv != NULL){
@@ -139,6 +150,7 @@ int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actio
     
     fclose(f);
     f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
+#endif
     
     posix_spawnattr_t attr;
     
@@ -147,9 +159,11 @@ int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actio
     if (attrp){
         newattrp = attrp;
         
+#if XPCPROXY_DEBUG
         fprintf(f, "got attrp\n");
         fclose(f);
         f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
+#endif
         
         short flags;
         posix_spawnattr_getflags(attrp, &flags);
@@ -160,10 +174,14 @@ int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actio
         posix_spawnattr_setflags(&attr, POSIX_SPAWN_START_SUSPENDED);
     }
     
+#if XPCPROXY_DEBUG
     fprintf(f, "Calling jailbreakd\n");
+#endif
     calljailbreakd(getpid());
     
+#if XPCPROXY_DEBUG
     fclose(f);
+#endif
     
     int origret = old_pspawn(pid, path, file_actions, newattrp, argv, newenvp);
     
@@ -175,6 +193,7 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
         return old_pspawnp(pid, file, file_actions, attrp, argv, envp);
     }
     
+#if XPCPROXY_DEBUG
     FILE *f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
     fprintf(f, "We got called (fake_posix_spawnp)! %s\n", file);
     
@@ -189,14 +208,19 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
     
     fclose(f);
     f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
+#endif
     
     int envcount = 0;
     
     if (envp != NULL){
+#if XPCPROXY_DEBUG
         fprintf(f, "Env: \n");
+#endif
         char** currentenv = envp;
         while (*currentenv != NULL){
+#if XPCPROXY_DEBUG
             fprintf(f,"\t%s\n", *currentenv);
+#endif
             if (strstr(*currentenv, "DYLD_INSERT_LIBRARIES") == NULL){
                 envcount++;
             }
@@ -204,8 +228,10 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
         }
     }
     
+#if XPCPROXY_DEBUG
     fclose(f);
     f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
+#endif
     
     char **newenvp = malloc((envcount+2) * sizeof(char **));
     int j = 0;
@@ -219,6 +245,7 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
     newenvp[j] = "DYLD_INSERT_LIBRARIES=/usr/lib/SBInject.dylib";
     newenvp[j+1] = NULL;
     
+#if XPCPROXY_DEBUG
     fprintf(f, "New Env: \n");
     char** currentenv = newenvp;
     while (*currentenv != NULL){
@@ -228,6 +255,7 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
     
     fclose(f);
     f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
+#endif
     
     posix_spawnattr_t attr;
     
@@ -236,9 +264,11 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
     if (attrp){
         newattrp = attrp;
         
+#if XPCPROXY_DEBUG
         fprintf(f, "got attrp\n");
         fclose(f);
         f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
+#endif
         
         short flags;
         posix_spawnattr_getflags(attrp, &flags);
@@ -249,10 +279,14 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
         posix_spawnattr_setflags(&attr, POSIX_SPAWN_START_SUSPENDED);
     }
     
+#if XPCPROXY_DEBUG
     fprintf(f, "Calling jailbreakd\n");
+#endif
     calljailbreakd(getpid());
     
+#if XPCPROXY_DEBUG
     fclose(f);
+#endif
     
     int origret = old_pspawnp(pid, file, file_actions, newattrp, argv, newenvp);
     
