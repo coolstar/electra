@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:async_wake_ios.xcodeproj">
+      location = "self:/Users/coolstar/Documents/Project/async_awake-fun/electra.xcodeproj">
    </FileRef>
 </Workspace>
