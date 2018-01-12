@@ -37,3 +37,14 @@ const char* realPath() {
 	char *pt = realpath(path, NULL);
 	return pt;
 }
+
+void update_springboard_plist(){
+    NSDictionary *springBoardPlist = [NSMutableDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.apple.springboard.plist"];
+    [springBoardPlist setValue:@YES forKey:@"SBShowNonDefaultSystemApps"];
+    [springBoardPlist writeToFile:@"/var/mobile/Library/Preferences/com.apple.springboard.plist" atomically:YES];
+    
+    NSDictionary* attr = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithShort:0755], NSFilePosixPermissions,@"mobile",NSFileOwnerAccountName,NULL];
+    
+    NSError *error = nil;
+    [[NSFileManager defaultManager] setAttributes:attr ofItemAtPath:@"/var/mobile/Library/Preferences/com.apple.springboard.plist" error:&error];
+}

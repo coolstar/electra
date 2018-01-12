@@ -525,7 +525,7 @@ int main(int argc, char* argv[]) {
 
     NSLog(@"amfid uid is now 0 - injecting our dylib");
 
-    uint64_t handler = call_remote(remoteTask, dlopen, 2, REMOTE_CSTRING("/fun_bins/amfid_payload.dylib"), REMOTE_LITERAL(RTLD_NOW));
+    uint64_t handler = call_remote(remoteTask, dlopen, 2, REMOTE_CSTRING("/bootstrap/amfid_payload.dylib"), REMOTE_LITERAL(RTLD_NOW));
     uint64_t error = call_remote(remoteTask, dlerror, 0);
     if (error == 0) {
         NSLog(@"No error occured!");

@@ -413,6 +413,8 @@ do { \
 	uint64_t kern_proc = 0;
 	uint64_t amfid_proc = 0;
     uint32_t amfid_pid = 0;
+    uint32_t cfprefsd_pid = 0;
+    uint32_t backboardd_pid = 0;
 	
 	uint64_t proc = rk64(find_allproc());
 	while (proc) {
@@ -424,6 +426,11 @@ do { \
 			our_proc = proc;
 		} else if (pid == 0) {
 			kern_proc = proc;
+        } else if (pid == 1){
+            printf("found launchd\n");
+            
+            uint32_t csflags = rk32(proc + offsetof_p_csflags);
+            wk32(proc + offsetof_p_csflags, (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT | CS_HARD));
 		} else if (strstr(name, "amfid")) {
 			printf("found amfid - getting task\n");
             amfid_proc = proc;
@@ -431,7 +438,13 @@ do { \
             
             uint32_t csflags = rk32(proc + offsetof_p_csflags);
             wk32(proc + offsetof_p_csflags, (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT | CS_HARD));
-		}
+        } else if (strstr(name, "cfprefsd")){
+            printf("found cfprefsd. keeping PID\n");
+            cfprefsd_pid = pid;
+        } else if (strstr(name, "backboardd")){
+            printf("found backboardd. keeping PID\n");
+            backboardd_pid = pid;
+        }
 		/*if (pid != 0) {
 			uint32_t csflags = rk32(proc + offsetof_p_csflags);
             printf("CSFlags for %s (PID: %d): 0x%x; ", name, pid, csflags);
@@ -569,64 +582,59 @@ do { \
     
     // Prepare our binaries
     {
-        if (!file_exist("/fun_bins")) {
-            printf("making /fun_bins");
-            mkdir("/fun_bins", 0755);
+        if (!file_exist("/bootstrap")) {
+            printf("making /bootstrap");
+            mkdir("/bootstrap", 0755);
         }
         
         /* uncomment if you need to replace the binaries */
-        unlink("/fun_bins/inject_amfid");
-        unlink("/fun_bins/amfid_payload.dylib");
-        unlink("/fun_bins/inject_launchd");
-        unlink("/fun_bins/launchd_payload.dylib");
-        unlink("/fun_bins/xpcproxy_payload.dylib");
+        unlink("/bootstrap/inject_amfid");
+        unlink("/bootstrap/amfid_payload.dylib");
+        unlink("/bootstrap/inject_launchd");
+        unlink("/bootstrap/launchd_payload.dylib");
+        unlink("/bootstrap/xpcproxy_payload.dylib");
         
-        if (!file_exist("/fun_bins/inject_amfid")) {
-            printf("copy /fun_bins/inject_amfid\n");
-            cp("/fun_bins/inject_amfid", progname("inject_amfid"));
-            chmod("/fun_bins/inject_amfid", 0755);
+        if (!file_exist("/bootstrap/inject_amfid")) {
+            printf("copy /bootstrap/inject_amfid\n");
+            cp("/bootstrap/inject_amfid", progname("inject_amfid"));
+            chmod("/bootstrap/inject_amfid", 0755);
         }
-        if (!file_exist("/fun_bins/amfid_payload.dylib")) {
-            printf("copy /fun_bins/amfid_payload.dylib\n");
-            cp("/fun_bins/amfid_payload.dylib", progname("amfid_payload.dylib"));
-            chmod("/fun_bins/amfid_payload.dylib", 0755);
+        if (!file_exist("/bootstrap/amfid_payload.dylib")) {
+            printf("copy /bootstrap/amfid_payload.dylib\n");
+            cp("/bootstrap/amfid_payload.dylib", progname("amfid_payload.dylib"));
+            chmod("/bootstrap/amfid_payload.dylib", 0755);
         }
-        if (!file_exist("/fun_bins/inject_launchd")) {
-            printf("copy /fun_bins/inject_launchd\n");
-            cp("/fun_bins/inject_launchd", progname("inject_launchd"));
-            chmod("/fun_bins/inject_launchd", 0755);
+        if (!file_exist("/bootstrap/inject_launchd")) {
+            printf("copy /bootstrap/inject_launchd\n");
+            cp("/bootstrap/inject_launchd", progname("inject_launchd"));
+            chmod("/bootstrap/inject_launchd", 0755);
         }
-        if (!file_exist("/fun_bins/launchd_payload.dylib")) {
-            printf("copy /fun_bins/launchd_payload.dylib\n");
-            cp("/fun_bins/launchd_payload.dylib", progname("launchd_payload.dylib"));
-            chmod("/fun_bins/launchd_payload.dylib", 0755);
+        if (!file_exist("/bootstrap/launchd_payload.dylib")) {
+            printf("copy /bootstrap/launchd_payload.dylib\n");
+            cp("/bootstrap/launchd_payload.dylib", progname("launchd_payload.dylib"));
+            chmod("/bootstrap/launchd_payload.dylib", 0755);
         }
-        if (!file_exist("/fun_bins/xpcproxy_payload.dylib")) {
-            printf("copy /fun_bins/xpcproxy_payload.dylib\n");
-            cp("/fun_bins/xpcproxy_payload.dylib", progname("xpcproxy_payload.dylib"));
-            chmod("/fun_bins/xpcproxy_payload.dylib", 0755);
+        if (!file_exist("/bootstrap/xpcproxy_payload.dylib")) {
+            printf("copy /bootstrap/xpcproxy_payload.dylib\n");
+            cp("/bootstrap/xpcproxy_payload.dylib", progname("xpcproxy_payload.dylib"));
+            chmod("/bootstrap/xpcproxy_payload.dylib", 0755);
         }
         
         printf("[fun] copied the required binaries into the right places\n");
     }
     
-    inject_trusts(1, (const char **)&(const char*[]){"/fun_bins/inject_amfid"});
-    inject_trusts(1, (const char **)&(const char*[]){"/fun_bins/amfid_payload.dylib"});
-    inject_trusts(1, (const char **)&(const char*[]){"/fun_bins/inject_launchd"});
+    inject_trusts(1, (const char **)&(const char*[]){"/bootstrap/inject_amfid"});
+    inject_trusts(1, (const char **)&(const char*[]){"/bootstrap/amfid_payload.dylib"});
+    inject_trusts(1, (const char **)&(const char*[]){"/bootstrap/inject_launchd"});
+    inject_trusts(1, (const char **)&(const char*[]){"/bootstrap/launchd_payload.dylib"});
     
-#define BinaryLocation_amfid "/fun_bins/inject_amfid"
+#define BinaryLocation_amfid "/bootstrap/inject_amfid"
     
     pid_t pd;
     
     const char* args_amfid[] = {BinaryLocation_amfid, itoa(amfid_pid), NULL};
     int rv = posix_spawn(&pd, BinaryLocation_amfid, NULL, NULL, (char **)&args_amfid, NULL);
     waitpid(pd, NULL, 0);
-    
-#define BinaryLocation_launchd "/fun_bins/inject_launchd"
-    
-    /*const char* args_launchd[] = {BinaryLocation_launchd, itoa(1), NULL};
-    rv = posix_spawn(&pd, BinaryLocation_launchd, NULL, NULL, (char **)&args_launchd, NULL);
-    waitpid(pd, NULL, 0);*/
     
 //	uint8_t launchd[19];
 //	kread(find_amficache()+0x11358, launchd, 19);
@@ -650,6 +658,8 @@ do { \
     chmod("/"BOOTSTRAP_PREFIX"/jailbreakd", 0755);
 
     rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
+    rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
+    rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("anemoneapp.tar"), "-C", "/Applications", NULL }, NULL);
     unlink(tar);
 
     const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
@@ -660,9 +670,45 @@ do { \
     cp(launchjailbreak, progname("launchjailbreak"));
     chmod(launchjailbreak, 0755);
     
+    unlink("/usr/libexec/sftp-server");
+    symlink("/"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server","/usr/libexec/sftp-server");
+    
+    unlink("/usr/share/terminfo");
+    symlink("/"BOOTSTRAP_PREFIX"/usr/share/terminfo","/usr/share/terminfo");
+    
+    if (!file_exist("/System/Library/Themes")) {
+        printf("making /System/Library/Themes");
+        mkdir("/System/Library/Themes", 0755);
+    }
+    
+    unlink("/"BOOTSTRAP_PREFIX"/Library/Themes");
+    symlink("/System/Library/Themes","/"BOOTSTRAP_PREFIX"/Library/Themes");
+    
+    unlink("/usr/lib/SBInject.dylib");
+    cp("/usr/lib/SBInject.dylib","/bootstrap/usr/lib/SBInject.dylib");
+    
+    unlink("/usr/lib/libsubstitute.dylib");
+    cp("/usr/lib/libsubstitute.dylib","/bootstrap/usr/lib/libsubstitute.dylib");
+    
+    unlink("/usr/lib/libsubstitute.0.dylib");
+    cp("/usr/lib/libsubstitute.0.dylib","/bootstrap/usr/lib/libsubstitute.0.dylib");
+    
+    unlink("/usr/bin/recache");
+    cp("/usr/bin/recache","/bootstrap/usr/bin/recache");
+    chmod("/usr/bin/recache", 0755);
+    
+    unlink("/usr/bin/killall");
+    cp("/usr/bin/killall","/bootstrap/usr/bin/killall");
+    chmod("/usr/bin/killall", 0755);
+    
+    if (!file_exist("/usr/lib/SBInject")) {
+        rename("/"BOOTSTRAP_PREFIX"/Library/SBInject", "/usr/lib/SBInject");
+        symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
+    }
+    
     printf("Dropbear would be up soon\n");
-    printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
-    printf("Note: to use clear/nano/reset (or other ncurses commands) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/share/terminfo /usr/share/terminfo'\n");
+    //printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
+    //printf("Note: to use clear/nano/reset (or other ncurses commands) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/share/terminfo /usr/share/terminfo'\n");
     
     pid_t launchjailbreak_pid;
     rv = posix_spawn(&launchjailbreak_pid, launchjailbreak, NULL, NULL, (char **)&(const char*[]){launchjailbreak, NULL}, NULL);
@@ -710,7 +756,23 @@ do { \
     mach_port_t pass_port = MACH_PORT_NULL;
     start_jailbreakd(kern_ucred, &pass_port, tfp0, kernel_base);
     
-	wk64(rk64(kern_ucred+0x78)+0x8, 0);
+    sleep(5);
+    
+    update_springboard_plist();
+    
+    kill(cfprefsd_pid, SIGKILL);
+    
+#define BinaryLocation_launchd "/bootstrap/inject_launchd"
+    
+    const char* args_launchd[] = {BinaryLocation_launchd, itoa(1), NULL};
+    rv = posix_spawn(&pd, BinaryLocation_launchd, NULL, NULL, (char **)&args_launchd, NULL);
+    waitpid(pd, NULL, 0);
+    
+    sleep(2);
+    
+    wk64(rk64(kern_ucred+0x78)+0x8, 0);
+    
+    kill(backboardd_pid, SIGTERM);
 }
 
 

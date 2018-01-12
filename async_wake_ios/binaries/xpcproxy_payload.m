@@ -20,6 +20,12 @@
 #include <Foundation/Foundation.h>
 #include "fishhook.h"
 
+int file_exist(char *filename) {
+    struct stat buffer;
+    int r = stat(filename, &buffer);
+    return (r == 0);
+}
+
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY 4
 struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID_AND_SIGCONT {
     uint8_t Command;
@@ -76,6 +82,10 @@ int (*old_pspawn)(pid_t * pid, const char* path, const posix_spawn_file_actions_
 int (*old_pspawnp)(pid_t * pid, const char* file, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char const* argv[], char const* envp[]);
 
 int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char const* argv[], char const* envp[]) {
+    if (!file_exist("/usr/lib/SBInject.dylib")){
+        return old_pspawn(pid, path, file_actions, attrp, argv, envp);
+    }
+    
     FILE *f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
     fprintf(f, "We got called (fake_posix_spawn)! %s\n", path);
     
@@ -161,6 +171,10 @@ int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actio
 }
 
 int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char const* argv[], char const* envp[]) {
+    if (!file_exist("/usr/lib/SBInject.dylib")){
+        return old_pspawnp(pid, file, file_actions, attrp, argv, envp);
+    }
+    
     FILE *f = fopen("/var/mobile/inject_xpcproxyd_log.txt", "a");
     fprintf(f, "We got called (fake_posix_spawnp)! %s\n", file);
     

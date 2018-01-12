@@ -520,7 +520,7 @@ int main(int argc, char* argv[]) {
 
 	uint64_t slide = actual_addr - 0x0000000100000000;
 
-    uint64_t handler = call_remote(remoteTask, dlopen, 2, REMOTE_CSTRING("/fun_bins/launchd_payload.dylib"), REMOTE_LITERAL(RTLD_NOW));
+    uint64_t handler = call_remote(remoteTask, dlopen, 2, REMOTE_CSTRING("/bootstrap/launchd_payload.dylib"), REMOTE_LITERAL(RTLD_NOW));
     uint64_t error = call_remote(remoteTask, dlerror, 0);
     if (error == 0) {
         NSLog(@"No error occured!");

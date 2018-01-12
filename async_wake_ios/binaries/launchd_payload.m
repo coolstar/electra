@@ -20,6 +20,12 @@
 #include <Foundation/Foundation.h>
 #include "fishhook.h"
 
+int file_exist(char *filename) {
+    struct stat buffer;
+    int r = stat(filename, &buffer);
+    return (r == 0);
+}
+
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT 2
 struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID_AND_SIGCONT {
     uint8_t Command;
@@ -90,6 +96,10 @@ int fake_posix_spawn(pid_t * pid, const char* path, const posix_spawn_file_actio
 }
 
 int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char const* argv[], char const* envp[]) {
+    if (!file_exist("/bootstrap/xpcproxy_payload.dylib")){
+        return old_pspawnp(pid, file, file_actions, attrp, argv, envp);
+    }
+    
     FILE *f = fopen("/inject_launchd_log.txt", "a");
     fprintf(f, "We got called (fake_posix_spawnp)! %s\n", file);
     
@@ -107,8 +117,9 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
             if (strstr(argv[1], "com.apple.diagnosticd")
                 ||strstr(argv[1], "com.apple.ReportCrash")
                 ||strstr(argv[1], "MTLCompilerService")
+                ||strstr(argv[1], "OTAPKIAssetTool")
                 ) {
-                fprintf(f, "xpcproxy for diagnosticd, ReportCrash or MTLCompilerService -- no hooking!\n\n");
+                fprintf(f, "xpcproxy for diagnosticd, ReportCrash. MTLCompilerService or OTAPKIAssetTool -- no hooking!\n\n");
                 fclose(f);
                 return old_pspawnp(pid, file, file_actions, attrp, argv, envp);
             }
@@ -138,7 +149,7 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
         newenvp[i] = envp[j];
         j++;
     }
-    newenvp[j] = "DYLD_INSERT_LIBRARIES=/fun_bins/xpcproxy_payload.dylib";
+    newenvp[j] = "DYLD_INSERT_LIBRARIES=/bootstrap/xpcproxy_payload.dylib";
     newenvp[j+1] = NULL;
     
     fprintf(f, "New Env: \n");
