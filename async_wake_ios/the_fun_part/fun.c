@@ -667,16 +667,22 @@ do { \
     cp("/"BOOTSTRAP_PREFIX"/jailbreakd", progname("jailbreakd"));
     chmod("/"BOOTSTRAP_PREFIX"/jailbreakd", 0755);
 
-    rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
+    rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
+    waitpid(pd, NULL, 0);
+    
     if (enable_tweaks){
-        rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
-        rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("anemoneapp.tar"), "-C", "/Applications", NULL }, NULL);
+        rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
+        waitpid(pd, NULL, 0);
+        
+        rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("anemoneapp.tar"), "-C", "/Applications", NULL }, NULL);
+        waitpid(pd, NULL, 0);
     }
     unlink(tar);
 
     if (enable_tweaks){
         const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
-        rv = startprog(kern_ucred, true, uicache, (char **)&(const char*[]){ uicache, NULL }, NULL);
+        rv = posix_spawn(&pd, uicache, NULL, NULL, (char **)&(const char*[]){ uicache, NULL }, NULL);
+        waitpid(pd, NULL, 0);
     }
         
     unlink("/"BOOTSTRAP_PREFIX"/launchjailbreak");
@@ -1028,40 +1034,4 @@ int setcsflags(int pd){
         }
     }
     return 0;
-}
-
-int startprog(uint64_t kern_ucred, bool wait, const char *prog, const char* args[], const char* envp[]) {
-    pid_t pd;
-    int rv = posix_spawn(&pd, prog, NULL, NULL, (char**)args, envp);
-    printf("spawn '%s': pid=%d\n", prog, pd);
-    printf("rv=%d\n", rv);
-
-    if (kern_ucred != 0) {
-        int tries = 3;
-        while (tries-- > 0) {
-            sleep(1);
-            uint64_t proc = rk64(find_allproc());
-            while (proc) {
-                uint32_t pid = rk32(proc + offsetof_p_pid);
-                if (pid == pd) {
-                    uint32_t csflags = rk32(proc + offsetof_p_csflags);
-                    csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT  | CS_HARD);
-                    wk32(proc + offsetof_p_csflags, csflags);
-                    printf("empower\n");
-                    tries = 0;
-                    uint64_t self_ucred = 0;
-                    kcall(find_copyout(), 3, proc+0x100, &self_ucred, sizeof(self_ucred));
-
-                    kcall(find_bcopy(), 3, kern_ucred + 0x78, self_ucred + 0x78, sizeof(uint64_t));
-                    kcall(find_bzero(), 2, self_ucred + 0x18, 12);
-                    break;
-                }
-                proc = rk64(proc);
-            }
-        }
-    }
-
-    if (wait)
-        waitpid(pd, NULL, 0);
-    return rv;
 }
