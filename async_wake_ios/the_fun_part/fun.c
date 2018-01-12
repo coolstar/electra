@@ -330,7 +330,7 @@ uint64_t kexecute(mach_port_t user_client, uint64_t fake_client, uint64_t addr, 
     return returnval;
 }
 
-void let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client) {
+int let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client, bool enable_tweaks) {
 	
 	kern_return_t err;
 	
@@ -415,6 +415,8 @@ do { \
     uint32_t amfid_pid = 0;
     uint32_t cfprefsd_pid = 0;
     uint32_t backboardd_pid = 0;
+    
+    bool found_jailbreakd = false;
 	
 	uint64_t proc = rk64(find_allproc());
 	while (proc) {
@@ -444,6 +446,9 @@ do { \
         } else if (strstr(name, "backboardd")){
             printf("found backboardd. keeping PID\n");
             backboardd_pid = pid;
+        } else if (strstr(name, "jailbreakd")){
+            printf("found jailbreakd. already jailbroken!\n");
+            found_jailbreakd = true;
         }
 		/*if (pid != 0) {
 			uint32_t csflags = rk32(proc + offsetof_p_csflags);
@@ -508,6 +513,11 @@ do { \
 		}*/
 		proc = rk64(proc);
 	}
+    
+    if (found_jailbreakd){
+        wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
+        return -1;
+    }
 	
 	printf("our proc is at 0x%016llx\n", our_proc);
 	printf("kern proc is at 0x%016llx\n", kern_proc);
@@ -658,13 +668,17 @@ do { \
     chmod("/"BOOTSTRAP_PREFIX"/jailbreakd", 0755);
 
     rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
-    rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
-    rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("anemoneapp.tar"), "-C", "/Applications", NULL }, NULL);
+    if (enable_tweaks){
+        rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
+        rv = startprog(kern_ucred, true, tar, (char **)&(const char*[]){ tar, "-xpf", progname("anemoneapp.tar"), "-C", "/Applications", NULL }, NULL);
+    }
     unlink(tar);
 
-    const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
-    rv = startprog(kern_ucred, true, uicache, (char **)&(const char*[]){ uicache, NULL }, NULL);
-
+    if (enable_tweaks){
+        const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
+        rv = startprog(kern_ucred, true, uicache, (char **)&(const char*[]){ uicache, NULL }, NULL);
+    }
+        
     unlink("/"BOOTSTRAP_PREFIX"/launchjailbreak");
     const char *launchjailbreak = "/" BOOTSTRAP_PREFIX "/launchjailbreak";
     cp(launchjailbreak, progname("launchjailbreak"));
@@ -676,34 +690,36 @@ do { \
     unlink("/usr/share/terminfo");
     symlink("/"BOOTSTRAP_PREFIX"/usr/share/terminfo","/usr/share/terminfo");
     
-    if (!file_exist("/System/Library/Themes")) {
-        printf("making /System/Library/Themes");
-        mkdir("/System/Library/Themes", 0755);
-    }
-    
-    unlink("/"BOOTSTRAP_PREFIX"/Library/Themes");
-    symlink("/System/Library/Themes","/"BOOTSTRAP_PREFIX"/Library/Themes");
-    
-    unlink("/usr/lib/SBInject.dylib");
-    cp("/usr/lib/SBInject.dylib","/bootstrap/usr/lib/SBInject.dylib");
-    
-    unlink("/usr/lib/libsubstitute.dylib");
-    cp("/usr/lib/libsubstitute.dylib","/bootstrap/usr/lib/libsubstitute.dylib");
-    
-    unlink("/usr/lib/libsubstitute.0.dylib");
-    cp("/usr/lib/libsubstitute.0.dylib","/bootstrap/usr/lib/libsubstitute.0.dylib");
-    
-    unlink("/usr/bin/recache");
-    cp("/usr/bin/recache","/bootstrap/usr/bin/recache");
-    chmod("/usr/bin/recache", 0755);
-    
-    unlink("/usr/bin/killall");
-    cp("/usr/bin/killall","/bootstrap/usr/bin/killall");
-    chmod("/usr/bin/killall", 0755);
-    
-    if (!file_exist("/usr/lib/SBInject")) {
-        rename("/"BOOTSTRAP_PREFIX"/Library/SBInject", "/usr/lib/SBInject");
-        symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
+    if (enable_tweaks){
+        if (!file_exist("/System/Library/Themes")) {
+            printf("making /System/Library/Themes");
+            mkdir("/System/Library/Themes", 0755);
+        }
+        
+        unlink("/"BOOTSTRAP_PREFIX"/Library/Themes");
+        symlink("/System/Library/Themes","/"BOOTSTRAP_PREFIX"/Library/Themes");
+        
+        unlink("/usr/lib/SBInject.dylib");
+        cp("/usr/lib/SBInject.dylib","/bootstrap/usr/lib/SBInject.dylib");
+        
+        unlink("/usr/lib/libsubstitute.dylib");
+        cp("/usr/lib/libsubstitute.dylib","/bootstrap/usr/lib/libsubstitute.dylib");
+        
+        unlink("/usr/lib/libsubstitute.0.dylib");
+        cp("/usr/lib/libsubstitute.0.dylib","/bootstrap/usr/lib/libsubstitute.0.dylib");
+        
+        unlink("/usr/bin/recache");
+        cp("/usr/bin/recache","/bootstrap/usr/bin/recache");
+        chmod("/usr/bin/recache", 0755);
+        
+        unlink("/usr/bin/killall");
+        cp("/usr/bin/killall","/bootstrap/usr/bin/killall");
+        chmod("/usr/bin/killall", 0755);
+        
+        if (!file_exist("/usr/lib/SBInject")) {
+            rename("/"BOOTSTRAP_PREFIX"/Library/SBInject", "/usr/lib/SBInject");
+            symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
+        }
     }
     
     printf("Dropbear would be up soon\n");
@@ -764,15 +780,24 @@ do { \
     
 #define BinaryLocation_launchd "/bootstrap/inject_launchd"
     
-    const char* args_launchd[] = {BinaryLocation_launchd, itoa(1), NULL};
-    rv = posix_spawn(&pd, BinaryLocation_launchd, NULL, NULL, (char **)&args_launchd, NULL);
-    waitpid(pd, NULL, 0);
+    if (enable_tweaks){
+        const char* args_launchd[] = {BinaryLocation_launchd, itoa(1), NULL};
+        rv = posix_spawn(&pd, BinaryLocation_launchd, NULL, NULL, (char **)&args_launchd, NULL);
+        waitpid(pd, NULL, 0);
+        
+        const char* args_recache[] = {"/bootstrap/usr/bin/recache", "--no-respring", NULL};
+        rv = posix_spawn(&pd, "/bootstrap/usr/bin/recache", NULL, NULL, (char **)&args_recache, NULL);
+        waitpid(pd, NULL, 0);
     
-    sleep(2);
+        sleep(2);
+    }
     
     wk64(rk64(kern_ucred+0x78)+0x8, 0);
     
-    kill(backboardd_pid, SIGTERM);
+    if (enable_tweaks){
+        kill(backboardd_pid, SIGTERM);
+    }
+    return 0;
 }
 
 
