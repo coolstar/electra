@@ -73,6 +73,10 @@ unsigned offsetof_csb_platform_path = 0xA8;   // cs_blob::csb_platform_path
 #define CS_PLATFORM_BINARY	0x4000000	/* this is a platform binary */
 #define CS_PLATFORM_PATH	0x8000000	/* platform binary by the fact of path (osx only) */
 
+#define CS_DEBUGGED         0x10000000  /* process is currently or has previously been debugged and allowed to run with invalid pages */
+#define CS_SIGNED         0x20000000  /* process has a signature (may have gone invalid) */
+#define CS_DEV_CODE         0x40000000  /* code is dev signed, cannot be loaded into prod signed code (will go away with rdar://problem/28322552) */
+
 size_t kread(uint64_t where, void *p, size_t size) {
 	int rv;
 	size_t offset = 0;
@@ -301,7 +305,7 @@ int setcsflagsandplatformize(int pd){
 #if JAILBREAKDDEBUG
               NSLog(@"Previous CSFlags: 0x%x", csflags);
 #endif
-              csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW) & ~(CS_RESTRICT | CS_HARD | CS_KILL);
+              csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW | CS_DEBUGGED) & ~(CS_RESTRICT | CS_HARD | CS_KILL);
 #if JAILBREAKDDEBUG
               NSLog(@"New CSFlags: 0x%x", csflags);
 #endif
