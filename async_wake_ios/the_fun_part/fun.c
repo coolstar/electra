@@ -590,12 +590,22 @@ do { \
         fputs(ln, stdout);
     fclose(fp);
     
+    pid_t pd;
+    int rv = 0;
+    
+    const char *tar = "/" BOOTSTRAP_PREFIX "/tar";
+    
     // Prepare our binaries
     {
         if (!file_exist("/bootstrap")) {
-            printf("making /bootstrap");
+            printf("making /bootstrap\n");
             mkdir("/bootstrap", 0755);
         }
+        
+        mkdir("/" BOOTSTRAP_PREFIX, 0755);
+        cp(tar, progname("tar"));
+        chmod(tar, 0755);
+        inject_trusts(1, (const char **)&(const char*[]){tar});
         
         /* uncomment if you need to replace the binaries */
         unlink("/bootstrap/inject_amfid");
@@ -603,32 +613,11 @@ do { \
         unlink("/bootstrap/inject_launchd");
         unlink("/bootstrap/launchd_payload.dylib");
         unlink("/bootstrap/xpcproxy_payload.dylib");
+        unlink("/bootstrap/launchjailbreak");
+        unlink("/bootstrap/jailbreakd");
         
-        if (!file_exist("/bootstrap/inject_amfid")) {
-            printf("copy /bootstrap/inject_amfid\n");
-            cp("/bootstrap/inject_amfid", progname("inject_amfid"));
-            chmod("/bootstrap/inject_amfid", 0755);
-        }
-        if (!file_exist("/bootstrap/amfid_payload.dylib")) {
-            printf("copy /bootstrap/amfid_payload.dylib\n");
-            cp("/bootstrap/amfid_payload.dylib", progname("amfid_payload.dylib"));
-            chmod("/bootstrap/amfid_payload.dylib", 0755);
-        }
-        if (!file_exist("/bootstrap/inject_launchd")) {
-            printf("copy /bootstrap/inject_launchd\n");
-            cp("/bootstrap/inject_launchd", progname("inject_launchd"));
-            chmod("/bootstrap/inject_launchd", 0755);
-        }
-        if (!file_exist("/bootstrap/launchd_payload.dylib")) {
-            printf("copy /bootstrap/launchd_payload.dylib\n");
-            cp("/bootstrap/launchd_payload.dylib", progname("launchd_payload.dylib"));
-            chmod("/bootstrap/launchd_payload.dylib", 0755);
-        }
-        if (!file_exist("/bootstrap/xpcproxy_payload.dylib")) {
-            printf("copy /bootstrap/xpcproxy_payload.dylib\n");
-            cp("/bootstrap/xpcproxy_payload.dylib", progname("xpcproxy_payload.dylib"));
-            chmod("/bootstrap/xpcproxy_payload.dylib", 0755);
-        }
+        rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("basebinaries.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
+        waitpid(pd, NULL, 0);
         
         printf("[fun] copied the required binaries into the right places\n");
     }
@@ -640,10 +629,8 @@ do { \
     
 #define BinaryLocation_amfid "/bootstrap/inject_amfid"
     
-    pid_t pd;
-    
     const char* args_amfid[] = {BinaryLocation_amfid, itoa(amfid_pid), NULL};
-    int rv = posix_spawn(&pd, BinaryLocation_amfid, NULL, NULL, (char **)&args_amfid, NULL);
+    rv = posix_spawn(&pd, BinaryLocation_amfid, NULL, NULL, (char **)&args_amfid, NULL);
     waitpid(pd, NULL, 0);
     
 //	uint8_t launchd[19];
@@ -656,16 +643,6 @@ do { \
 	
 //	mkdir("/Library/LaunchDaemons", 777);
 //	cp("/Library/LaunchDaemons/test_fsigned.plist", plistPath2());
-
-    mkdir("/" BOOTSTRAP_PREFIX, 0755);
-    const char *tar = "/" BOOTSTRAP_PREFIX "/tar";
-    cp(tar, progname("tar"));
-    chmod(tar, 0755);
-    inject_trusts(1, (const char **)&(const char*[]){tar});
-    
-    unlink("/"BOOTSTRAP_PREFIX"/jailbreakd");
-    cp("/"BOOTSTRAP_PREFIX"/jailbreakd", progname("jailbreakd"));
-    chmod("/"BOOTSTRAP_PREFIX"/jailbreakd", 0755);
 
     rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
     waitpid(pd, NULL, 0);
@@ -684,11 +661,6 @@ do { \
         rv = posix_spawn(&pd, uicache, NULL, NULL, (char **)&(const char*[]){ uicache, NULL }, NULL);
         waitpid(pd, NULL, 0);
     }
-        
-    unlink("/"BOOTSTRAP_PREFIX"/launchjailbreak");
-    const char *launchjailbreak = "/" BOOTSTRAP_PREFIX "/launchjailbreak";
-    cp(launchjailbreak, progname("launchjailbreak"));
-    chmod(launchjailbreak, 0755);
     
     unlink("/usr/libexec/sftp-server");
     symlink("/"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server","/usr/libexec/sftp-server");
@@ -732,6 +704,7 @@ do { \
     //printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
     //printf("Note: to use clear/nano/reset (or other ncurses commands) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/share/terminfo /usr/share/terminfo'\n");
     
+    const char *launchjailbreak = "/" BOOTSTRAP_PREFIX "/launchjailbreak";
     pid_t launchjailbreak_pid;
     rv = posix_spawn(&launchjailbreak_pid, launchjailbreak, NULL, NULL, (char **)&(const char*[]){launchjailbreak, NULL}, NULL);
 	waitpid(launchjailbreak_pid, NULL, 0);
