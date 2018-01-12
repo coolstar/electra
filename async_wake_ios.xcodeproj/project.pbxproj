@@ -37,8 +37,9 @@
 		F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */ = {isa = PBXBuildFile; fileRef = F158610D1FEA002000795B90 /* gnubinpack.tar */; };
 		F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0263200888A6002CF5EE /* anemoneapp.tar */; };
 		F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0265200888AA002CF5EE /* tweaksupport.tar */; };
-		F15B02682008AD4D002CF5EE /* background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = F15B02672008AD4C002CF5EE /* background.jpg */; };
 		F15B026B2008BADE002CF5EE /* RoundedButton.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026A2008BADE002CF5EE /* RoundedButton.m */; };
+		F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026D2008C679002CF5EE /* CSGradientView.m */; };
+		F15B02712008CA58002CF5EE /* CSGradientSeparatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B02702008CA58002CF5EE /* CSGradientSeparatorView.m */; };
 		F17480161FF99C6D009A37FB /* inject_launchd in Resources */ = {isa = PBXBuildFile; fileRef = F17480151FF99C6D009A37FB /* inject_launchd */; };
 		F17480191FF99C8A009A37FB /* launchd_payload.dylib in Resources */ = {isa = PBXBuildFile; fileRef = F17480131FF99C4F009A37FB /* launchd_payload.dylib */; };
 		F1C524DD1FF350E200A4B25E /* jailbreakd_client in Resources */ = {isa = PBXBuildFile; fileRef = F1C524DB1FF350E100A4B25E /* jailbreakd_client */; };
@@ -97,9 +98,12 @@
 		F158610D1FEA002000795B90 /* gnubinpack.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = gnubinpack.tar; sourceTree = "<group>"; };
 		F15B0263200888A6002CF5EE /* anemoneapp.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = anemoneapp.tar; sourceTree = "<group>"; };
 		F15B0265200888AA002CF5EE /* tweaksupport.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = tweaksupport.tar; sourceTree = "<group>"; };
-		F15B02672008AD4C002CF5EE /* background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = background.jpg; sourceTree = "<group>"; };
 		F15B02692008BADE002CF5EE /* RoundedButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RoundedButton.h; sourceTree = "<group>"; };
 		F15B026A2008BADE002CF5EE /* RoundedButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RoundedButton.m; sourceTree = "<group>"; };
+		F15B026C2008C679002CF5EE /* CSGradientView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CSGradientView.h; sourceTree = "<group>"; };
+		F15B026D2008C679002CF5EE /* CSGradientView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientView.m; sourceTree = "<group>"; };
+		F15B026F2008CA58002CF5EE /* CSGradientSeparatorView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CSGradientSeparatorView.h; sourceTree = "<group>"; };
+		F15B02702008CA58002CF5EE /* CSGradientSeparatorView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientSeparatorView.m; sourceTree = "<group>"; };
 		F17480111FF99C4A009A37FB /* inject_launchd.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = inject_launchd.m; sourceTree = "<group>"; };
 		F17480131FF99C4F009A37FB /* launchd_payload.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = launchd_payload.dylib; sourceTree = "<group>"; };
 		F17480151FF99C6D009A37FB /* inject_launchd */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = inject_launchd; sourceTree = "<group>"; };
@@ -187,9 +191,12 @@
 				B07A023F1FB09B6F0018ACE5 /* ViewController.h */,
 				B07A02401FB09B6F0018ACE5 /* ViewController.m */,
 				BC9969031FE66CE200A4EDB9 /* ent.plist */,
-				F15B02672008AD4C002CF5EE /* background.jpg */,
 				F15B02692008BADE002CF5EE /* RoundedButton.h */,
 				F15B026A2008BADE002CF5EE /* RoundedButton.m */,
+				F15B026C2008C679002CF5EE /* CSGradientView.h */,
+				F15B026D2008C679002CF5EE /* CSGradientView.m */,
+				F15B026F2008CA58002CF5EE /* CSGradientSeparatorView.h */,
+				F15B02702008CA58002CF5EE /* CSGradientSeparatorView.m */,
 			);
 			path = async_wake_ios;
 			sourceTree = "<group>";
@@ -314,7 +321,6 @@
 				F14B5F921FF1735700E62599 /* launchjailbreak in Resources */,
 				B07A02461FB09B6F0018ACE5 /* Assets.xcassets in Resources */,
 				F1C524DD1FF350E200A4B25E /* jailbreakd_client in Resources */,
-				F15B02682008AD4D002CF5EE /* background.jpg in Resources */,
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
 				BC9969001FE663B700A4EDB9 /* launchctl in Resources */,
 			);
@@ -327,6 +333,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F15B02712008CA58002CF5EE /* CSGradientSeparatorView.m in Sources */,
 				B003EB351FC583CB00C58441 /* kmem.c in Sources */,
 				B0EF11171FCC784B00C1D14E /* symbols.c in Sources */,
 				B07A02411FB09B6F0018ACE5 /* ViewController.m in Sources */,
@@ -337,6 +344,7 @@
 				F15B026B2008BADE002CF5EE /* RoundedButton.m in Sources */,
 				B003EB381FC5863800C58441 /* find_port.c in Sources */,
 				B07A02541FB09C3D0018ACE5 /* async_wake.c in Sources */,
+				F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */,
 				B07A023E1FB09B6F0018ACE5 /* AppDelegate.m in Sources */,
 				F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */,
 				BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */,

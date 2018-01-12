@@ -15,7 +15,7 @@
     if (self){
         self.layer.cornerRadius = 10.0f;
         self.clipsToBounds = YES;
-        [self setBackgroundColor:[UIColor colorWithRed:98.0f/255.f green:159.f/255.f blue:214.f/255.f alpha:0.8]];
+        [self setBackgroundColor:[UIColor colorWithRed:82.0f/255.0f green:104.0f/255.0f blue:118.0f/255.0f alpha:0.5]];
     }
     return self;
 }
@@ -23,9 +23,9 @@
 - (void)setHighlighted:(BOOL)highlighted {
     [super setHighlighted:highlighted];
     if (highlighted){
-        [self setBackgroundColor:[UIColor colorWithRed:98.0f/255.f green:159.f/255.f blue:214.f/255.f alpha:0.5]];
+        [self setBackgroundColor:[UIColor colorWithRed:82.0f/255.0f green:104.0f/255.0f blue:118.0f/255.0f alpha:0.3]];
     } else {
-        [self setBackgroundColor:[UIColor colorWithRed:98.0f/255.f green:159.f/255.f blue:214.f/255.f alpha:0.8]];
+        [self setBackgroundColor:[UIColor colorWithRed:82.0f/255.0f green:104.0f/255.0f blue:118.0f/255.0f alpha:0.5]];
     }
 }
 

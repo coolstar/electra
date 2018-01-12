@@ -15,6 +15,12 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+    
+    if (kCFCoreFoundationVersionNumber < 1443 || kCFCoreFoundationVersionNumber > 1445.32){
+        [jailbreak setEnabled:NO];
+        [enableTweaks setEnabled:NO];
+        [jailbreak setTitle:@"Version Error" forState:UIControlStateNormal];
+    }
   // Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -55,6 +61,10 @@
         
         NSLog(@" ♫ KPP never bothered me anyway... ♫ ");
     });
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return UIStatusBarStyleLightContent;
 }
 
 @end
