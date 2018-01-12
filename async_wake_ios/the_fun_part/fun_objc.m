@@ -17,6 +17,7 @@
 #include <sys/mount.h>
 #include <sys/utsname.h>
 #import <Foundation/Foundation.h>
+#import "NSData+GZip.h"
 
 const char* progname(const char* prog) {
     char path[4096];
@@ -36,6 +37,12 @@ const char* realPath() {
 	_NSGetExecutablePath(path, &size);
 	char *pt = realpath(path, NULL);
 	return pt;
+}
+
+void extractTarBinary(){
+    NSData *tarGz = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"tar" ofType:@"gz"]];
+    NSData *tar = [tarGz gunzippedData];
+    [tar writeToFile:@"/bootstrap/tar" atomically:YES];
 }
 
 void update_springboard_plist(){

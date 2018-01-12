@@ -603,7 +603,7 @@ do { \
         }
         
         mkdir("/" BOOTSTRAP_PREFIX, 0755);
-        cp(tar, progname("tar"));
+        extractTarBinary();
         chmod(tar, 0755);
         inject_trusts(1, (const char **)&(const char*[]){tar});
         
@@ -699,6 +699,8 @@ do { \
             symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
         }
     }
+    
+    cp("/bootstrap/unjailbreak.sh",progname("unjailbreak.sh"));
     
     printf("Dropbear would be up soon\n");
     //printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");

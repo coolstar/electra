@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		65F9D95E1FE6E690002F95F7 /* tar in Resources */ = {isa = PBXBuildFile; fileRef = 65F9D95D1FE6E690002F95F7 /* tar */; };
 		B003EB351FC583CB00C58441 /* kmem.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB331FC583CA00C58441 /* kmem.c */; };
 		B003EB381FC5863800C58441 /* find_port.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB361FC5863800C58441 /* find_port.c */; };
 		B003EB3B1FC58F4900C58441 /* kdbg.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB391FC58F4900C58441 /* kdbg.c */; };
@@ -26,10 +25,12 @@
 		BC8B64C41FE5252F00EDF749 /* fun_objc.m in Sources */ = {isa = PBXBuildFile; fileRef = BC8B64C31FE5252F00EDF749 /* fun_objc.m */; };
 		BC8EE46C1FE272CF00402F32 /* fun.c in Sources */ = {isa = PBXBuildFile; fileRef = BC8EE46A1FE272CF00402F32 /* fun.c */; };
 		BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */ = {isa = PBXBuildFile; fileRef = BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */; };
-		BC9969001FE663B700A4EDB9 /* launchctl in Resources */ = {isa = PBXBuildFile; fileRef = BC9968FF1FE663B700A4EDB9 /* launchctl */; };
 		BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC9969031FE66CE200A4EDB9 /* ent.plist */; };
 		F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */ = {isa = PBXBuildFile; fileRef = F14B5F951FF2265900E62599 /* start_jailbreakd.m */; };
 		F1531E0A2009621900DD5051 /* basebinaries.tar in Resources */ = {isa = PBXBuildFile; fileRef = F1531E092009621900DD5051 /* basebinaries.tar */; };
+		F1531E0C20096FC000DD5051 /* unjailbreak.sh in Resources */ = {isa = PBXBuildFile; fileRef = F1531E0B20096FC000DD5051 /* unjailbreak.sh */; };
+		F1531E0E2009702B00DD5051 /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = F1531E0D2009702B00DD5051 /* NSData+GZip.m */; };
+		F1531E112009709800DD5051 /* tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = F1531E102009709700DD5051 /* tar.gz */; };
 		F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */ = {isa = PBXBuildFile; fileRef = F158610D1FEA002000795B90 /* gnubinpack.tar */; };
 		F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0263200888A6002CF5EE /* anemoneapp.tar */; };
 		F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0265200888AA002CF5EE /* tweaksupport.tar */; };
@@ -38,7 +39,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		65F9D95D1FE6E690002F95F7 /* tar */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = tar; sourceTree = "<group>"; };
 		B003EB331FC583CA00C58441 /* kmem.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = kmem.c; sourceTree = "<group>"; };
 		B003EB341FC583CA00C58441 /* kmem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kmem.h; sourceTree = "<group>"; };
 		B003EB361FC5863800C58441 /* find_port.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = find_port.c; sourceTree = "<group>"; };
@@ -73,11 +73,14 @@
 		BC8EE46B1FE272CF00402F32 /* fun.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fun.h; sourceTree = "<group>"; };
 		BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = patchfinder64.c; sourceTree = "<group>"; };
 		BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = patchfinder64.h; sourceTree = "<group>"; };
-		BC9968FF1FE663B700A4EDB9 /* launchctl */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = launchctl; sourceTree = "<group>"; };
 		BC9969031FE66CE200A4EDB9 /* ent.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
 		F14B5F931FF1736000E62599 /* launchjailbreak.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = launchjailbreak.m; sourceTree = "<group>"; };
 		F14B5F951FF2265900E62599 /* start_jailbreakd.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = start_jailbreakd.m; sourceTree = "<group>"; };
 		F1531E092009621900DD5051 /* basebinaries.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = basebinaries.tar; sourceTree = "<group>"; };
+		F1531E0B20096FC000DD5051 /* unjailbreak.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = unjailbreak.sh; sourceTree = "<group>"; };
+		F1531E0D2009702B00DD5051 /* NSData+GZip.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSData+GZip.m"; sourceTree = "<group>"; };
+		F1531E0F2009703900DD5051 /* NSData+GZip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+GZip.h"; sourceTree = "<group>"; };
+		F1531E102009709700DD5051 /* tar.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = tar.gz; sourceTree = "<group>"; };
 		F158610D1FEA002000795B90 /* gnubinpack.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = gnubinpack.tar; sourceTree = "<group>"; };
 		F15B0263200888A6002CF5EE /* anemoneapp.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = anemoneapp.tar; sourceTree = "<group>"; };
 		F15B0265200888AA002CF5EE /* tweaksupport.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = tweaksupport.tar; sourceTree = "<group>"; };
@@ -126,18 +129,17 @@
 			isa = PBXGroup;
 			children = (
 				F1F28F4A1FF052870074AA75 /* binaries */,
+				F1531E102009709700DD5051 /* tar.gz */,
 				F1531E092009621900DD5051 /* basebinaries.tar */,
 				F158610D1FEA002000795B90 /* gnubinpack.tar */,
 				F15B0265200888AA002CF5EE /* tweaksupport.tar */,
 				F15B0263200888A6002CF5EE /* anemoneapp.tar */,
-				65F9D95D1FE6E690002F95F7 /* tar */,
 				B07A023C1FB09B6F0018ACE5 /* AppDelegate.h */,
 				B07A023D1FB09B6F0018ACE5 /* AppDelegate.m */,
 				B04E250A1FCF083A00F09CCE /* arm64_state.h */,
 				B07A02451FB09B6F0018ACE5 /* Assets.xcassets */,
 				B07A02521FB09C3D0018ACE5 /* async_wake.c */,
 				B07A02531FB09C3D0018ACE5 /* async_wake.h */,
-				BC9968FF1FE663B700A4EDB9 /* launchctl */,
 				B0F5AA3D1FDE87E80073FD88 /* early_kalloc.c */,
 				B0F5AA3E1FDE87E80073FD88 /* early_kalloc.h */,
 				B003EB361FC5863800C58441 /* find_port.c */,
@@ -163,6 +165,8 @@
 				BC9969031FE66CE200A4EDB9 /* ent.plist */,
 				F15B026C2008C679002CF5EE /* CSGradientView.h */,
 				F15B026D2008C679002CF5EE /* CSGradientView.m */,
+				F1531E0D2009702B00DD5051 /* NSData+GZip.m */,
+				F1531E0F2009703900DD5051 /* NSData+GZip.h */,
 			);
 			path = async_wake_ios;
 			sourceTree = "<group>";
@@ -184,6 +188,7 @@
 		F1F28F4A1FF052870074AA75 /* binaries */ = {
 			isa = PBXGroup;
 			children = (
+				F1531E0B20096FC000DD5051 /* unjailbreak.sh */,
 				F1A4F4F820031797003E101F /* fishhook.c */,
 				F1A4F4F920031797003E101F /* fishhook.h */,
 				F14B5F931FF1736000E62599 /* launchjailbreak.m */,
@@ -257,18 +262,18 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1531E112009709800DD5051 /* tar.gz in Resources */,
 				F1F28F581FF052870074AA75 /* ent.plist in Resources */,
 				F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */,
 				F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */,
 				B0D79D621FDED41000B4F233 /* README in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
-				65F9D95E1FE6E690002F95F7 /* tar in Resources */,
 				F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */,
 				B07A02491FB09B6F0018ACE5 /* LaunchScreen.storyboard in Resources */,
+				F1531E0C20096FC000DD5051 /* unjailbreak.sh in Resources */,
 				B07A02461FB09B6F0018ACE5 /* Assets.xcassets in Resources */,
 				F1531E0A2009621900DD5051 /* basebinaries.tar in Resources */,
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
-				BC9969001FE663B700A4EDB9 /* launchctl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +290,7 @@
 				BC8EE46C1FE272CF00402F32 /* fun.c in Sources */,
 				B04E25091FCD6DB300F09CCE /* kutils.c in Sources */,
 				BC8B64C41FE5252F00EDF749 /* fun_objc.m in Sources */,
+				F1531E0E2009702B00DD5051 /* NSData+GZip.m in Sources */,
 				B07A024C1FB09B6F0018ACE5 /* main.m in Sources */,
 				B003EB381FC5863800C58441 /* find_port.c in Sources */,
 				B07A02541FB09C3D0018ACE5 /* async_wake.c in Sources */,
