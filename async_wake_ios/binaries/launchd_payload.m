@@ -20,6 +20,8 @@
 #include <Foundation/Foundation.h>
 #include "fishhook.h"
 
+#define LAUNCHD_DEBUG 0
+
 int file_exist(char *filename) {
     struct stat buffer;
     int r = stat(filename, &buffer);
@@ -100,6 +102,7 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
         return old_pspawnp(pid, file, file_actions, attrp, argv, envp);
     }
     
+#if LAUNCHD_DEBUG
     FILE *f = fopen("/inject_launchd_log.txt", "a");
     fprintf(f, "We got called (fake_posix_spawnp)! %s\n", file);
     
@@ -111,6 +114,7 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
             currentarg++;
         }
     }
+#endif
     
     if (strcmp(file, "/usr/libexec/xpcproxy") == 0) {
         if (argv[1] != NULL) {
@@ -119,8 +123,10 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
                 ||strstr(argv[1], "MTLCompilerService")
                 ||strstr(argv[1], "OTAPKIAssetTool")
                 ) {
+#if LAUNCHD_DEBUG
                 fprintf(f, "xpcproxy for diagnosticd, ReportCrash. MTLCompilerService or OTAPKIAssetTool -- no hooking!\n\n");
                 fclose(f);
+#endif
                 return old_pspawnp(pid, file, file_actions, attrp, argv, envp);
             }
         }
@@ -129,10 +135,14 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
     int envcount = 0;
     
     if (envp != NULL){
+#if LAUNCHD_DEBUG
         fprintf(f, "Env: \n");
+#endif
         char** currentenv = envp;
         while (*currentenv != NULL){
+#if LAUNCHD_DEBUG
             fprintf(f,"\t%s\n", *currentenv);
+#endif
             if (strstr(*currentenv, "DYLD_INSERT_LIBRARIES") == NULL){
                 envcount++;
             }
@@ -152,12 +162,14 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
     newenvp[j] = "DYLD_INSERT_LIBRARIES=/bootstrap/xpcproxy_payload.dylib";
     newenvp[j+1] = NULL;
     
+#if LAUNCHD_DEBUG
     fprintf(f, "New Env: \n");
     char **currentenv = newenvp;
     while (*currentenv != NULL){
         fprintf(f,"\t%s\n", *currentenv);
         currentenv++;
     }
+#endif
     
     posix_spawnattr_t attr;
     posix_spawnattr_t *newattrp = &attr;
@@ -177,15 +189,19 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
     int origret = old_pspawnp(pid, file, file_actions, newattrp, argv, newenvp);
     
     if (pid != NULL){
+#if LAUNCHD_DEBUG
         fprintf(f, "Got PID: %d\n", *pid);
     
         fprintf(f, "Calling jailbreakd\n");
+#endif
         calljailbreakd(*pid);
     }
     
     free(newenvp);
     
+#if LAUNCHD_DEBUG
     fclose(f);
+#endif
     
     return origret;
 }
@@ -194,12 +210,16 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
 void* thd_func(void* arg){
     openedjailbreakd = false;
     
+#if LAUNCHD_DEBUG
     FILE *f = fopen("/inject_launchd_log.txt", "a");
     
     fprintf(f, "In a new thread!\n");
+#endif
     NSLog(@"In a new thread!");
     
+#if LAUNCHD_DEBUG
     fclose(f);
+#endif
     
     rebind_symbols((struct rebinding[2]){
         {"posix_spawn", (void *)fake_posix_spawn, (void **)&old_pspawn},
