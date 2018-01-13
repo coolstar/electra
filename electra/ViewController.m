@@ -50,7 +50,7 @@
             [jailbreak setTitle:@"Jailbroken" forState:UIControlStateNormal];
             
             UIAlertController *dropbearRunning = [UIAlertController alertControllerWithTitle:@"DropBear Running" message:@"DropBear is now running! Enjoy." preferredStyle:UIAlertControllerStyleAlert];
-            [dropbearRunning addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [dropbearRunning addAction:[UIAlertAction actionWithTitle:@"Exit" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                 [dropbearRunning dismissViewControllerAnimated:YES completion:nil];
                 exit(0);
             }]];
