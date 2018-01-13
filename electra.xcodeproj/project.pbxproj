@@ -36,6 +36,7 @@
 		F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0263200888A6002CF5EE /* anemoneapp.tar */; };
 		F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0265200888AA002CF5EE /* tweaksupport.tar */; };
 		F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026D2008C679002CF5EE /* CSGradientView.m */; };
+		F198765B200A8A0F00D4BB56 /* unlocknvram.c in Sources */ = {isa = PBXBuildFile; fileRef = F198765A200A8A0F00D4BB56 /* unlocknvram.c */; };
 		F1F28F581FF052870074AA75 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = F1F28F511FF052870074AA75 /* ent.plist */; };
 /* End PBXBuildFile section */
 
@@ -90,6 +91,8 @@
 		F15B026D2008C679002CF5EE /* CSGradientView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientView.m; sourceTree = "<group>"; };
 		F17480111FF99C4A009A37FB /* inject_launchd.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = inject_launchd.m; sourceTree = "<group>"; };
 		F17480171FF99C79009A37FB /* launchd_payload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = launchd_payload.m; sourceTree = "<group>"; };
+		F1987659200A8A0F00D4BB56 /* unlocknvram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unlocknvram.h; sourceTree = "<group>"; };
+		F198765A200A8A0F00D4BB56 /* unlocknvram.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unlocknvram.c; sourceTree = "<group>"; };
 		F1A4F4F820031797003E101F /* fishhook.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fishhook.c; sourceTree = "<group>"; };
 		F1A4F4F920031797003E101F /* fishhook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fishhook.h; sourceTree = "<group>"; };
 		F1C524DC1FF350E100A4B25E /* jailbreakd_client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = jailbreakd_client.m; sourceTree = "<group>"; };
@@ -184,6 +187,8 @@
 				BC8B64C31FE5252F00EDF749 /* fun_objc.m */,
 				BC8B64C51FE5253B00EDF749 /* fun_objc.h */,
 				F14B5F951FF2265900E62599 /* start_jailbreakd.m */,
+				F1987659200A8A0F00D4BB56 /* unlocknvram.h */,
+				F198765A200A8A0F00D4BB56 /* unlocknvram.c */,
 			);
 			path = the_fun_part;
 			sourceTree = "<group>";
@@ -290,6 +295,7 @@
 			files = (
 				B003EB351FC583CB00C58441 /* kmem.c in Sources */,
 				B0EF11171FCC784B00C1D14E /* symbols.c in Sources */,
+				F198765B200A8A0F00D4BB56 /* unlocknvram.c in Sources */,
 				B07A02411FB09B6F0018ACE5 /* ViewController.m in Sources */,
 				BC8EE46C1FE272CF00402F32 /* fun.c in Sources */,
 				B04E25091FCD6DB300F09CCE /* kutils.c in Sources */,

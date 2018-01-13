@@ -8,6 +8,7 @@
 
 #include "fun.h"
 #include "kcall.h"
+#include "unlocknvram.h"
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -632,6 +633,8 @@ do { \
     const char* args_amfid[] = {BinaryLocation_amfid, itoa(amfid_pid), NULL};
     rv = posix_spawn(&pd, BinaryLocation_amfid, NULL, NULL, (char **)&args_amfid, NULL);
     waitpid(pd, NULL, 0);
+    
+    unlocknvram();
     
 //	uint8_t launchd[19];
 //	kread(find_amficache()+0x11358, launchd, 19);

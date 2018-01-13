@@ -16,7 +16,7 @@ int main(int argc, char **argv, char **envp) {
         } else {
             char *environ[] = {
                 "BOOTSTRAP_PREFIX=/"BOOTSTRAP_PREFIX"",
-                "PATH=/"BOOTSTRAP_PREFIX"/usr/local/bin:/"BOOTSTRAP_PREFIX"/usr/sbin:/"BOOTSTRAP_PREFIX"/usr/bin:/"BOOTSTRAP_PREFIX"/sbin:/"BOOTSTRAP_PREFIX"/bin:/bin:/usr/bin:/sbin",
+                "PATH=/"BOOTSTRAP_PREFIX"/usr/local/bin:/"BOOTSTRAP_PREFIX"/usr/sbin:/"BOOTSTRAP_PREFIX"/usr/bin:/"BOOTSTRAP_PREFIX"/sbin:/"BOOTSTRAP_PREFIX"/bin:/bin:/usr/bin:/sbin:/usr/sbin",
                 "PS1=\\h:\\w \\u\\$ ",
                 NULL
             };
