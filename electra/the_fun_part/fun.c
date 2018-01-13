@@ -680,6 +680,9 @@ do { \
         unlink("/"BOOTSTRAP_PREFIX"/Library/Themes");
         symlink("/System/Library/Themes","/"BOOTSTRAP_PREFIX"/Library/Themes");
         
+        unlink("/Library/Themes");
+        symlink("/System/Library/Themes","/Library/Themes");
+        
         unlink("/usr/lib/SBInject.dylib");
         cp("/usr/lib/SBInject.dylib","/bootstrap/usr/lib/SBInject.dylib");
         
