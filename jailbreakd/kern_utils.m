@@ -1,3 +1,4 @@
+#import <Foundation/Foundation.h>
 #import "debug.h"
 #import "kern_utils.h"
 #import "patchfinder64.h"
@@ -47,6 +48,10 @@ unsigned offsetof_csb_entitlements_offset = 0x98; // cs_blob::csb_entitlements
 unsigned offsetof_csb_signer_type = 0xA0;     // cs_blob::csb_signer_type
 unsigned offsetof_csb_platform_binary = 0xA4; // cs_blob::csb_platform_binary
 unsigned offsetof_csb_platform_path = 0xA8;   // cs_blob::csb_platform_path
+
+unsigned offsetof_t_flags = 0x3a0; // task::t_flags
+
+#define TF_PLATFORM 0x400
 
 #define	CS_VALID		0x0000001	/* dynamically valid */
 #define CS_ADHOC		0x0000002	/* ad hoc signed */
@@ -310,6 +315,18 @@ int setcsflagsandplatformize(int pd){
               NSLog(@"New CSFlags: 0x%x", csflags);
 #endif
               wk32(proc + offsetof_p_csflags, csflags);
+
+              // task.t_flags & TF_PLATFORM
+              uint64_t task = rk64(proc + offsetof_task);
+              uint32_t t_flags = rk32(task + offsetof_t_flags);
+#if JAILBREAKDDEBUG
+              NSLog(@"Old t_flags: 0x%x", t_flags);
+#endif
+              t_flags |= TF_PLATFORM;
+              wk32(task+offsetof_t_flags, t_flags);
+#if JAILBREAKDDEBUG
+              NSLog(@"New t_flags: 0x%x", t_flags);
+#endif
 
               // AMFI entitlements
 #if JAILBREAKDDEBUG
