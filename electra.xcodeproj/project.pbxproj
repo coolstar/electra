@@ -31,6 +31,7 @@
 		F1531E0C20096FC000DD5051 /* unjailbreak.sh in Resources */ = {isa = PBXBuildFile; fileRef = F1531E0B20096FC000DD5051 /* unjailbreak.sh */; };
 		F1531E0E2009702B00DD5051 /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = F1531E0D2009702B00DD5051 /* NSData+GZip.m */; };
 		F1531E112009709800DD5051 /* tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = F1531E102009709700DD5051 /* tar.gz */; };
+		F1531E51200983DD00DD5051 /* safemode.tar in Resources */ = {isa = PBXBuildFile; fileRef = F1531E50200983DD00DD5051 /* safemode.tar */; };
 		F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */ = {isa = PBXBuildFile; fileRef = F158610D1FEA002000795B90 /* gnubinpack.tar */; };
 		F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0263200888A6002CF5EE /* anemoneapp.tar */; };
 		F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0265200888AA002CF5EE /* tweaksupport.tar */; };
@@ -81,6 +82,7 @@
 		F1531E0D2009702B00DD5051 /* NSData+GZip.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSData+GZip.m"; sourceTree = "<group>"; };
 		F1531E0F2009703900DD5051 /* NSData+GZip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+GZip.h"; sourceTree = "<group>"; };
 		F1531E102009709700DD5051 /* tar.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = tar.gz; sourceTree = "<group>"; };
+		F1531E50200983DD00DD5051 /* safemode.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = safemode.tar; sourceTree = "<group>"; };
 		F158610D1FEA002000795B90 /* gnubinpack.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = gnubinpack.tar; sourceTree = "<group>"; };
 		F15B0263200888A6002CF5EE /* anemoneapp.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = anemoneapp.tar; sourceTree = "<group>"; };
 		F15B0265200888AA002CF5EE /* tweaksupport.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = tweaksupport.tar; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 				F158610D1FEA002000795B90 /* gnubinpack.tar */,
 				F15B0265200888AA002CF5EE /* tweaksupport.tar */,
 				F15B0263200888A6002CF5EE /* anemoneapp.tar */,
+				F1531E50200983DD00DD5051 /* safemode.tar */,
 				B07A023C1FB09B6F0018ACE5 /* AppDelegate.h */,
 				B07A023D1FB09B6F0018ACE5 /* AppDelegate.m */,
 				B04E250A1FCF083A00F09CCE /* arm64_state.h */,
@@ -269,6 +272,7 @@
 				B0D79D621FDED41000B4F233 /* README in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
 				F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */,
+				F1531E51200983DD00DD5051 /* safemode.tar in Resources */,
 				B07A02491FB09B6F0018ACE5 /* LaunchScreen.storyboard in Resources */,
 				F1531E0C20096FC000DD5051 /* unjailbreak.sh in Resources */,
 				B07A02461FB09B6F0018ACE5 /* Assets.xcassets in Resources */,

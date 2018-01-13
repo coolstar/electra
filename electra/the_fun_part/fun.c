@@ -653,6 +653,9 @@ do { \
         
         rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("anemoneapp.tar"), "-C", "/Applications", NULL }, NULL);
         waitpid(pd, NULL, 0);
+        
+        rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("safemode.tar"), "-C", "/Applications", NULL }, NULL);
+        waitpid(pd, NULL, 0);
     }
     unlink(tar);
 
