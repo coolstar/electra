@@ -1,3 +1,4 @@
+#import <Foundation/Foundation.h>
 #include <stdio.h>
 #include <mach/mach.h>
 #include <mach/error.h>

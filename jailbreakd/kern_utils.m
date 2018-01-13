@@ -1,3 +1,4 @@
+#import <Foundation/Foundation.h>
 #import "debug.h"
 #import "kern_utils.h"
 #import "patchfinder64.h"
