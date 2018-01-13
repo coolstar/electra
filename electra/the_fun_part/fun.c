@@ -623,10 +623,15 @@ do { \
         printf("[fun] copied the required binaries into the right places\n");
     }
     
-    inject_trusts(1, (const char **)&(const char*[]){"/bootstrap/inject_amfid"});
-    inject_trusts(1, (const char **)&(const char*[]){"/bootstrap/amfid_payload.dylib"});
-    inject_trusts(1, (const char **)&(const char*[]){"/bootstrap/inject_launchd"});
-    inject_trusts(1, (const char **)&(const char*[]){"/bootstrap/launchd_payload.dylib"});
+    inject_trusts(4, (const char **)&(const char*[]){
+        "/bootstrap/inject_amfid",
+        "/bootstrap/amfid_payload.dylib",
+
+        "/bootstrap/inject_launchd",
+        "/bootstrap/launchd_payload.dylib",
+
+        // Don't forget to update number in beginning
+    });
     
 #define BinaryLocation_amfid "/bootstrap/inject_amfid"
     
@@ -812,89 +817,45 @@ do { \
     return 0;
 }
 
-
-void inject_trust(const char *path) {
-    printf("Trusting '%s'\n", path);
-    // TODO: try to optimize by finding trustcache once and/or adding more than one hash in chain
-    uint64_t tc = find_trustcache();
-//    printf("trust cache at: %016llx\n", rk64(tc));
+// thx hieplpvip
+void inject_trusts(int pathc, const char *paths[]) {
+    static uint64_t tc = 0;
+    if (tc == 0) tc = find_trustcache();
 
     typedef char hash_t[20];
 
     struct trust_chain {
-        uint64_t next;                 // +0x00 - the next struct trust_mem
-        unsigned char uuid[16];        // +0x08 - The uuid of the trust_mem (it doesn't seem important or checked apart from when importing a new trust chain)
-        unsigned int count;            // +0x18 - Number of hashes there are
-        hash_t hash[1];                // +0x1C - The hashes
-    };
+        uint64_t next;
+        unsigned char uuid[16];
+        unsigned int count;
+    } __attribute__((packed));
 
     struct trust_chain fake_chain;
-
-    static uint64_t last_injected = 0;
-
     fake_chain.next = rk64(tc);
     *(uint64_t *)&fake_chain.uuid[0] = 0xabadbabeabadbabe;
     *(uint64_t *)&fake_chain.uuid[8] = 0xabadbabeabadbabe;
-    fake_chain.count = 1;
 
-    uint8_t *hash = getSHA256(getCodeDirectory(path));
-    memmove(fake_chain.hash[0], hash, 20);
-    free(hash);
+    int cnt = 0;
+    uint8_t hash[CC_SHA256_DIGEST_LENGTH];
+    hash_t *allhash = malloc(sizeof(hash_t) * pathc);
+    for (int i = 0; i != pathc; ++i) {
+        uint8_t *cd = getCodeDirectory(paths[i]);
+        if (cd != NULL) {
+            getSHA256inplace(cd, hash);
+            memmove(allhash[cnt], hash, sizeof(hash_t));
+            ++cnt;
+        }
+    }
 
-    uint64_t kernel_trust = kalloc(sizeof(fake_chain));
+    fake_chain.count = cnt;
+
+    size_t length = (sizeof(fake_chain) + cnt * sizeof(hash_t) + 0xFFFF) & ~0xFFFF;
+    uint64_t kernel_trust = kalloc(length);
+
     kwrite(kernel_trust, &fake_chain, sizeof(fake_chain));
-    last_injected = kernel_trust;
-
-    // Comment this line out to see `amfid` saying there is no signature on test_fsigned (or your binary)
+    kwrite(kernel_trust + sizeof(fake_chain), allhash, cnt * sizeof(hash_t));
     wk64(tc, kernel_trust);
 }
-
-void inject_trusts(int pathc, const char *paths[]) {
-    for (int i = 0; i != pathc; ++i) {
-        inject_trust(paths[i]);
-    }
-    return;
-
-    typedef char hash_t[20];
-
-    struct trust_chain {
-        uint64_t next;                 // +0x00 - the next struct trust_mem
-        unsigned char uuid[16];        // +0x08 - The uuid of the trust_mem (it doesn't seem important or checked apart from when importing a new trust chain)
-        unsigned int count;            // +0x18 - Number of hashes there are
-        // hash_t hash[pathc];             // +0x1C - The hashes
-    };
-
-    int chain_size = sizeof(struct trust_chain) + pathc * sizeof(hash_t);
-    struct trust_chain* fake_chain = malloc(chain_size);
-
-    uint8_t hashto[CC_SHA256_DIGEST_LENGTH];
-
-    hash_t *cur_hash = (hash_t *)((uint8_t*)fake_chain + sizeof(fake_chain));
-    for (int i = 0; i != pathc; ++i) {
-        getSHA256inplace(getCodeDirectory(paths[i]), hashto);
-        memmove(cur_hash, hashto, 20);
-        ++cur_hash;
-    }
-
-    *(uint64_t *)&fake_chain->uuid[0] = 0xabadbabeabadbabe;
-    *(uint64_t *)&fake_chain->uuid[8] = 0xabadbabeabadbabe;
-    fake_chain->count = pathc;
-
-    uint64_t tc = find_trustcache();
-
-    printf("trust cache at: %016llx\n", rk64(tc));
-
-    fake_chain->next = rk64(tc);
-
-    uint64_t kernel_trust = kalloc(chain_size);
-    kwrite(kernel_trust, fake_chain, chain_size);
-
-    free(fake_chain);
-
-    // Comment this line out to see `amfid` saying there is no signature on test_fsigned (or your binary)
-    wk64(tc, kernel_trust);
-}
-
 
 int process_binlist(const char *path) {
     FILE *binlist = fopen(path, "r");
