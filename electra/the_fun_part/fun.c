@@ -643,9 +643,22 @@ do { \
 	
 //	mkdir("/Library/LaunchDaemons", 777);
 //	cp("/Library/LaunchDaemons/test_fsigned.plist", plistPath2());
-
+    
     rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
     waitpid(pd, NULL, 0);
+    
+    if (file_exist("/bootstrap/._amfid_payload.dylib")){
+        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/bootstrap", "-name", "._*", "-delete", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
+    if (file_exist("/Applications/Anemone.app/._Info.plist")){
+        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/Applications/Anemone.app", "-name", "._*", "-delete", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
+    if (file_exist("/Applications/SafeMode.app/._Info.plist")){
+        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/Applications/SafeMode.app", "-name", "._*", "-delete", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
     
     if (enable_tweaks){
         rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
