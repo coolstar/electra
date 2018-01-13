@@ -131,10 +131,10 @@ uint32_t swap_uint32(uint32_t val) {
 	return (val << 16) | (val >> 16);
 }
 
-uint8_t *get_sha256(uint8_t* code_dir) {
-	uint8_t *out = malloc(CC_SHA256_DIGEST_LENGTH);
 
-	uint32_t* code_dir_int = (uint32_t*)code_dir;
+// see ldid.cpp around line 1250
+uint8_t *get_hash(uint8_t* code_dir, uint32_t* size) {
+    uint32_t* code_dir_int = (uint32_t*)code_dir;
 
     int cd_off = 0;
     while (code_dir_int[cd_off] != 0) {
@@ -146,17 +146,45 @@ uint8_t *get_sha256(uint8_t* code_dir) {
     code_dir_int = (uint32_t*)(code_dir+actual_off);
     uint32_t realsize = swap_uint32(code_dir_int[1]);
 
-	// uint32_t realsize = 0;
-	// for (int j = 0; j < 1000; j++) {
-	// 	if (swap_uint32(code_dir_int[j]) == 0xfade0c02) {
-	// 		realsize = swap_uint32(code_dir_int[j+1]);
-	// 		code_dir += 4*j;
-	// 	}
-	// }
+    if (swap_uint32(code_dir_int[0]) != 0xfade0c02) {
+        NSLog(@"[get_hash] wtf, not CSMAGIC_CODEDIRECTORY?!");
+        return NULL;
+    }
 
-	CC_SHA256(code_dir_int, realsize, out);
+    uint32_t cd_version = swap_uint32(code_dir_int[2]);
+    if (cd_version != 0x00020001) {
+        NSLog(@"[get_hash] Unknown version of codedir: %x", cd_version);
+        return NULL;
+    }
 
-	return out;
+    // 2 uint32s in Blob (magic, length)
+    // 7 uint32s in CodeDirectory (version, flags, ..., codeLimit)
+    // 1 uint8 (hashSize)
+    uint8_t hash_type = ((uint8_t*)code_dir_int)[9*4 + 1];
+
+    // uint32_t realsize = 0;
+    // for (int j = 0; j < 1000; j++) {
+    //     if (swap_uint32(code_dir_int[j]) == 0xfade0c02) {
+    //         realsize = swap_uint32(code_dir_int[j+1]);
+    //         code_dir += 4*j;
+    //     }
+    // }
+
+    uint8_t *out = NULL;
+    if (hash_type == 1) {
+        *size = CC_SHA1_DIGEST_LENGTH;
+        out = malloc(*size);
+        CC_SHA1(code_dir_int, realsize, out);
+    } else if (hash_type == 2) {
+        *size = CC_SHA256_DIGEST_LENGTH;
+        out = malloc(*size);
+        CC_SHA256(code_dir_int, realsize, out);
+    } else {
+        NSLog(@"[get_hash] Unknown hash type: 0x%x", hash_type);
+        out = NULL;
+    }
+
+    return out;
 }
 
 uint8_t *get_code_directory(const char* name, uint64_t file_off) {
@@ -179,7 +207,7 @@ uint8_t *get_code_directory(const char* name, uint64_t file_off) {
 	for (int i = 0; i < mh.ncmds; i++) {
 		const struct load_command cmd;
 		fseek(fd, off, SEEK_SET);
-		fread(&cmd, sizeof(struct load_command), 1, fd);
+		fread((void*)&cmd, sizeof(struct load_command), 1, fd);
 		if (cmd.cmd == 0x1d) {
 			uint32_t off_cs;
 			fread(&off_cs, sizeof(uint32_t), 1, fd);
@@ -205,10 +233,11 @@ typedef int (*t)(NSString* file, NSDictionary* options, NSMutableDictionary** in
 int fake_MISValidateSignatureAndCopyInfo(NSString* file, NSDictionary* options, NSMutableDictionary** info) {
     // NSString *file = (__bridge NSString *)fileStr;
     // NSDictionary *options = (__bridge NSDictionary*)opts;
-    NSLog(@"We got called! %@ with %@", file, options);
+    NSLog(@"We got called! %@ with %@ (info: %@)", file, options, *info);
 
     t actual_func = (t)real_func;
     int origret = actual_func(file, options, info);
+    NSLog(@"We got called! AFTER ACTUAL %@ with %@ (info: %@)", file, options, *info);
 
     if (![*info objectForKey:@"CdHash"]) {
         NSNumber* file_offset = [options objectForKey:@"UniversalFileOffset"];
@@ -217,10 +246,15 @@ int fake_MISValidateSignatureAndCopyInfo(NSString* file, NSDictionary* options, 
         uint8_t* code_directory = get_code_directory([file UTF8String], file_off);
         if (!code_directory)
             return origret;
-        uint8_t* cd_hash = get_sha256(code_directory);
+
+        uint32_t size;
+        uint8_t* cd_hash = get_hash(code_directory, &size);
+
+        if (!cd_hash)
+            return origret;
 
         *info = [[NSMutableDictionary alloc] init];
-        [*info setValue:[[NSData alloc] initWithBytes:cd_hash length:CC_SHA256_DIGEST_LENGTH] forKey:@"CdHash"];
+        [*info setValue:[[NSData alloc] initWithBytes:cd_hash length:size] forKey:@"CdHash"];
         NSLog(@"ours: %@", *info);
     }
 
@@ -261,7 +295,7 @@ void* thd_func(void* arg){
 
     uint64_t patch_offset = found_at - buf;
 
-    uint64_t fake_func_addr = &fake_MISValidateSignatureAndCopyInfo;
+    uint64_t fake_func_addr = (uint64_t)&fake_MISValidateSignatureAndCopyInfo;
 
     real_func = remote_read64(binary_load_address()+patch_offset);
 
