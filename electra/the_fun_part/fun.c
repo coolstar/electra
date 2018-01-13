@@ -667,6 +667,11 @@ do { \
         waitpid(pd, NULL, 0);
     }
     
+    bool runUICache = true;
+    if (file_exist("/Applications/Anemone.app")){
+        runUICache = false;
+    }
+    
     if (enable_tweaks){
         rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
         waitpid(pd, NULL, 0);
@@ -680,9 +685,11 @@ do { \
     unlink(tar);
 
     if (enable_tweaks){
-        const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
-        rv = posix_spawn(&pd, uicache, NULL, NULL, (char **)&(const char*[]){ uicache, NULL }, NULL);
-        waitpid(pd, NULL, 0);
+        if (runUICache){
+            const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
+            rv = posix_spawn(&pd, uicache, NULL, NULL, (char **)&(const char*[]){ uicache, NULL }, NULL);
+            waitpid(pd, NULL, 0);
+        }
     }
     
     unlink("/usr/libexec/sftp-server");
@@ -795,8 +802,6 @@ do { \
         const char* args_recache[] = {"/bootstrap/usr/bin/recache", "--no-respring", NULL};
         rv = posix_spawn(&pd, "/bootstrap/usr/bin/recache", NULL, NULL, (char **)&args_recache, NULL);
         waitpid(pd, NULL, 0);
-    
-        sleep(2);
     }
     
     wk64(rk64(kern_ucred+0x78)+0x8, 0);
