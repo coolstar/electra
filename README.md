@@ -1,4 +1,6 @@
-Fun additions to async_await
+Electra Jailbeak Tookit for iOS 11.0-11.1.2
+
+https://coolstar.org/electra/
 
 Original patchfinder64 by xerub, additions of current gadgets + fix for allproc by ninjaprawn + jailbreakd by coolstar
 
