@@ -45,5 +45,20 @@
 	</array>
 	<key>UISupportsDocumentBrowser</key>
 	<true/>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconFileName</key>
+			<string>AppIcon</string>
+			<key>CFBundleIconFiles</key>
+			<array>
+				<string>AppIcon60x60</string>
+				<string>AppIcon76x76</string>
+			</array>
+			<key>UIPrerenderedIcon</key>
+			<false/>
+		</dict>
+	</dict>
 </dict>
 </plist>
