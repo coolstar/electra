@@ -659,6 +659,10 @@ do { \
         rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/Applications/SafeMode.app", "-name", "._*", "-delete", NULL }, NULL);
         waitpid(pd, NULL, 0);
     }
+    if (file_exist("/usr/lib/SBInject/._AnemoneCore.dylib")){
+        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/usr/lib/SBInject", "-name", "._*", "-delete", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
     
     if (enable_tweaks){
         rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
