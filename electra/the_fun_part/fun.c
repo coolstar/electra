@@ -758,6 +758,10 @@ do { \
         if (!file_exist("/usr/lib/SBInject")) {
             rename("/"BOOTSTRAP_PREFIX"/Library/SBInject", "/usr/lib/SBInject");
             symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
+        } else {
+            rv = posix_spawn(&pd, "/bootstrap/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/"BOOTSTRAP_PREFIX"/Library/SBInject", NULL }, NULL);
+            waitpid(pd, NULL, 0);
+            symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
         }
     }
     
