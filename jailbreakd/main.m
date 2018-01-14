@@ -321,6 +321,11 @@ int runserver(){
         int size = recvfrom(sockfd, buf, 1024, 0, (struct sockaddr *)&clientaddr, &clientlen);
         if (size < 0){
             NSLog(@"Error in recvfrom");
+            continue;
+        }
+        if (size < 1){
+            NSLog(@"Packet must have at least 1 byte");
+            continue;
         }
         NSLog(@"Server received %d bytes.", size);
         
@@ -328,6 +333,7 @@ int runserver(){
         if (command == JAILBREAKD_COMMAND_ENTITLE){
             if (size < sizeof(struct JAILBREAKD_ENTITLE_PID)){
                 NSLog(@"Error: ENTITLE packet is too small");
+                continue;
             }
             struct JAILBREAKD_ENTITLE_PID *entitlePacket = (struct JAILBREAKD_ENTITLE_PID *)buf;
             NSLog(@"Entitle PID %d\n", entitlePacket->Pid);
@@ -336,6 +342,7 @@ int runserver(){
         if (command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
             if (size < sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
                 NSLog(@"Error: ENTITLE_SIGCONT packet is too small");
+                continue;
             }
             struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
             NSLog(@"Entitle+SIGCONT PID %d\n", entitleSIGCONTPacket->Pid);
@@ -345,6 +352,7 @@ int runserver(){
         if (command == JAILBREAKD_COMMAND_ENTITLE_PLATFORMIZE){
             if (size < sizeof(struct JAILBREAKD_ENTITLE_PLATFORMIZE_PID)){
                 NSLog(@"Error: ENTITLE_PLATFORMIZE packet is too small");
+                continue;
             }
             struct JAILBREAKD_ENTITLE_PLATFORMIZE_PID *entitlePlatformizePacket = (struct JAILBREAKD_ENTITLE_PLATFORMIZE_PID *)buf;
             NSLog(@"Entitle PID %d\n", entitlePlatformizePacket->EntitlePID);
@@ -355,6 +363,7 @@ int runserver(){
         if (command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY){
             if (size < sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
                 NSLog(@"Error: ENTITLE_SIGCONT packet is too small");
+                continue;
             }
             struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
             NSLog(@"Entitle+SIGCONT PID %d\n", entitleSIGCONTPacket->Pid);
@@ -367,6 +376,7 @@ int runserver(){
         if (command == JAILBREAKD_COMMAND_DUMP_CRED){
             if (size < sizeof(struct JAILBREAKD_DUMP_CRED)){
                 NSLog(@"Error: DUMP_CRED packet is too small");
+                continue;
             }
             struct JAILBREAKD_DUMP_CRED *dumpCredPacket = (struct JAILBREAKD_DUMP_CRED *)buf;
             NSLog(@"Dump PID %d\n", dumpCredPacket->Pid);
