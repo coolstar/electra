@@ -20,7 +20,7 @@ rm -rf /usr/share/terminfo
 rm /usr/libexec/sftp-server
 rm -rf /System/Library/Themes
 rm -rf /Library/Frameworks/CydiaSubstrate.framework
-rm -rf /Library/MobileSubstrate/DynamicLibraries
+rm -rf /Library/MobileSubstrate
 rm -rf /Library/Themes
 uicache
 rm -rf /bootstrap
