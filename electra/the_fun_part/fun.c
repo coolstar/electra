@@ -763,6 +763,9 @@ do { \
             waitpid(pd, NULL, 0);
             symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
         }
+        
+        mkdir("/Library/MobileSubstrate/DynamicLibraries", 0755);
+        symlink("/Library/MobileSubstrate/DynamicLibraries","/"BOOTSTRAP_PREFIX"/Library/SBInject");
     }
     
     cp("/bootstrap/unjailbreak.sh",progname("unjailbreak.sh"));
