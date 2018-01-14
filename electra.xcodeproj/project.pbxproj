@@ -36,18 +36,18 @@
 		F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0263200888A6002CF5EE /* anemoneapp.tar */; };
 		F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0265200888AA002CF5EE /* tweaksupport.tar */; };
 		F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026D2008C679002CF5EE /* CSGradientView.m */; };
+		F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400E200BFE85000D094F /* AppIcon76x76.png */; };
+		F195401A200BFE86000D094F /* AppIcon40x40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400F200BFE85000D094F /* AppIcon40x40@3x.png */; };
+		F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954010200BFE85000D094F /* AppIcon40x40.png */; };
+		F195401C200BFE86000D094F /* AppIcon40x40@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954011200BFE86000D094F /* AppIcon40x40@2x.png */; };
+		F195401D200BFE86000D094F /* AppIcon20x20.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954012200BFE86000D094F /* AppIcon20x20.png */; };
+		F195401E200BFE86000D094F /* AppIcon83.5x83.5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954013200BFE86000D094F /* AppIcon83.5x83.5@2x.png */; };
+		F195401F200BFE86000D094F /* AppIcon60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954014200BFE86000D094F /* AppIcon60x60@3x.png */; };
+		F1954020200BFE86000D094F /* AppIcon60x60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954015200BFE86000D094F /* AppIcon60x60@2x.png */; };
+		F1954021200BFE86000D094F /* AppIcon20x20@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954016200BFE86000D094F /* AppIcon20x20@3x.png */; };
+		F1954022200BFE86000D094F /* AppIcon20x20@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954017200BFE86000D094F /* AppIcon20x20@2x.png */; };
+		F1954023200BFE86000D094F /* AppIcon76x76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954018200BFE86000D094F /* AppIcon76x76@2x.png */; };
 		F198765B200A8A0F00D4BB56 /* unlocknvram.c in Sources */ = {isa = PBXBuildFile; fileRef = F198765A200A8A0F00D4BB56 /* unlocknvram.c */; };
-		F1987674200AA3A600D4BB56 /* AppIcon60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1987669200AA3A500D4BB56 /* AppIcon60x60@3x.png */; };
-		F1987675200AA3A600D4BB56 /* AppIcon76x76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F198766A200AA3A500D4BB56 /* AppIcon76x76@2x.png */; };
-		F1987676200AA3A600D4BB56 /* AppIcon40x40.png in Resources */ = {isa = PBXBuildFile; fileRef = F198766B200AA3A500D4BB56 /* AppIcon40x40.png */; };
-		F1987677200AA3A600D4BB56 /* AppIcon40x40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F198766C200AA3A500D4BB56 /* AppIcon40x40@3x.png */; };
-		F1987678200AA3A600D4BB56 /* AppIcon76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = F198766D200AA3A500D4BB56 /* AppIcon76x76.png */; };
-		F1987679200AA3A600D4BB56 /* AppIcon20x20.png in Resources */ = {isa = PBXBuildFile; fileRef = F198766E200AA3A500D4BB56 /* AppIcon20x20.png */; };
-		F198767A200AA3A600D4BB56 /* AppIcon20x20@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F198766F200AA3A500D4BB56 /* AppIcon20x20@2x.png */; };
-		F198767B200AA3A600D4BB56 /* AppIcon60x60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1987670200AA3A500D4BB56 /* AppIcon60x60@2x.png */; };
-		F198767C200AA3A600D4BB56 /* AppIcon20x20@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1987671200AA3A500D4BB56 /* AppIcon20x20@3x.png */; };
-		F198767D200AA3A600D4BB56 /* AppIcon83.5x83.5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1987672200AA3A600D4BB56 /* AppIcon83.5x83.5@2x.png */; };
-		F198767E200AA3A600D4BB56 /* AppIcon40x40@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1987673200AA3A600D4BB56 /* AppIcon40x40@2x.png */; };
 		F1F28F581FF052870074AA75 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = F1F28F511FF052870074AA75 /* ent.plist */; };
 /* End PBXBuildFile section */
 
@@ -102,19 +102,19 @@
 		F15B026D2008C679002CF5EE /* CSGradientView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientView.m; sourceTree = "<group>"; };
 		F17480111FF99C4A009A37FB /* inject_launchd.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = inject_launchd.m; sourceTree = "<group>"; };
 		F17480171FF99C79009A37FB /* launchd_payload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = launchd_payload.m; sourceTree = "<group>"; };
+		F195400E200BFE85000D094F /* AppIcon76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon76x76.png; sourceTree = "<group>"; };
+		F195400F200BFE85000D094F /* AppIcon40x40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon40x40@3x.png"; sourceTree = "<group>"; };
+		F1954010200BFE85000D094F /* AppIcon40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon40x40.png; sourceTree = "<group>"; };
+		F1954011200BFE86000D094F /* AppIcon40x40@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon40x40@2x.png"; sourceTree = "<group>"; };
+		F1954012200BFE86000D094F /* AppIcon20x20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon20x20.png; sourceTree = "<group>"; };
+		F1954013200BFE86000D094F /* AppIcon83.5x83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon83.5x83.5@2x.png"; sourceTree = "<group>"; };
+		F1954014200BFE86000D094F /* AppIcon60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon60x60@3x.png"; sourceTree = "<group>"; };
+		F1954015200BFE86000D094F /* AppIcon60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon60x60@2x.png"; sourceTree = "<group>"; };
+		F1954016200BFE86000D094F /* AppIcon20x20@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon20x20@3x.png"; sourceTree = "<group>"; };
+		F1954017200BFE86000D094F /* AppIcon20x20@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon20x20@2x.png"; sourceTree = "<group>"; };
+		F1954018200BFE86000D094F /* AppIcon76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon76x76@2x.png"; sourceTree = "<group>"; };
 		F1987659200A8A0F00D4BB56 /* unlocknvram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unlocknvram.h; sourceTree = "<group>"; };
 		F198765A200A8A0F00D4BB56 /* unlocknvram.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unlocknvram.c; sourceTree = "<group>"; };
-		F1987669200AA3A500D4BB56 /* AppIcon60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon60x60@3x.png"; path = "electra/Assets.xcassets/AppIcon.appiconset/AppIcon60x60@3x.png"; sourceTree = SOURCE_ROOT; };
-		F198766A200AA3A500D4BB56 /* AppIcon76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon76x76@2x.png"; path = "electra/Assets.xcassets/AppIcon.appiconset/AppIcon76x76@2x.png"; sourceTree = SOURCE_ROOT; };
-		F198766B200AA3A500D4BB56 /* AppIcon40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = AppIcon40x40.png; path = electra/Assets.xcassets/AppIcon.appiconset/AppIcon40x40.png; sourceTree = SOURCE_ROOT; };
-		F198766C200AA3A500D4BB56 /* AppIcon40x40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon40x40@3x.png"; path = "electra/Assets.xcassets/AppIcon.appiconset/AppIcon40x40@3x.png"; sourceTree = SOURCE_ROOT; };
-		F198766D200AA3A500D4BB56 /* AppIcon76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = AppIcon76x76.png; path = electra/Assets.xcassets/AppIcon.appiconset/AppIcon76x76.png; sourceTree = SOURCE_ROOT; };
-		F198766E200AA3A500D4BB56 /* AppIcon20x20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = AppIcon20x20.png; path = electra/Assets.xcassets/AppIcon.appiconset/AppIcon20x20.png; sourceTree = SOURCE_ROOT; };
-		F198766F200AA3A500D4BB56 /* AppIcon20x20@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon20x20@2x.png"; path = "electra/Assets.xcassets/AppIcon.appiconset/AppIcon20x20@2x.png"; sourceTree = SOURCE_ROOT; };
-		F1987670200AA3A500D4BB56 /* AppIcon60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon60x60@2x.png"; path = "electra/Assets.xcassets/AppIcon.appiconset/AppIcon60x60@2x.png"; sourceTree = SOURCE_ROOT; };
-		F1987671200AA3A500D4BB56 /* AppIcon20x20@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon20x20@3x.png"; path = "electra/Assets.xcassets/AppIcon.appiconset/AppIcon20x20@3x.png"; sourceTree = SOURCE_ROOT; };
-		F1987672200AA3A600D4BB56 /* AppIcon83.5x83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon83.5x83.5@2x.png"; path = "electra/Assets.xcassets/AppIcon.appiconset/AppIcon83.5x83.5@2x.png"; sourceTree = SOURCE_ROOT; };
-		F1987673200AA3A600D4BB56 /* AppIcon40x40@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon40x40@2x.png"; path = "electra/Assets.xcassets/AppIcon.appiconset/AppIcon40x40@2x.png"; sourceTree = SOURCE_ROOT; };
 		F1A4F4F820031797003E101F /* fishhook.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fishhook.c; sourceTree = "<group>"; };
 		F1A4F4F920031797003E101F /* fishhook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fishhook.h; sourceTree = "<group>"; };
 		F1C524DC1FF350E100A4B25E /* jailbreakd_client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = jailbreakd_client.m; sourceTree = "<group>"; };
@@ -219,17 +219,17 @@
 		F198765C200AA12800D4BB56 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				F198766E200AA3A500D4BB56 /* AppIcon20x20.png */,
-				F198766F200AA3A500D4BB56 /* AppIcon20x20@2x.png */,
-				F1987671200AA3A500D4BB56 /* AppIcon20x20@3x.png */,
-				F198766B200AA3A500D4BB56 /* AppIcon40x40.png */,
-				F1987673200AA3A600D4BB56 /* AppIcon40x40@2x.png */,
-				F198766C200AA3A500D4BB56 /* AppIcon40x40@3x.png */,
-				F1987670200AA3A500D4BB56 /* AppIcon60x60@2x.png */,
-				F1987669200AA3A500D4BB56 /* AppIcon60x60@3x.png */,
-				F198766D200AA3A500D4BB56 /* AppIcon76x76.png */,
-				F198766A200AA3A500D4BB56 /* AppIcon76x76@2x.png */,
-				F1987672200AA3A600D4BB56 /* AppIcon83.5x83.5@2x.png */,
+				F1954012200BFE86000D094F /* AppIcon20x20.png */,
+				F1954017200BFE86000D094F /* AppIcon20x20@2x.png */,
+				F1954016200BFE86000D094F /* AppIcon20x20@3x.png */,
+				F1954010200BFE85000D094F /* AppIcon40x40.png */,
+				F1954011200BFE86000D094F /* AppIcon40x40@2x.png */,
+				F195400F200BFE85000D094F /* AppIcon40x40@3x.png */,
+				F1954015200BFE86000D094F /* AppIcon60x60@2x.png */,
+				F1954014200BFE86000D094F /* AppIcon60x60@3x.png */,
+				F195400E200BFE85000D094F /* AppIcon76x76.png */,
+				F1954018200BFE86000D094F /* AppIcon76x76@2x.png */,
+				F1954013200BFE86000D094F /* AppIcon83.5x83.5@2x.png */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -312,27 +312,27 @@
 			buildActionMask = 2147483647;
 			files = (
 				F1531E112009709800DD5051 /* tar.gz in Resources */,
-				F1987679200AA3A600D4BB56 /* AppIcon20x20.png in Resources */,
-				F1987677200AA3A600D4BB56 /* AppIcon40x40@3x.png in Resources */,
 				F1F28F581FF052870074AA75 /* ent.plist in Resources */,
-				F1987678200AA3A600D4BB56 /* AppIcon76x76.png in Resources */,
-				F1987675200AA3A600D4BB56 /* AppIcon76x76@2x.png in Resources */,
-				F198767A200AA3A600D4BB56 /* AppIcon20x20@2x.png in Resources */,
 				F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */,
+				F195401F200BFE86000D094F /* AppIcon60x60@3x.png in Resources */,
+				F195401C200BFE86000D094F /* AppIcon40x40@2x.png in Resources */,
 				F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */,
 				B0D79D621FDED41000B4F233 /* README in Resources */,
-				F198767B200AA3A600D4BB56 /* AppIcon60x60@2x.png in Resources */,
-				F198767C200AA3A600D4BB56 /* AppIcon20x20@3x.png in Resources */,
-				F1987674200AA3A600D4BB56 /* AppIcon60x60@3x.png in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
 				F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */,
 				F1531E51200983DD00DD5051 /* safemode.tar in Resources */,
+				F1954020200BFE86000D094F /* AppIcon60x60@2x.png in Resources */,
+				F1954021200BFE86000D094F /* AppIcon20x20@3x.png in Resources */,
+				F195401D200BFE86000D094F /* AppIcon20x20.png in Resources */,
+				F195401A200BFE86000D094F /* AppIcon40x40@3x.png in Resources */,
 				B07A02491FB09B6F0018ACE5 /* LaunchScreen.storyboard in Resources */,
-				F198767D200AA3A600D4BB56 /* AppIcon83.5x83.5@2x.png in Resources */,
-				F198767E200AA3A600D4BB56 /* AppIcon40x40@2x.png in Resources */,
+				F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */,
 				F1531E0C20096FC000DD5051 /* unjailbreak.sh in Resources */,
 				B07A02461FB09B6F0018ACE5 /* Assets.xcassets in Resources */,
-				F1987676200AA3A600D4BB56 /* AppIcon40x40.png in Resources */,
+				F1954022200BFE86000D094F /* AppIcon20x20@2x.png in Resources */,
+				F195401E200BFE86000D094F /* AppIcon83.5x83.5@2x.png in Resources */,
+				F1954023200BFE86000D094F /* AppIcon76x76@2x.png in Resources */,
+				F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */,
 				F1531E0A2009621900DD5051 /* basebinaries.tar in Resources */,
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
 			);
@@ -495,7 +495,6 @@
 		B07A02501FB09B6F0018ACE5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N78R6QBX22;
 				ENABLE_BITCODE = NO;
@@ -520,7 +519,6 @@
 		B07A02511FB09B6F0018ACE5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N78R6QBX22;
 				ENABLE_BITCODE = NO;
