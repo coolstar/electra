@@ -719,7 +719,7 @@ do { \
     
     if (enable_tweaks){
         if (!file_exist("/System/Library/Themes")) {
-            printf("making /System/Library/Themes");
+            printf("making /System/Library/Themes\n");
             mkdir("/System/Library/Themes", 0755);
         }
         
@@ -763,6 +763,9 @@ do { \
             waitpid(pd, NULL, 0);
             symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
         }
+        
+        mkdir("/Library/MobileSubstrate", 0755);
+        symlink("/"BOOTSTRAP_PREFIX"/Library/SBInject", "/Library/MobileSubstrate/DynamicLibraries");
     }
     
     cp("/bootstrap/unjailbreak.sh",progname("unjailbreak.sh"));

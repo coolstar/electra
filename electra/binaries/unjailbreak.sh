@@ -16,11 +16,12 @@ rm /usr/lib/libsubstitute.dylib
 rm /usr/lib/libsubstrate.dylib
 rm /usr/bin/recache
 rm /usr/bin/killall
-rm /usr/share/terminfo
+rm -rf /usr/share/terminfo
 rm /usr/libexec/sftp-server
 rm -rf /System/Library/Themes
 rm -rf /Library/Frameworks/CydiaSubstrate.framework
-rm /Library/Themes
+rm -rf /Library/MobileSubstrate
+rm -rf /Library/Themes
 uicache
 rm -rf /bootstrap
 echo "Your device has been wiped clean of all files from CoolStar's iOS 11 development kit!"
