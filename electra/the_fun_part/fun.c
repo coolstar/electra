@@ -560,7 +560,7 @@ do { \
 		printf("wrote test file: %p\n", f);
 	}
 
-    set_hsp(4, tfpzero);
+    //set_hsp(4, tfpzero);
     
     unlink("/var/mobile/test.txt");
 	
