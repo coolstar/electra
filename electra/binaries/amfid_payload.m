@@ -151,12 +151,6 @@ uint8_t *get_hash(uint8_t* code_dir, uint32_t* size) {
         return NULL;
     }
 
-    uint32_t cd_version = swap_uint32(code_dir_int[2]);
-    if (cd_version != 0x00020001) {
-        NSLog(@"[get_hash] Unknown version of codedir: %x", cd_version);
-        return NULL;
-    }
-
     // 2 uint32s in Blob (magic, length)
     // 7 uint32s in CodeDirectory (version, flags, ..., codeLimit)
     // 1 uint8 (hashSize)
