@@ -331,6 +331,18 @@ uint64_t kexecute(mach_port_t user_client, uint64_t fake_client, uint64_t addr, 
     return returnval;
 }
 
+void set_hsp(int which, mach_port_t port) {
+    uint64_t realhost_kaddr = find_realhost();
+    // deadbeef since we must have kread anyway
+    uint64_t port_kaddr = find_port_address(port, 0xdeadbeef);
+
+    // lck_mtx -- arm: 8  arm64: 16
+    const int offsetof_host_special = 0x10;
+    uint64_t hsp_kaddr = realhost_kaddr + offsetof_host_special + which * sizeof(void*);
+
+    wk64(hsp_kaddr, port_kaddr);
+}
+
 int let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client, bool enable_tweaks) {
 	
 	kern_return_t err;
@@ -547,6 +559,8 @@ do { \
 	} else {
 		printf("wrote test file: %p\n", f);
 	}
+
+    set_hsp(4, tfpzero);
     
     unlink("/var/mobile/test.txt");
 	

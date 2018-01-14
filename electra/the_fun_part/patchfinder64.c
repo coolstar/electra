@@ -880,3 +880,57 @@ addr_t find_amficache(void) {
 	}
 	return val + kerndumpbase;
 }
+
+addr_t find_realhost(void) {
+    uint64_t val = kerndumpbase;
+
+    addr_t ref1 = find_strref("\"ipc_init: kmem_suballoc of ipc_kernel_copy_map failed\"", 1, 0);
+    ref1 -= kerndumpbase;
+    addr_t ref2 = find_strref("\"ipc_host_init\"", 1, 0);
+    ref2 -= kerndumpbase;
+
+    addr_t call = ref2;
+    call = step64(kernel, call+4, 32, INSN_CALL); // panic
+    call = step64(kernel, call+4, 32, INSN_CALL); // something about
+    call = step64(kernel, call+4, 32, INSN_CALL); // allocing ports
+    call = step64(kernel, call+4, 32, INSN_CALL); // _lck_mtx_lock
+
+    call -= 4; // previous insn
+
+    uint32_t mov_opcode = *(uint32_t*)(kernel+call);
+    // must be mov x0, xm
+    if ((mov_opcode & 0xAA0003E0) != 0xAA0003E0) {
+        return 0;
+    }
+    uint8_t xm = (mov_opcode & 0x1F0000) >> 16;
+
+    uint32_t *insn = (uint32_t*)(kernel+ref1);
+    int i = 0;
+
+    // adrp xX, #_realhost@PAGE
+    for (i = 0; i != ref2 - ref1; ++i) {
+        if ((insn[i] & xm) == xm && (insn[i] & 0x9F000000) == 0x90000000)
+            break;
+    }
+
+    if (i == ref2 - ref1) {
+        return 0;
+    }
+
+    // get pc
+    val += ((uint8_t*)(insn + i) - kernel) & ~0x7FF;
+
+    // don't ask, I wrote this at 5am
+    val += (insn[i]<<9 & 0x1ffffc000) | (insn[i]>>17 & 0x3000);
+
+    // add xX, xX, #_realhost@PAGEOFF
+    ++i;
+    // xd == xX, xn == xX, SS == 00
+    if ((insn[i]&0x1f) != xm || ((insn[i]>>5)&0x1f) != xm || ((insn[i]>>22)&3) != 0) {
+        return 0;
+    }
+
+    val += (insn[i]>>10) & 0xfff;
+
+    return val;
+}
