@@ -738,6 +738,15 @@ do { \
         unlink("/usr/lib/libsubstitute.0.dylib");
         cp("/usr/lib/libsubstitute.0.dylib","/bootstrap/usr/lib/libsubstitute.0.dylib");
         
+        unlink("/usr/lib/libsubstrate.dylib");
+        cp("/usr/lib/libsubstrate.dylib","/bootstrap/usr/lib/libsubstrate.dylib");
+        
+        rv = posix_spawn(&pd, "/bootstrap/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/Library/Frameworks/CydiaSubstrate.framework", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+        
+        mkdir("/Library/Frameworks/CydiaSubstrate.framework", 0755);
+        symlink("/usr/lib/libsubstrate.framework", "/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate");
+        
         unlink("/usr/bin/recache");
         cp("/usr/bin/recache","/bootstrap/usr/bin/recache");
         chmod("/usr/bin/recache", 0755);

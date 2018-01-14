@@ -13,11 +13,13 @@ rm -rf /usr/lib/SBInject
 rm /usr/lib/SBInject.dylib
 rm /usr/lib/libsubstitute.0.dylib
 rm /usr/lib/libsubstitute.dylib
+rm /usr/lib/libsubstrate.dylib
 rm /usr/bin/recache
 rm /usr/bin/killall
 rm /usr/share/terminfo
 rm /usr/libexec/sftp-server
 rm -rf /System/Library/Themes
+rm -rf /Library/Frameworks/CydiaSubstrate.framework
 rm /Library/Themes
 uicache
 rm -rf /bootstrap
