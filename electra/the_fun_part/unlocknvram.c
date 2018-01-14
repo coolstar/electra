@@ -65,7 +65,7 @@ void unlocknvram(void) {
     buf[getOFVariablePerm/2] = buf[searchNVRAMProperty/2];
     
     // allocate buffer in kernel and copy it back
-    uint64_t fake_vtable = kmem_alloc(vtable_len);
+    uint64_t fake_vtable = kmem_alloc_wired(vtable_len);
     wkbuffer(fake_vtable, buf, vtable_len);
     
     // replace vtable on IODTNVRAM object
