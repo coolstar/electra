@@ -745,7 +745,7 @@ do { \
         waitpid(pd, NULL, 0);
         
         mkdir("/Library/Frameworks/CydiaSubstrate.framework", 0755);
-        symlink("/usr/lib/libsubstrate.framework", "/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate");
+        symlink("/usr/lib/libsubstrate.dylib", "/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate");
         
         unlink("/usr/bin/recache");
         cp("/usr/bin/recache","/bootstrap/usr/bin/recache");
