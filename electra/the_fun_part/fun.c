@@ -618,7 +618,6 @@ do { \
         chmod(tar, 0755);
         inject_trusts(1, (const char **)&(const char*[]){tar});
         
-        /* uncomment if you need to replace the binaries */
         unlink("/bootstrap/inject_amfid");
         unlink("/bootstrap/amfid_payload.dylib");
         unlink("/bootstrap/inject_launchd");
@@ -657,13 +656,19 @@ do { \
 //	uint8_t really[19] = {0xdb, 0x75, 0x57, 0x7d, 0x9c, 0x5c, 0xc2, 0xe7, 0x83, 0x7d, 0xa8, 0x66, 0x6a, 0x05, 0xc7, 0x17, 0x7e, 0xdb, 0xd3};
 //
 //	printf("%d\n", memcmp(launchd, really, 19)); // == 0
-
-	
-//	mkdir("/Library/LaunchDaemons", 777);
-//	cp("/Library/LaunchDaemons/test_fsigned.plist", plistPath2());
     
     rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
     waitpid(pd, NULL, 0);
+
+    inject_trusts(1, (const char **)&(const char*[]){"/"BOOTSTRAP_PREFIX"/bin/launchctl"});
+
+    // TODO: Clean this up, like, a lot
+    mkdir("/bootstrap/Library", 0755);
+    mkdir("/bootstrap/Library/LaunchDaemons", 0755);
+    unlink("/bootstrap/Library/LaunchDaemons/dropbear.plist");
+    cp("/bootstrap/Library/LaunchDaemons/dropbear.plist", progname("dropbear.plist"));
+    chmod("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0600);
+    chown("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0, 0);
     
     if (file_exist("/bootstrap/._amfid_payload.dylib")){
         rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/bootstrap", "-name", "._*", "-delete", NULL }, NULL);
@@ -766,12 +771,10 @@ do { \
     printf("Dropbear would be up soon\n");
     //printf("Note: to use SFTP clients (such as Cyberduck, Filezilla, etc.) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server /usr/libexec/sftp-server'\n");
     //printf("Note: to use clear/nano/reset (or other ncurses commands) please run: 'ln -s /"BOOTSTRAP_PREFIX"/usr/share/terminfo /usr/share/terminfo'\n");
-    
-    const char *launchjailbreak = "/" BOOTSTRAP_PREFIX "/launchjailbreak";
-    pid_t launchjailbreak_pid;
-    rv = posix_spawn(&launchjailbreak_pid, launchjailbreak, NULL, NULL, (char **)&(const char*[]){launchjailbreak, NULL}, NULL);
-	waitpid(launchjailbreak_pid, NULL, 0);
 	
+    rv = posix_spawn(&pd, "/bootstrap/bin/launchctl", NULL, NULL, (char **)&(const char*[]){ "launchctl", "load", "/"BOOTSTRAP_PREFIX"/Library/LaunchDaemons/dropbear.plist", NULL }, NULL);
+    waitpid(pd, NULL, 0);
+
 	// zzz AMFI sucks..
 	/*
 	 	Note this patch still came from @xerub's KPPless branch, but detailed below is kind of my adventures which I rediscovered most of what he did

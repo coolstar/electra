@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		17C74A00200E7298008B0276 /* dropbear.plist in Resources */ = {isa = PBXBuildFile; fileRef = 17C749FF200E7297008B0276 /* dropbear.plist */; };
 		6545304C200E8F600017BA60 /* remap_tfp_set_hsp.c in Sources */ = {isa = PBXBuildFile; fileRef = 6545304B200E8F600017BA60 /* remap_tfp_set_hsp.c */; };
 		B003EB351FC583CB00C58441 /* kmem.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB331FC583CA00C58441 /* kmem.c */; };
 		B003EB381FC5863800C58441 /* find_port.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB361FC5863800C58441 /* find_port.c */; };
@@ -53,6 +54,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		17C749FF200E7297008B0276 /* dropbear.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = dropbear.plist; sourceTree = "<group>"; };
 		6545304A200E8F600017BA60 /* remap_tfp_set_hsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = remap_tfp_set_hsp.h; sourceTree = "<group>"; };
 		6545304B200E8F600017BA60 /* remap_tfp_set_hsp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = remap_tfp_set_hsp.c; sourceTree = "<group>"; };
 		B003EB331FC583CA00C58441 /* kmem.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = kmem.c; sourceTree = "<group>"; };
@@ -90,7 +92,6 @@
 		BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = patchfinder64.c; sourceTree = "<group>"; };
 		BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = patchfinder64.h; sourceTree = "<group>"; };
 		BC9969031FE66CE200A4EDB9 /* ent.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
-		F14B5F931FF1736000E62599 /* launchjailbreak.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = launchjailbreak.m; sourceTree = "<group>"; };
 		F14B5F951FF2265900E62599 /* start_jailbreakd.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = start_jailbreakd.m; sourceTree = "<group>"; };
 		F1531E092009621900DD5051 /* basebinaries.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = basebinaries.tar; sourceTree = "<group>"; };
 		F1531E0B20096FC000DD5051 /* unjailbreak.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = unjailbreak.sh; sourceTree = "<group>"; };
@@ -165,6 +166,7 @@
 				F15B0265200888AA002CF5EE /* tweaksupport.tar */,
 				F15B0263200888A6002CF5EE /* anemoneapp.tar */,
 				F1531E50200983DD00DD5051 /* safemode.tar */,
+				17C749FF200E7297008B0276 /* dropbear.plist */,
 				B07A023C1FB09B6F0018ACE5 /* AppDelegate.h */,
 				B07A023D1FB09B6F0018ACE5 /* AppDelegate.m */,
 				B04E250A1FCF083A00F09CCE /* arm64_state.h */,
@@ -245,7 +247,6 @@
 				F1531E0B20096FC000DD5051 /* unjailbreak.sh */,
 				F1A4F4F820031797003E101F /* fishhook.c */,
 				F1A4F4F920031797003E101F /* fishhook.h */,
-				F14B5F931FF1736000E62599 /* launchjailbreak.m */,
 				F1F28F4B1FF052870074AA75 /* amfid_payload.m */,
 				F17480171FF99C79009A37FB /* launchd_payload.m */,
 				F1CCDD1F20035688000191DC /* xpcproxy_payload.m */,
@@ -325,6 +326,7 @@
 				B0D79D621FDED41000B4F233 /* README in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
 				F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */,
+				17C74A00200E7298008B0276 /* dropbear.plist in Resources */,
 				F1531E51200983DD00DD5051 /* safemode.tar in Resources */,
 				F1954020200BFE86000D094F /* AppIcon60x60@2x.png in Resources */,
 				F1954021200BFE86000D094F /* AppIcon20x20@3x.png in Resources */,
@@ -502,7 +504,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = N78R6QBX22;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -526,7 +528,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = N78R6QBX22;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
