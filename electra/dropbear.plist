@@ -9,7 +9,7 @@
 	<key>EnvironmentVariables</key>
 	<dict>
 		<key>PS1</key>
-		<string>\\h:\\w \\u\\$ </string>
+		<string>\h:\w \u\$ </string>
 		<key>PATH</key>
 		<string>/bootstrap/usr/local/bin:/bootstrap/usr/sbin:/bootstrap/usr/bin:/bootstrap/sbin:/bootstrap/bin:/bin:/usr/bin:/sbin</string>
 		<key>BOOTSTRAP_PREFIX</key>
