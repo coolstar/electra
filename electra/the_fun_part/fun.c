@@ -551,14 +551,14 @@ do { \
 
     unlink("/var/mobile/test.txt");
 
-//    {
-//        mach_port_t real_tfp0 = MACH_PORT_NULL;
-//        if (remap_tfp0_set_hsp4(&real_tfp0)) {
-//            real_tfp0 = MACH_PORT_NULL;
-//        }
-//        printf("remapped tfp0: 0x%x\n", real_tfp0);
-//        // tfpzero = real_tfp0;
-//    }
+    {
+        mach_port_t real_tfp0 = MACH_PORT_NULL;
+        if (remap_tfp0_set_hsp4(&real_tfp0)) {
+            real_tfp0 = MACH_PORT_NULL;
+        }
+        printf("remapped tfp0: 0x%x\n", real_tfp0);
+        // tfpzero = real_tfp0;
+    }
 
 	// Remount / as rw - patch by xerub with nosuid patch added by coolstar
 	{
