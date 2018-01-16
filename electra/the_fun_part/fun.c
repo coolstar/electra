@@ -9,6 +9,7 @@
 #include "fun.h"
 #include "kcall.h"
 #include "unlocknvram.h"
+#include "remap_tfp_set_hsp.h"
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -331,18 +332,6 @@ uint64_t kexecute(mach_port_t user_client, uint64_t fake_client, uint64_t addr, 
     return returnval;
 }
 
-void set_hsp(int which, mach_port_t port) {
-    uint64_t realhost_kaddr = find_realhost();
-    // deadbeef since we must have kread anyway
-    uint64_t port_kaddr = find_port_address(port, 0xdeadbeef);
-
-    // lck_mtx -- arm: 8  arm64: 16
-    const int offsetof_host_special = 0x10;
-    uint64_t hsp_kaddr = realhost_kaddr + offsetof_host_special + which * sizeof(void*);
-
-    wk64(hsp_kaddr, port_kaddr);
-}
-
 int let_the_fun_begin(mach_port_t tfp0, mach_port_t user_client, bool enable_tweaks) {
 	
 	kern_return_t err;
@@ -560,10 +549,17 @@ do { \
 		printf("wrote test file: %p\n", f);
 	}
 
-    //set_hsp(4, tfpzero);
-    
     unlink("/var/mobile/test.txt");
-	
+
+//    {
+//        mach_port_t real_tfp0 = MACH_PORT_NULL;
+//        if (remap_tfp0_set_hsp4(&real_tfp0)) {
+//            real_tfp0 = MACH_PORT_NULL;
+//        }
+//        printf("remapped tfp0: 0x%x\n", real_tfp0);
+//        // tfpzero = real_tfp0;
+//    }
+
 	// Remount / as rw - patch by xerub with nosuid patch added by coolstar
 	{
 		uint64_t _rootvnode = find_rootvnode();

@@ -612,6 +612,7 @@ term_kernel(void)
 #define INSN_CALL 0x94000000, 0xFC000000
 #define INSN_B    0x14000000, 0xFC000000
 #define INSN_CBZ  0x34000000, 0xFC000000
+#define INSN_ADRP 0x90000000, 0x9F000000
 
 addr_t
 find_register_value(addr_t where, int reg)
@@ -918,7 +919,7 @@ addr_t find_realhost(void) {
     }
 
     // get pc
-    val += ((uint8_t*)(insn + i) - kernel) & ~0x7FF;
+    val += ((uint8_t*)(insn + i) - kernel) & ~0xfff;
 
     // don't ask, I wrote this at 5am
     val += (insn[i]<<9 & 0x1ffffc000) | (insn[i]>>17 & 0x3000);
@@ -931,6 +932,43 @@ addr_t find_realhost(void) {
     }
 
     val += (insn[i]>>10) & 0xfff;
+
+    return val;
+}
+
+addr_t find_zone_map_ref(void) {
+    // \"Nothing being freed to the zone_map. start = end = %p\\n\"
+    uint64_t val = kerndumpbase;
+
+    addr_t ref = find_strref("\"Nothing being freed to the zone_map. start = end = %p\\n\"", 1, 0);
+    ref -= kerndumpbase;
+
+    // skip add & adrp for panic str
+    ref -= 8;
+
+    // adrp xX, #_zone_map@PAGE
+    ref = step64_back(kernel, ref, 30, INSN_ADRP);
+
+    uint32_t *insn = (uint32_t*)(kernel+ref);
+    // get pc
+    val += ((uint8_t*)(insn) - kernel) & ~0xfff;
+    uint8_t xm = *insn & 0x1f;
+
+    // don't ask, I wrote this at 5am
+    val += (*insn<<9 & 0x1ffffc000) | (*insn>>17 & 0x3000);
+
+    // ldr x, [xX, #_zone_map@PAGEOFF]
+    ++insn;
+    if ((*insn & 0xF9C00000) != 0xF9400000) {
+        return 0;
+    }
+
+    // xd == xX, xn == xX,
+    if ((*insn&0x1f) != xm || ((*insn>>5)&0x1f) != xm) {
+        return 0;
+    }
+
+    val += ((*insn >> 10) & 0xFFF) << 3;
 
     return val;
 }
