@@ -6,6 +6,15 @@
 	<string>Dropbear</string>
 	<key>Program</key>
 	<string>/bootstrap/usr/local/bin/dropbear</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PS1</key>
+		<string>\\h:\\w \\u\\$ </string>
+		<key>PATH</key>
+		<string>/bootstrap/usr/local/bin:/bootstrap/usr/sbin:/bootstrap/usr/bin:/bootstrap/sbin:/bootstrap/bin:/bin:/usr/bin:/sbin</string>
+		<key>BOOTSTRAP_PREFIX</key>
+		<string>/bootstrap</string>
+	</dict>
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bootstrap/usr/local/bin/dropbear</string>
