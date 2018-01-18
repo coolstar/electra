@@ -65,7 +65,7 @@ int remove_memory_limit(void) {
 }
 
 int runserver(){
-    NSLog(@"[jailbreakd] Process Start!\n");
+    NSLog(@"[jailbreakd] Process Start!");
     remove_memory_limit();
 
     kern_return_t err = host_get_special_port(mach_host_self(), HOST_LOCAL_NODE, 4, &tfpzero);
@@ -79,28 +79,28 @@ int runserver(){
     init_kernel(kernel_base, NULL);
     // Get the slide
     kernel_slide = kernel_base - 0xFFFFFFF007004000;
-    NSLog(@"[jailbreakd] slide: 0x%016llx\n", kernel_slide);
+    NSLog(@"[jailbreakd] slide: 0x%016llx", kernel_slide);
 
     user_client = prepare_user_client();
 
     uint64_t cached_task_self_addr = 0;
     uint64_t task_self = task_self_addr();
     if (task_self == 0) {
-        NSLog(@"unable to disclose address of our task port\n");
+        NSLog(@"unable to disclose address of our task port");
         sleep(10);
         exit(EXIT_FAILURE);
     }
-    NSLog(@"our task port is at 0x%llx\n", task_self);
+    NSLog(@"our task port is at 0x%llx", task_self);
 
     // From v0rtex - get the IOSurfaceRootUserClient port, and then the address of the actual client, and vtable
     uint64_t IOSurfaceRootUserClient_port = find_port(user_client); // UserClients are just mach_ports, so we find its address
-    NSLog(@"Found port: 0x%llx\n", IOSurfaceRootUserClient_port);
+    NSLog(@"Found port: 0x%llx", IOSurfaceRootUserClient_port);
 
     uint64_t IOSurfaceRootUserClient_addr = rk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT)); // The UserClient itself (the C++ object) is at the kobject field
-    NSLog(@"Found addr: 0x%llx\n", IOSurfaceRootUserClient_addr);
+    NSLog(@"Found addr: 0x%llx", IOSurfaceRootUserClient_addr);
 
     uint64_t IOSurfaceRootUserClient_vtab = rk64(IOSurfaceRootUserClient_addr); // vtables in C++ are at *object
-    NSLog(@"Found vtab: 0x%llx\n", IOSurfaceRootUserClient_vtab);
+    NSLog(@"Found vtab: 0x%llx", IOSurfaceRootUserClient_vtab);
 
     // The aim is to create a fake client, with a fake vtable, and overwrite the existing client with the fake one
     // Once we do that, we can use IOConnectTrap6 to call functions in the kernel as the kernel
@@ -108,24 +108,24 @@ int runserver(){
 
     // Create the vtable in the kernel memory, then copy the existing vtable into there
     uint64_t fake_vtable = kalloc(0x1000);
-    NSLog(@"Created fake_vtable at %016llx\n", fake_vtable);
+    NSLog(@"Created fake_vtable at %016llx", fake_vtable);
 
     for (int i = 0; i < 0x200; i++) {
         wk64(fake_vtable+i*8, rk64(IOSurfaceRootUserClient_vtab+i*8));
     }
 
-    NSLog(@"Copied some of the vtable over\n");
+    NSLog(@"Copied some of the vtable over");
 
 
     // Create the fake user client
     fake_client = kalloc(0x1000);
-    NSLog(@"Created fake_client at %016llx\n", fake_client);
+    NSLog(@"Created fake_client at %016llx", fake_client);
 
     for (int i = 0; i < 0x200; i++) {
         wk64(fake_client+i*8, rk64(IOSurfaceRootUserClient_addr+i*8));
     }
 
-    NSLog(@"Copied the user client over\n");
+    NSLog(@"Copied the user client over");
 
     // Write our fake vtable into the fake user client
     wk64(fake_client, fake_vtable);
@@ -138,15 +138,15 @@ int runserver(){
     // Replace IOUserClient::getExternalTrapForIndex with our ROP gadget (add x0, x0, #0x40; ret;)
     wk64(fake_vtable+8*0xB7, find_add_x0_x0_0x40_ret());
 
-    NSLog(@"Wrote the `add x0, x0, #0x40; ret;` gadget over getExternalTrapForIndex\n");
+    NSLog(@"Wrote the `add x0, x0, #0x40; ret;` gadget over getExternalTrapForIndex");
 
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
 
-    NSLog(@"[jailbreakd] Running server...\n");
+    NSLog(@"[jailbreakd] Running server...");
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0)
-        NSLog(@"[jailbreakd] Error opening socket\n");
+        NSLog(@"[jailbreakd] Error opening socket");
     int optval = 1;
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval, sizeof(int));
 
@@ -155,7 +155,7 @@ int runserver(){
     /* gethostbyname: get the server's DNS entry */
     server = gethostbyname(hostname);
     if (server == NULL) {
-        fprintf(stderr,"[jailbreakd] ERROR, no such host as %s\n", hostname);
+        NSLog("[jailbreakd] ERROR, no such host as %s", hostname);
         exit(0);
     }
 
@@ -167,11 +167,11 @@ int runserver(){
     serveraddr.sin_port = htons((unsigned short)5);
 
     if (bind(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
-        NSLog(@"[jailbreakd] Error binding...\n");
+        NSLog(@"[jailbreakd] Error binding...");
         wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
         exit(-1);
     }
-    NSLog(@"[jailbreakd] Server running!\n");
+    NSLog(@"[jailbreakd] Server running!");
 
     char buf[1024];
 
@@ -196,7 +196,7 @@ int runserver(){
                 continue;
             }
             struct JAILBREAKD_ENTITLE_PID *entitlePacket = (struct JAILBREAKD_ENTITLE_PID *)buf;
-            NSLog(@"Entitle PID %d\n", entitlePacket->Pid);
+            NSLog(@"Entitle PID %d", entitlePacket->Pid);
             setcsflagsandplatformize(entitlePacket->Pid);
         }
         if (command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
@@ -205,7 +205,7 @@ int runserver(){
                 continue;
             }
             struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
-            NSLog(@"Entitle+SIGCONT PID %d\n", entitleSIGCONTPacket->Pid);
+            NSLog(@"Entitle+SIGCONT PID %d", entitleSIGCONTPacket->Pid);
             setcsflagsandplatformize(entitleSIGCONTPacket->Pid);
             kill(entitleSIGCONTPacket->Pid, SIGCONT);
         }
@@ -215,9 +215,9 @@ int runserver(){
                 continue;
             }
             struct JAILBREAKD_ENTITLE_PLATFORMIZE_PID *entitlePlatformizePacket = (struct JAILBREAKD_ENTITLE_PLATFORMIZE_PID *)buf;
-            NSLog(@"Entitle PID %d\n", entitlePlatformizePacket->EntitlePID);
+            NSLog(@"Entitle PID %d", entitlePlatformizePacket->EntitlePID);
             setcsflagsandplatformize(entitlePlatformizePacket->EntitlePID);
-            NSLog(@"Platformize PID %d\n", entitlePlatformizePacket->PlatformizePID);
+            NSLog(@"Platformize PID %d", entitlePlatformizePacket->PlatformizePID);
             setcsflagsandplatformize(entitlePlatformizePacket->PlatformizePID);
         }
         if (command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY){
@@ -226,7 +226,7 @@ int runserver(){
                 continue;
             }
             struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
-            NSLog(@"Entitle+SIGCONT PID %d\n", entitleSIGCONTPacket->Pid);
+            NSLog(@"Entitle+SIGCONT PID %d", entitleSIGCONTPacket->Pid);
             __block int PID = entitleSIGCONTPacket->Pid;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 setcsflagsandplatformize(PID);
@@ -239,7 +239,7 @@ int runserver(){
                 continue;
             }
             struct JAILBREAKD_DUMP_CRED *dumpCredPacket = (struct JAILBREAKD_DUMP_CRED *)buf;
-            NSLog(@"Dump PID %d\n", dumpCredPacket->Pid);
+            NSLog(@"Dump PID %d", dumpCredPacket->Pid);
             dumppid(dumpCredPacket->Pid);
         }
         if (command == JAILBREAKD_COMMAND_EXIT){
