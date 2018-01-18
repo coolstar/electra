@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>jailbreakd</string>
+	<key>Program</key>
+	<string>/bootstrap/jailbreakd</string>
+	<!-- Do not remove EnvironmentVariables! It's needed by start_jailbreakd
+         The value of KernelBase will be adjusted accordingly.-->
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>KernelBase</key>
+		<string>0x746f6d6f68696d61</string>
+	</dict>
+	<key>UserName</key>
+	<string>root</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+</dict>
+</plist>

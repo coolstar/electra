@@ -10,7 +10,7 @@
 #define fun_objc_h
 
 const char* progname(const char*);
-void extractTarBinary();
-void update_springboard_plist();
+void extractTarBinary(void);
+void update_springboard_plist(void);
 
 #endif /* fun_objc_h */

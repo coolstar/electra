@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		17C74A00200E7298008B0276 /* dropbear.plist in Resources */ = {isa = PBXBuildFile; fileRef = 17C749FF200E7297008B0276 /* dropbear.plist */; };
+		4A7B89692010255800CB6439 /* jailbreakd.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4A7B89682010255800CB6439 /* jailbreakd.plist */; };
 		6545304C200E8F600017BA60 /* remap_tfp_set_hsp.c in Sources */ = {isa = PBXBuildFile; fileRef = 6545304B200E8F600017BA60 /* remap_tfp_set_hsp.c */; };
 		B003EB351FC583CB00C58441 /* kmem.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB331FC583CA00C58441 /* kmem.c */; };
 		B003EB381FC5863800C58441 /* find_port.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB361FC5863800C58441 /* find_port.c */; };
@@ -55,6 +56,7 @@
 
 /* Begin PBXFileReference section */
 		17C749FF200E7297008B0276 /* dropbear.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = dropbear.plist; sourceTree = "<group>"; };
+		4A7B89682010255800CB6439 /* jailbreakd.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = jailbreakd.plist; sourceTree = "<group>"; };
 		6545304A200E8F600017BA60 /* remap_tfp_set_hsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = remap_tfp_set_hsp.h; sourceTree = "<group>"; };
 		6545304B200E8F600017BA60 /* remap_tfp_set_hsp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = remap_tfp_set_hsp.c; sourceTree = "<group>"; };
 		B003EB331FC583CA00C58441 /* kmem.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = kmem.c; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 				F15B0263200888A6002CF5EE /* anemoneapp.tar */,
 				F1531E50200983DD00DD5051 /* safemode.tar */,
 				17C749FF200E7297008B0276 /* dropbear.plist */,
+				4A7B89682010255800CB6439 /* jailbreakd.plist */,
 				B07A023C1FB09B6F0018ACE5 /* AppDelegate.h */,
 				B07A023D1FB09B6F0018ACE5 /* AppDelegate.m */,
 				B04E250A1FCF083A00F09CCE /* arm64_state.h */,
@@ -342,6 +345,7 @@
 				F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */,
 				F1531E0A2009621900DD5051 /* basebinaries.tar in Resources */,
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
+				4A7B89692010255800CB6439 /* jailbreakd.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
