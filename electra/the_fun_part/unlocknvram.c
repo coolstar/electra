@@ -58,11 +58,11 @@ void unlocknvram(void) {
     uint32_t vtable_len = (uint32_t) (vtable_end - vtable_start);
     
     // copy vtable to userspace
-    uint16_t *buf = calloc(1, vtable_len);
+    uint64_t *buf = calloc(1, vtable_len);
     rkbuffer(vtable_start, buf, vtable_len);
     
     // alter it
-    buf[getOFVariablePerm/2] = buf[searchNVRAMProperty/2];
+    buf[getOFVariablePerm/sizeof(uint64_t)] = buf[searchNVRAMProperty/sizeof(uint64_t)];
     
     // allocate buffer in kernel and copy it back
     uint64_t fake_vtable = kmem_alloc_wired(vtable_len);
