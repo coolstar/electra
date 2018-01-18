@@ -814,8 +814,7 @@ do { \
     wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
     
     printf("Starting server...\n");
-    mach_port_t pass_port = MACH_PORT_NULL;
-    start_jailbreakd(kern_ucred, &pass_port, tfp0, kernel_base);
+    start_jailbreakd(kernel_base);
     
     sleep(5);
     

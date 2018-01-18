@@ -55,3 +55,11 @@ void update_springboard_plist(){
     NSError *error = nil;
     [[NSFileManager defaultManager] setAttributes:attr ofItemAtPath:@"/var/mobile/Library/Preferences/com.apple.springboard.plist" error:&error];
 }
+
+void write_jailbreakd_plist(uint64_t kbase) {
+    NSData *blob = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"jailbreakd" ofType:@"plist"]];
+    NSMutableDictionary *job = [NSPropertyListSerialization propertyListWithData:blob options:NSPropertyListMutableContainers format:nil error:nil];
+
+    job[@"EnvironmentVariables"][@"KernelBase"] = [NSString stringWithFormat:@"0x%16llx", kbase];
+    [job writeToFile:@"/bootstrap/Library/LaunchDaemons/jailbreakd.plist" atomically:YES];
+}

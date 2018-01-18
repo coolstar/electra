@@ -19,13 +19,20 @@
 #include <unistd.h>
 #import <Foundation/Foundation.h>
 #include <spawn.h>
+#import "fun_objc.h"
 
-int start_jailbreakd(uint64_t kern_ucred, mach_port_t *pass_port, mach_port_t task_for_pid0, uint64_t kernel_base)
-{
-    unlink("/var/tmp/jailbreakd.pid");
-    pid_t pd;
-    
-    NSString *kernel_base_str = [NSString stringWithFormat:@"%llu",kernel_base];
-    posix_spawn(&pd, "/bootstrap/jailbreakd", NULL, NULL, (char **)&(char*[]){"jailbreakd", (char *)[kernel_base_str UTF8String], NULL}, NULL);
+int start_jailbreakd(uint64_t kernel_base) {
+    pid_t pid = 0;
+
+    write_jailbreakd_plist(kernel_base);
+
+    int rv = posix_spawn(&pid, "/bootstrap/bin/launchctl", NULL, NULL, (char **)&(const char*[]){ "launchctl", "load", "-w", "/bootstrap/Library/LaunchDaemons/jailbreakd.plist", NULL }, NULL);
+    if (rv == -1) {
+        return -1;
+    }
+
+    int ex = 0;
+    waitpid(pid, &ex, 0);
+    NSLog(@"once it is drawn, it cannot be sheathed without causing death");
     return 0;
 }

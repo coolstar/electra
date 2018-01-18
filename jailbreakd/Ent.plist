@@ -10,5 +10,7 @@
 	<true/>
 	<key>task_for_pid-allow</key>
 	<true/>
+	<key>com.apple.private.memorystatus</key>
+	<true/>
 </dict>
 </plist>

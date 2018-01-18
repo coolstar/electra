@@ -53,9 +53,20 @@ uint64_t kernel_slide;
 mach_port_t user_client;
 uint64_t fake_client;
 
+#define MEMORYSTATUS_CMD_SET_JETSAM_TASK_LIMIT 6
+int memorystatus_control(uint32_t command, int32_t pid, uint32_t flags, void *buffer, size_t buffersize);
+
+int remove_memory_limit(void) {
+    // daemons run under launchd have a very stingy memory limit by default, we need
+    // quite a bit more for patchfinder so disable it here
+    // (note that we need the com.apple.private.memorystatus entitlement to do so)
+    pid_t my_pid = getpid();
+    return memorystatus_control(MEMORYSTATUS_CMD_SET_JETSAM_TASK_LIMIT, my_pid, 0, NULL, 0);
+}
 
 int runserver(){
     NSLog(@"[jailbreakd] Process Start!\n");
+    remove_memory_limit();
 
     kern_return_t err = host_get_special_port(mach_host_self(), HOST_LOCAL_NODE, 4, &tfpzero);
     if (err != KERN_SUCCESS) {
@@ -68,28 +79,28 @@ int runserver(){
     init_kernel(kernel_base, NULL);
     // Get the slide
     kernel_slide = kernel_base - 0xFFFFFFF007004000;
-    printf("[jailbreakd] slide: 0x%016llx\n", kernel_slide);
+    NSLog(@"[jailbreakd] slide: 0x%016llx\n", kernel_slide);
 
     user_client = prepare_user_client();
 
     uint64_t cached_task_self_addr = 0;
     uint64_t task_self = task_self_addr();
     if (task_self == 0) {
-        printf("unable to disclose address of our task port\n");
+        NSLog(@"unable to disclose address of our task port\n");
         sleep(10);
         exit(EXIT_FAILURE);
     }
-    printf("our task port is at 0x%llx\n", task_self);
+    NSLog(@"our task port is at 0x%llx\n", task_self);
 
     // From v0rtex - get the IOSurfaceRootUserClient port, and then the address of the actual client, and vtable
     uint64_t IOSurfaceRootUserClient_port = find_port(user_client); // UserClients are just mach_ports, so we find its address
-    printf("Found port: 0x%llx\n", IOSurfaceRootUserClient_port);
+    NSLog(@"Found port: 0x%llx\n", IOSurfaceRootUserClient_port);
 
     uint64_t IOSurfaceRootUserClient_addr = rk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT)); // The UserClient itself (the C++ object) is at the kobject field
-    printf("Found addr: 0x%llx\n", IOSurfaceRootUserClient_addr);
+    NSLog(@"Found addr: 0x%llx\n", IOSurfaceRootUserClient_addr);
 
     uint64_t IOSurfaceRootUserClient_vtab = rk64(IOSurfaceRootUserClient_addr); // vtables in C++ are at *object
-    printf("Found vtab: 0x%llx\n", IOSurfaceRootUserClient_vtab);
+    NSLog(@"Found vtab: 0x%llx\n", IOSurfaceRootUserClient_vtab);
 
     // The aim is to create a fake client, with a fake vtable, and overwrite the existing client with the fake one
     // Once we do that, we can use IOConnectTrap6 to call functions in the kernel as the kernel
@@ -97,24 +108,24 @@ int runserver(){
 
     // Create the vtable in the kernel memory, then copy the existing vtable into there
     uint64_t fake_vtable = kalloc(0x1000);
-    printf("Created fake_vtable at %016llx\n", fake_vtable);
+    NSLog(@"Created fake_vtable at %016llx\n", fake_vtable);
 
     for (int i = 0; i < 0x200; i++) {
         wk64(fake_vtable+i*8, rk64(IOSurfaceRootUserClient_vtab+i*8));
     }
 
-    printf("Copied some of the vtable over\n");
+    NSLog(@"Copied some of the vtable over\n");
 
 
     // Create the fake user client
     fake_client = kalloc(0x1000);
-    printf("Created fake_client at %016llx\n", fake_client);
+    NSLog(@"Created fake_client at %016llx\n", fake_client);
 
     for (int i = 0; i < 0x200; i++) {
         wk64(fake_client+i*8, rk64(IOSurfaceRootUserClient_addr+i*8));
     }
 
-    printf("Copied the user client over\n");
+    NSLog(@"Copied the user client over\n");
 
     // Write our fake vtable into the fake user client
     wk64(fake_client, fake_vtable);
@@ -127,15 +138,15 @@ int runserver(){
     // Replace IOUserClient::getExternalTrapForIndex with our ROP gadget (add x0, x0, #0x40; ret;)
     wk64(fake_vtable+8*0xB7, find_add_x0_x0_0x40_ret());
 
-    printf("Wrote the `add x0, x0, #0x40; ret;` gadget over getExternalTrapForIndex\n");
+    NSLog(@"Wrote the `add x0, x0, #0x40; ret;` gadget over getExternalTrapForIndex\n");
 
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
 
-    printf("[jailbreakd] Running server...\n");
+    NSLog(@"[jailbreakd] Running server...\n");
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0)
-        printf("[jailbreakd] Error opening socket\n");
+        NSLog(@"[jailbreakd] Error opening socket\n");
     int optval = 1;
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval, sizeof(int));
 
@@ -156,11 +167,11 @@ int runserver(){
     serveraddr.sin_port = htons((unsigned short)5);
 
     if (bind(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
-        printf("[jailbreakd] Error binding...\n");
+        NSLog(@"[jailbreakd] Error binding...\n");
         wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
         exit(-1);
     }
-    printf("[jailbreakd] Server running!\n");
+    NSLog(@"[jailbreakd] Server running!\n");
 
     char buf[1024];
 
@@ -246,40 +257,10 @@ int runserver(){
 int main(int argc, char **argv, char **envp)
 {
     char *endptr;
-    kernel_base = strtoull(argv[1], &endptr, 10);
-    setpgid(getpid(), 0);
+    kernel_base = strtoull(getenv("KernelBase"), &endptr, 16);
+    // setpgid(getpid(), 0);
 
-    pid_t pid1 = fork();
-    if(pid1 == 0)
-    {
-        pid_t pid2 = fork();
-        if (pid2 == 0){
-            unlink("/var/tmp/jailbreakd.pid");
-
-            FILE *f = fopen("/var/tmp/jailbreakd.pid", "w");
-            fprintf(f, "%d\n", getpid());
-            fclose(f);
-
-            int ret = runserver();
-            exit(ret);
-        } else {
-            exit(0);
-        }
-    }
-    else if(pid1 > 0)
-    {
-        int status;
-        waitpid(pid1, &status, 0);
-        return (0);
-    }
-    else
-    {
-        return (-1);
-    }
-
-    /* Exit and clean up the child process. */
-    _exit(0);
-
-    return (0);
+    int ret = runserver();
+    exit(ret);
 }
 
