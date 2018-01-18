@@ -123,9 +123,10 @@ int fake_posix_spawnp(pid_t * pid, const char* file, const posix_spawn_file_acti
                 ||strstr(argv[1], "MTLCompilerService")
                 ||strstr(argv[1], "OTAPKIAssetTool")
                 ||strstr(argv[1], "cfprefsd")
+                ||strstr(argv[1], "jailbreakd")
                 ) {
 #if LAUNCHD_DEBUG
-                fprintf(f, "xpcproxy for diagnosticd, ReportCrash. MTLCompilerService, cfprefsd or OTAPKIAssetTool -- no hooking!\n\n");
+                fprintf(f, "xpcproxy for diagnosticd, ReportCrash. MTLCompilerService, cfprefsd, jailbreakd or OTAPKIAssetTool -- no hooking!\n\n");
                 fclose(f);
 #endif
                 return old_pspawnp(pid, file, file_actions, attrp, argv, envp);

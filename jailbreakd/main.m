@@ -155,7 +155,7 @@ int runserver(){
     /* gethostbyname: get the server's DNS entry */
     server = gethostbyname(hostname);
     if (server == NULL) {
-        NSLog("[jailbreakd] ERROR, no such host as %s", hostname);
+        NSLog(@"[jailbreakd] ERROR, no such host as %s", hostname);
         exit(0);
     }
 
