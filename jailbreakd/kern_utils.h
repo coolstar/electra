@@ -67,6 +67,7 @@ kern_return_t IOConnectTrap6(io_connect_t connect, uint32_t index, uintptr_t p1,
 kern_return_t mach_vm_read_overwrite(vm_map_t target_task, mach_vm_address_t address, mach_vm_size_t size, mach_vm_address_t data, mach_vm_size_t *outsize);
 kern_return_t mach_vm_write(vm_map_t target_task, mach_vm_address_t address, vm_offset_t data, mach_msg_type_number_t dataCnt);
 kern_return_t mach_vm_allocate(vm_map_t target, mach_vm_address_t *address, mach_vm_size_t size, int flags);
+kern_return_t mach_vm_deallocate(vm_map_t target, mach_vm_address_t address, mach_vm_size_t size);
 
 uint64_t kalloc(vm_size_t size);
 uint32_t rk32(uint64_t kaddr);

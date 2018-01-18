@@ -124,6 +124,10 @@ uint64_t kalloc(vm_size_t size){
 	return address;
 }
 
+uint64_t kfree(mach_vm_address_t address, vm_size_t size){
+    mach_vm_deallocate(tfpzero, address, size);
+}
+
 uint32_t rk32(uint64_t kaddr) {
   kern_return_t err;
   uint32_t val = 0;
@@ -239,6 +243,7 @@ uint64_t find_port(mach_port_name_t port){
 #define OSDictionary_SetItem(dict, str, val) {\
 uint64_t s = kalloc(strlen(str)+1); kwrite(s, str, strlen(str)); \
 kexecute(user_client, fake_client, rk64(rk64(dict)+SetObjectWithCharP), dict, s, val, 0, 0, 0, 0); \
+kfree(s, strlen(str)+1); \
             }
 #define OSString_CStringPtr(str) rk64(str+0x10)
 
