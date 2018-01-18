@@ -12,6 +12,5 @@
 const char* progname(const char*);
 void extractTarBinary(void);
 void update_springboard_plist(void);
-void write_jailbreakd_plist(uint64_t kbase);
 
 #endif /* fun_objc_h */
