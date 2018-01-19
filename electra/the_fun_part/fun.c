@@ -665,10 +665,13 @@ do { \
     // TODO: Clean this up, like, a lot
     mkdir("/bootstrap/Library", 0755);
     mkdir("/bootstrap/Library/LaunchDaemons", 0755);
-    unlink("/bootstrap/Library/LaunchDaemons/dropbear.plist");
-    cp("/bootstrap/Library/LaunchDaemons/dropbear.plist", progname("dropbear.plist"));
-    chmod("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0600);
-    chown("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0, 0);
+    
+    if (!file_exist("/bootstrap/Library/LaunchDaemons/dropbear.plist")){
+        unlink("/bootstrap/Library/LaunchDaemons/dropbear.plist");
+        cp("/bootstrap/Library/LaunchDaemons/dropbear.plist", progname("dropbear.plist"));
+        chmod("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0600);
+        chown("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0, 0);
+    }
     
     if (file_exist("/bootstrap/._amfid_payload.dylib")){
         rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/bootstrap", "-name", "._*", "-delete", NULL }, NULL);
