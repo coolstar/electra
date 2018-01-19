@@ -39,6 +39,7 @@ int start_jailbreakd(uint64_t kernel_base) {
 
     int ex = 0;
     waitpid(pid, &ex, 0);
+    NSLog(@"The dragon becomes me!");
     NSLog(@"once it is drawn, it cannot be sheathed without causing death");
     return 0;
 }
