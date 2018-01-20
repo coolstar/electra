@@ -518,19 +518,21 @@ int main(int argc, char* argv[]) {
 
 	NSLog(@"Address is at %016llx", actual_addr);
 
-	uint64_t slide = actual_addr - 0x0000000100000000;
-
     uint64_t handler = call_remote(remoteTask, dlopen, 2, REMOTE_CSTRING(loaded_dylib), REMOTE_LITERAL(RTLD_NOW));
-    uint64_t error = call_remote(remoteTask, dlerror, 0);
-    if (error == 0) {
+    if (handler != 0) {
         NSLog(@"No error occured!");
     } else {
-        uint64_t len = call_remote(remoteTask, strlen, 1, REMOTE_LITERAL(error));
-        char* local_cstring = malloc(len+1);
-        remote_read_overwrite(remoteTask, error, (uint64_t)local_cstring, len+1);
+      uint64_t error = call_remote(remoteTask, dlerror, 0);
+      if (error == 0) {
+        NSLog(@"Error occured, but dlerror returned NULL!");
+      } else {
+          uint64_t len = call_remote(remoteTask, strlen, 1, REMOTE_LITERAL(error));
+          char* local_cstring = malloc(len+1);
+          remote_read_overwrite(remoteTask, error, (uint64_t)local_cstring, len+1);
 
-        NSLog(@"Error is %s", local_cstring);
-        return -1;
+          NSLog(@"Error is %s", local_cstring);
+      }
+      return -1;
     }
 
 	return 0;
