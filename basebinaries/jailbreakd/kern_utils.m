@@ -1,9 +1,7 @@
 #import <Foundation/Foundation.h>
-#import "debug.h"
 #import "kern_utils.h"
 #import "patchfinder64.h"
 #import "offsets.h"
-#include "find_port.h"
 
 extern mach_port_t tfpzero;
 extern uint64_t kernel_base;
@@ -124,7 +122,7 @@ uint64_t kalloc(vm_size_t size){
 	return address;
 }
 
-uint64_t kfree(mach_vm_address_t address, vm_size_t size){
+void kfree(mach_vm_address_t address, vm_size_t size){
     mach_vm_deallocate(tfpzero, address, size);
 }
 
@@ -206,23 +204,36 @@ mach_port_t prepare_user_client() {
   return user_client;
 }
 
-uint64_t find_port_address(mach_port_name_t port, int disposition) {
-  return find_port_via_proc_pidlistuptrs_bug(port, disposition);
+uint64_t proc_find(int pd, int tries) {
+  // TODO use kcall(proc_find) + ZM_FIX_ADDR
+  while (tries-- > 0) {
+    uint64_t proc = rk64(find_allproc());
+    while (proc) {
+      uint32_t pid = rk32(proc + offsetof_p_pid);
+      if (pid == pd) {
+        return proc;
+      }
+      proc = rk64(proc);
+    }
+  }
+  return 0;
 }
 
-uint64_t cached_task_self_addr = 0;
-uint64_t task_self_addr() {
-  if (cached_task_self_addr == 0) {
-    cached_task_self_addr = find_port_address(mach_task_self(), MACH_MSG_TYPE_COPY_SEND);
-    printf("task self: 0x%llx\n", cached_task_self_addr);
+CACHED_FIND(uint64_t, our_task_addr) {
+  uint64_t our_proc = proc_find(getpid(), 1);
+
+  if (our_proc == 0) {
+    printf("failed to find our_task_addr!\n");
+    exit(EXIT_FAILURE);
   }
-  return cached_task_self_addr;
+
+  uint64_t addr = rk64(our_proc + offsetof_task);
+  printf("our_task_addr: 0x%llx\n", addr);
+  return addr;
 }
 
 uint64_t find_port(mach_port_name_t port){
-  uint64_t task_port_addr = task_self_addr();
-  
-  uint64_t task_addr = rk64(task_port_addr + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT));
+  uint64_t task_addr = our_task_addr();
   
   uint64_t itk_space = rk64(task_addr + koffset(KSTRUCT_OFFSET_TASK_ITK_SPACE));
   
@@ -278,142 +289,130 @@ uint64_t kexecute(mach_port_t user_client, uint64_t fake_client, uint64_t addr, 
 }
 
 int dumppid(int pd){
-  int tries = 3;
-  while (tries-- > 0) {
-      uint64_t proc = rk64(find_allproc());
-      while (proc) {
-            uint32_t pid = rk32(proc + offsetof_p_pid);
-            if (pid == pd) {
-                uid_t p_uid = rk32(proc + offsetof_p_uid);
-                gid_t p_gid = rk32(proc + offsetof_p_gid);
-                uid_t p_ruid = rk32(proc + offsetof_p_ruid);
-                gid_t p_rgid = rk32(proc + offsetof_p_rgid);
+  uint64_t proc = proc_find(pd, 3);
+  if (proc != 0) {
+    uid_t p_uid = rk32(proc + offsetof_p_uid);
+    gid_t p_gid = rk32(proc + offsetof_p_gid);
+    uid_t p_ruid = rk32(proc + offsetof_p_ruid);
+    gid_t p_rgid = rk32(proc + offsetof_p_rgid);
 
-                uint64_t ucred = rk64(proc + offsetof_p_ucred);
-                uid_t cr_uid = rk32(ucred + offsetof_ucred_cr_uid);
-                uid_t cr_ruid = rk32(ucred + offsetof_ucred_cr_ruid);
-                uid_t cr_svuid = rk32(ucred + offsetof_ucred_cr_svuid);
+    uint64_t ucred = rk64(proc + offsetof_p_ucred);
+    uid_t cr_uid = rk32(ucred + offsetof_ucred_cr_uid);
+    uid_t cr_ruid = rk32(ucred + offsetof_ucred_cr_ruid);
+    uid_t cr_svuid = rk32(ucred + offsetof_ucred_cr_svuid);
 
-                NSLog(@"Found PID %d", pid);
-                NSLog(@"UID: %d GID: %d RUID: %d RGID: %d", p_uid, p_gid, p_ruid, p_rgid);
-                NSLog(@"CR_UID: %d CR_RUID: %d CR_SVUID: %d", cr_uid, cr_ruid, cr_svuid);
-                return 0;
-            }
-            proc = rk64(proc);
-      }
+    NSLog(@"Found PID %d", pd);
+    NSLog(@"UID: %d GID: %d RUID: %d RGID: %d", p_uid, p_gid, p_ruid, p_rgid);
+    NSLog(@"CR_UID: %d CR_RUID: %d CR_SVUID: %d", cr_uid, cr_ruid, cr_svuid);
+    return 0;
+  } else {
+    return 1;
   }
 }
 
-int setcsflagsandplatformize(int pd){
-  int tries = 3;
-  while (tries-- > 0) {
-      uint64_t proc = rk64(find_allproc());
-      while (proc) {
-          uint32_t pid = rk32(proc + offsetof_p_pid);
-          if (pid == pd) {
-              uint32_t csflags = rk32(proc + offsetof_p_csflags);
-#if JAILBREAKDDEBUG
-              NSLog(@"Previous CSFlags: 0x%x", csflags);
+int setcsflagsandplatformize(int pid){
+  uint64_t proc = proc_find(pid, 3);
+  if (proc != 0) {
+    uint32_t csflags = rk32(proc + offsetof_p_csflags);
+#ifdef JAILBREAKDDEBUG
+    NSLog(@"Previous CSFlags: 0x%x", csflags);
 #endif
-              csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW | CS_DEBUGGED) & ~(CS_RESTRICT | CS_HARD | CS_KILL);
-#if JAILBREAKDDEBUG
-              NSLog(@"New CSFlags: 0x%x", csflags);
+    csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW | CS_DEBUGGED) & ~(CS_RESTRICT | CS_HARD | CS_KILL);
+#ifdef JAILBREAKDDEBUG
+    NSLog(@"New CSFlags: 0x%x", csflags);
 #endif
-              wk32(proc + offsetof_p_csflags, csflags);
+    wk32(proc + offsetof_p_csflags, csflags);
 
-              // task.t_flags & TF_PLATFORM
-              uint64_t task = rk64(proc + offsetof_task);
-              uint32_t t_flags = rk32(task + offsetof_t_flags);
-#if JAILBREAKDDEBUG
-              NSLog(@"Old t_flags: 0x%x", t_flags);
+    // task.t_flags & TF_PLATFORM
+    uint64_t task = rk64(proc + offsetof_task);
+    uint32_t t_flags = rk32(task + offsetof_t_flags);
+#ifdef JAILBREAKDDEBUG
+    NSLog(@"Old t_flags: 0x%x", t_flags);
 #endif
-              t_flags |= TF_PLATFORM;
-              wk32(task+offsetof_t_flags, t_flags);
-#if JAILBREAKDDEBUG
-              NSLog(@"New t_flags: 0x%x", t_flags);
+    t_flags |= TF_PLATFORM;
+    wk32(task+offsetof_t_flags, t_flags);
+#ifdef JAILBREAKDDEBUG
+    NSLog(@"New t_flags: 0x%x", t_flags);
 #endif
 
-              // AMFI entitlements
-#if JAILBREAKDDEBUG
-              NSLog(@"%@",@"AMFI:");
+    // AMFI entitlements
+#ifdef JAILBREAKDDEBUG
+    NSLog(@"%@",@"AMFI:");
 #endif
-              uint64_t proc_ucred = rk64(proc+0x100);
-              uint64_t amfi_entitlements = rk64(rk64(proc_ucred+0x78)+0x8);
-#if JAILBREAKDDEBUG
-              NSLog(@"%@",@"Setting Entitlements...");
+    uint64_t proc_ucred = rk64(proc+0x100);
+    uint64_t amfi_entitlements = rk64(rk64(proc_ucred+0x78)+0x8);
+#ifdef JAILBREAKDDEBUG
+    NSLog(@"%@",@"Setting Entitlements...");
 #endif
 
-              OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
-              OSDictionary_SetItem(amfi_entitlements, "com.apple.private.skip-library-validation", find_OSBoolean_True());
+    OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
+    OSDictionary_SetItem(amfi_entitlements, "com.apple.private.skip-library-validation", find_OSBoolean_True());
 
-              NSLog(@"Set Entitlements on PID %d", pd);
+    NSLog(@"Set Entitlements on PID %d", pid);
 
-              uint64_t textvp = rk64(proc + offsetof_p_textvp); //vnode of executable
-              off_t textoff = rk64(proc + offsetof_p_textoff);
+    uint64_t textvp = rk64(proc + offsetof_p_textvp); //vnode of executable
+    off_t textoff = rk64(proc + offsetof_p_textoff);
+    
+#ifdef JAILBREAKDDEBUG
+    NSLog(@"\t__TEXT at 0x%llx. Offset: 0x%llx", textvp, textoff);
+#endif
+    if (textvp != 0){
+      uint32_t vnode_type_tag = rk32(textvp + offsetof_v_type);
+      uint16_t vnode_type = vnode_type_tag & 0xffff;
+      uint16_t vnode_tag = (vnode_type_tag >> 16);
+#ifdef JAILBREAKDDEBUG
+      NSLog(@"\tVNode Type: 0x%x. Tag: 0x%x.", vnode_type, vnode_tag);
+#endif
+      
+      if (vnode_type == 1){
+          uint64_t ubcinfo = rk64(textvp + offsetof_v_ubcinfo);
+#ifdef JAILBREAKDDEBUG
+          NSLog(@"\t\tUBCInfo at 0x%llx.\n", ubcinfo);
+#endif
+          
+          uint64_t csblobs = rk64(ubcinfo + offsetof_ubcinfo_csblobs);
+          while (csblobs != 0){
+#ifdef JAILBREAKDDEBUG
+              NSLog(@"\t\t\tCSBlobs at 0x%llx.", csblobs);
+#endif
               
-#if JAILBREAKDDEBUG
-              NSLog(@"\t__TEXT at 0x%llx. Offset: 0x%llx", textvp, textoff);
-#endif
-              if (textvp != 0){
-                uint32_t vnode_type_tag = rk32(textvp + offsetof_v_type);
-                uint16_t vnode_type = vnode_type_tag & 0xffff;
-                uint16_t vnode_tag = (vnode_type_tag >> 16);
-#if JAILBREAKDDEBUG
-                NSLog(@"\tVNode Type: 0x%x. Tag: 0x%x.", vnode_type, vnode_tag);
-#endif
-                
-                if (vnode_type == 1){
-                    uint64_t ubcinfo = rk64(textvp + offsetof_v_ubcinfo);
-#if JAILBREAKDDEBUG
-                    NSLog(@"\t\tUBCInfo at 0x%llx.\n", ubcinfo);
-#endif
-                    
-                    uint64_t csblobs = rk64(ubcinfo + offsetof_ubcinfo_csblobs);
-                    while (csblobs != 0){
-#if JAILBREAKDDEBUG
-                        NSLog(@"\t\t\tCSBlobs at 0x%llx.", csblobs);
-#endif
-                        
-                        cpu_type_t csblob_cputype = rk32(csblobs + offsetof_csb_cputype);
-                        unsigned int csblob_flags = rk32(csblobs + offsetof_csb_flags);
-                        off_t csb_base_offset = rk64(csblobs + offsetof_csb_base_offset);
-                        uint64_t csb_entitlements = rk64(csblobs + offsetof_csb_entitlements_offset);
-                        unsigned int csb_signer_type = rk32(csblobs + offsetof_csb_signer_type);
-                        unsigned int csb_platform_binary = rk32(csblobs + offsetof_csb_platform_binary);
-                        unsigned int csb_platform_path = rk32(csblobs + offsetof_csb_platform_path);
+              cpu_type_t csblob_cputype = rk32(csblobs + offsetof_csb_cputype);
+              unsigned int csblob_flags = rk32(csblobs + offsetof_csb_flags);
+              off_t csb_base_offset = rk64(csblobs + offsetof_csb_base_offset);
+              uint64_t csb_entitlements = rk64(csblobs + offsetof_csb_entitlements_offset);
+              unsigned int csb_signer_type = rk32(csblobs + offsetof_csb_signer_type);
+              unsigned int csb_platform_binary = rk32(csblobs + offsetof_csb_platform_binary);
+              unsigned int csb_platform_path = rk32(csblobs + offsetof_csb_platform_path);
 
-#if JAILBREAKDDEBUG
-                        NSLog(@"\t\t\tCSBlob CPU Type: 0x%x. Flags: 0x%x. Offset: 0x%llx", csblob_cputype, csblob_flags, csb_base_offset);
-                        NSLog(@"\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d", csb_signer_type, csb_platform_binary, csb_platform_path);
+#ifdef JAILBREAKDDEBUG
+              NSLog(@"\t\t\tCSBlob CPU Type: 0x%x. Flags: 0x%x. Offset: 0x%llx", csblob_cputype, csblob_flags, csb_base_offset);
+              NSLog(@"\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d", csb_signer_type, csb_platform_binary, csb_platform_path);
 #endif
-                        wk32(csblobs + offsetof_csb_platform_binary, 1);
+              wk32(csblobs + offsetof_csb_platform_binary, 1);
 
-                        csb_platform_binary = rk32(csblobs + offsetof_csb_platform_binary);
-#if JAILBREAKDDEBUG
-                        NSLog(@"\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d", csb_signer_type, csb_platform_binary, csb_platform_path);
-                        
-                        NSLog(@"\t\t\t\tEntitlements at 0x%llx.\n", csb_entitlements);
+              csb_platform_binary = rk32(csblobs + offsetof_csb_platform_binary);
+#ifdef JAILBREAKDDEBUG
+              NSLog(@"\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d", csb_signer_type, csb_platform_binary, csb_platform_path);
+              
+              NSLog(@"\t\t\t\tEntitlements at 0x%llx.\n", csb_entitlements);
 #endif
-                        csblobs = rk64(csblobs);
-                    }
-                }
-              }
-
-              /*for (int idx = 0; idx < OSDictionary_ItemCount(amfi_entitlements); idx++) {
-                  uint64_t key = OSDictionary_ItemKey(OSDictionary_ItemBuffer(amfi_entitlements), idx);
-                  uint64_t keyOSStr = OSString_CStringPtr(key);
-                  size_t length = kexecute(user_client, fake_client, 0xFFFFFFF00709BDE0+kernel_slide, keyOSStr, 0, 0, 0, 0, 0, 0); //strlen
-                  char* s = (char*)calloc(length+1, 1);
-                  kread(keyOSStr, s, length);
-                  NSLog(@"Entitlement: %s", s);
-                  free(s);
-              }*/
-
-              return 0;
+              csblobs = rk64(csblobs);
           }
-          proc = rk64(proc);
       }
+    }
+
+    /*for (int idx = 0; idx < OSDictionary_ItemCount(amfi_entitlements); idx++) {
+        uint64_t key = OSDictionary_ItemKey(OSDictionary_ItemBuffer(amfi_entitlements), idx);
+        uint64_t keyOSStr = OSString_CStringPtr(key);
+        size_t length = kexecute(user_client, fake_client, 0xFFFFFFF00709BDE0+kernel_slide, keyOSStr, 0, 0, 0, 0, 0, 0); //strlen
+        char* s = (char*)calloc(length+1, 1);
+        kread(keyOSStr, s, length);
+        NSLog(@"Entitlement: %s", s);
+        free(s);
+    }*/
+
+    return 0;
   }
-  NSLog(@"Unable to find PID %d to entitle!", pd);
-  return 0;
+  NSLog(@"Unable to find PID %d to entitle!", pid);
+  return 1;
 }
