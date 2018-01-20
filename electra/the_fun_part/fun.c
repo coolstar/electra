@@ -819,7 +819,10 @@ do { \
     printf("Starting server...\n");
     start_jailbreakd(kernel_base);
     
-    sleep(5);
+    while (!file_exist("/var/tmp/jailbreakd.pid")){
+        printf("Waiting for jailbreakd...\n");
+        usleep(100000); //100 ms
+    }
     
     update_springboard_plist();
     

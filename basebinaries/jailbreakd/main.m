@@ -162,6 +162,12 @@ int runserver(){
         exit(-1);
     }
     NSLog(@"[jailbreakd] Server running!");
+    
+    unlink("/var/tmp/jailbreakd.pid");
+    
+    FILE *f = fopen("/var/tmp/jailbreakd.pid", "w");
+    fprintf(f, "%d\n", getpid());
+    fclose(f);
 
     char buf[1024];
 

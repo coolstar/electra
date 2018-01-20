@@ -22,6 +22,8 @@
 #include <spawn.h>
 
 int start_jailbreakd(uint64_t kernel_base) {
+    unlink("/var/tmp/jailbreakd.pid");
+    
     NSData *blob = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"jailbreakd" ofType:@"plist"]];
     NSMutableDictionary *job = [NSPropertyListSerialization propertyListWithData:blob options:NSPropertyListMutableContainers format:nil error:nil];
 
