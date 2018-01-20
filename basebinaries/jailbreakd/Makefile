@@ -3,7 +3,7 @@ OUTDIR ?= bin
 
 CC      = xcrun -sdk iphoneos cc -arch arm64
 LDID    = ldid
-CFLAGS  = -Wall
+CFLAGS  = -Wall -Wno-unused-variable -Wno-unused-function
 
 .PHONY: all clean
 
