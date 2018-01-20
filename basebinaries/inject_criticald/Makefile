@@ -2,7 +2,9 @@ TARGET  = inject_criticald
 OUTDIR ?= bin
 
 CC      = xcrun -sdk iphoneos cc -arch arm64
-LDID    = ldid
+# it is injected into trust cache by code
+# which only supports sha-256 signatures
+LDID    = ldid2
 
 .PHONY: all clean
 
@@ -16,4 +18,4 @@ $(OUTDIR)/$(TARGET): *.m | $(OUTDIR)
 	$(LDID) -SEnt.plist $@
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(OUTDIR)/$(TARGET)

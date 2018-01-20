@@ -21,4 +21,4 @@ $(OUTDIR)/$(TARGET): *.c *.m | $(OUTDIR)
 	$(LDID) -SEnt.plist $@
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(OUTDIR)/$(TARGET)
