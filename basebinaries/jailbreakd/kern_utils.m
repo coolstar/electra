@@ -1,7 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "kern_utils.h"
 #import "patchfinder64.h"
-#import "offsets.h"
 
 extern mach_port_t tfpzero;
 extern uint64_t kernel_base;
@@ -21,13 +20,16 @@ unsigned offsetof_p_csflags = 0x2a8;          // proc_t::p_csflags
 unsigned offsetof_itk_self = 0xD8;            // task_t::itk_self (convert_task_to_port)
 unsigned offsetof_itk_sself = 0xE8;           // task_t::itk_sself (task_get_special_port)
 unsigned offsetof_itk_bootstrap = 0x2b8;      // task_t::itk_bootstrap (task_get_special_port)
+unsigned offsetof_itk_space = 0x308;          // task_t::itk_space
 unsigned offsetof_ip_mscount = 0x9C;          // ipc_port_t::ip_mscount (ipc_port_make_send)
 unsigned offsetof_ip_srights = 0xA0;          // ipc_port_t::ip_srights (ipc_port_make_send)
+unsigned offsetof_ip_kobject = 0x68;          // ipc_port_t::ip_kobject
 unsigned offsetof_p_textvp = 0x248;           // proc_t::p_textvp
 unsigned offsetof_p_textoff = 0x250;          // proc_t::p_textoff
 unsigned offsetof_p_cputype = 0x2c0;          // proc_t::p_cputype
 unsigned offsetof_p_cpu_subtype = 0x2c4;      // proc_t::p_cpu_subtype
 unsigned offsetof_special = 2 * sizeof(long); // host::special
+unsigned offsetof_ipc_space_is_table = 0x20;  // ipc_space::is_table?..
 
 unsigned offsetof_ucred_cr_uid = 0x18;        // ucred::cr_uid
 unsigned offsetof_ucred_cr_ruid = 0x1c;       // ucred::cr_ruid
@@ -235,9 +237,9 @@ CACHED_FIND(uint64_t, our_task_addr) {
 uint64_t find_port(mach_port_name_t port){
   uint64_t task_addr = our_task_addr();
   
-  uint64_t itk_space = rk64(task_addr + koffset(KSTRUCT_OFFSET_TASK_ITK_SPACE));
+  uint64_t itk_space = rk64(task_addr + offsetof_itk_space);
   
-  uint64_t is_table = rk64(itk_space + koffset(KSTRUCT_OFFSET_IPC_SPACE_IS_TABLE));
+  uint64_t is_table = rk64(itk_space + offsetof_ipc_space_is_table);
   
   uint32_t port_index = port >> 8;
   const int sizeof_ipc_entry_t = 0x18;
