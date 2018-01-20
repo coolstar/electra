@@ -154,15 +154,23 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
     
 #if PSPAWN_PAYLOAD_DEBUG
     fprintf(f, "Calling jailbreakd\n");
-#endif
-    // SIGCONT wont cause any harm
-    calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT);
-    
-#if PSPAWN_PAYLOAD_DEBUG
     fclose(f);
 #endif
-    
-    int origret = old_pspawn(pid, path, file_actions, newattrp, argv, newenvp);
+
+    int origret;
+
+    if (current_process == PROCESS_XPCPROXY) {
+        calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY);
+        origret = old_pspawn(pid, path, file_actions, newattrp, argv, newenvp);
+    } else {
+        int gotpid;
+        origret = old_pspawn(&gotpid, path, file_actions, newattrp, argv, newenvp);
+
+        if (origret == 0) {
+            if (pid != NULL) *pid = gotpid;
+            calljailbreakd(gotpid, JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT);
+        }
+    }
     
     return origret;
 }
@@ -188,9 +196,7 @@ void rebind_pspawns(void) {
 
 void* thd_func(void* arg){
     NSLog(@"In a new thread!");
-    
     rebind_pspawns();
-
     return NULL;
 }
 
