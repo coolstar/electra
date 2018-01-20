@@ -120,7 +120,7 @@ static int DecodeBitMasks(unsigned immN, unsigned imms, unsigned immr, int immed
 	if (len < 1) {
 		return -1;
 	}
-	levels = ZeroExtendOnes(len, 6);
+	levels = (unsigned) ZeroExtendOnes(len, 6);
 	if (immediate && (imms & levels) == levels) {
 		return -1;
 	}
@@ -420,7 +420,9 @@ follow_cbz(const uint8_t *buf, addr_t cbz)
 #include <unistd.h>
 #include <mach-o/loader.h>
 
+#ifndef __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
 #define __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
+#endif
 
 #ifdef __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
 #include <mach/mach.h>

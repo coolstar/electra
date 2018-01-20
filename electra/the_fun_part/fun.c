@@ -33,7 +33,7 @@ int cp(const char *to, const char *from)
 	if (fd_to < 0)
 		goto out_error;
 	
-	while (nread = read(fd_from, buf, sizeof buf), nread > 0)
+	while ((nread = read(fd_from, buf, sizeof buf)) > 0)
 	{
 		char *out_ptr = buf;
 		ssize_t nwritten;
