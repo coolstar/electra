@@ -66,10 +66,12 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
     if (current_process == PROCESS_XPCPROXY && !file_exist(XPCPROXY_DYLIB)) {
         return old(pid, path, file_actions, attrp, argv, envp);
     } else if (current_process == PROCESS_LAUNCHD && !file_exist(LAUNCHD_DYLIB)) {
+        return old(pid, path, file_actions, attrp, argv, envp);
+    } else if (current_process == PROCESS_LAUNCHD && file_exist(LAUNCHD_DYLIB)){
         if ((strcmp(path, "/usr/libexec/xpcproxy") == 0) && argv[1] != NULL) {
             const char **blacklist = xpcproxy_blacklist;
 
-            while (blacklist) {
+            while (*blacklist) {
                 if (strstr(argv[1], *blacklist)) {
                     DEBUGLOG("xpcproxy for %s which is in blacklist, not injecting", argv[1]);
                     return old(pid, path, file_actions, attrp, argv, envp);
@@ -151,10 +153,10 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
 
     if (current_process == PROCESS_XPCPROXY) {
         calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY);
-        origret = old_pspawn(pid, path, file_actions, newattrp, argv, newenvp);
+        origret = old(pid, path, file_actions, newattrp, argv, newenvp);
     } else {
         int gotpid;
-        origret = old_pspawn(&gotpid, path, file_actions, newattrp, argv, newenvp);
+        origret = old(&gotpid, path, file_actions, newattrp, argv, newenvp);
 
         if (origret == 0) {
             if (pid != NULL) *pid = gotpid;
