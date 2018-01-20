@@ -163,7 +163,11 @@ static void ctor(void) {
             if (!safeMode){
                 for (NSString *dylib in sbinjectGenerateDylibList()) {
                     NSLog(@"Injecting %@ into %@", dylib, NSBundle.mainBundle.bundleIdentifier);
-                    dlopen([dylib UTF8String], RTLD_LAZY | RTLD_GLOBAL);
+                    void *dl = dlopen([dylib UTF8String], RTLD_LAZY | RTLD_GLOBAL);
+
+                    if (dl == NULL) {
+                        NSLog(@"Injection failed: '%s'", dlerror());
+                    }
                 }
             }
         }

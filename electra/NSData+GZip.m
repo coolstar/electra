@@ -31,7 +31,7 @@
 //
 
 
-#import "NSData+GZIP.h"
+#import "NSData+GZip.h"
 #import <zlib.h>
 
 

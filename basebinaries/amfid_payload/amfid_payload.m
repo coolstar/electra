@@ -1,6 +1,3 @@
-// xcrun -sdk iphoneos gcc -dynamiclib -arch arm64 -framework Foundation -o amfid_payload.dylib amfid_payload.m
-// jtool --sign --inplace amfid_payload.dylib
-
 #include <dlfcn.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -300,7 +297,7 @@ void* thd_func(void* arg){
 
 __attribute__ ((constructor))
 static void ctor(void) {
-	NSLog(@"Hi there - creating the thread to do our stuff!");
+    NSLog(@"Hi there - creating the thread to do our stuff!");
     pthread_t thd;
     pthread_create(&thd, NULL, thd_func, NULL);
 }

@@ -9,8 +9,11 @@
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
+#include "patchfinder64.h"
 
-typedef unsigned long long addr_t;
+#define CACHED_FIND_UINT64(name) CACHED_FIND(uint64_t, name)
+
+typedef uint64_t addr_t;
 
 #define IS64(image) (*(uint8_t *)(image) & 1)
 
@@ -689,7 +692,7 @@ find_strref(const char *string, int n, int prelink)
 
 /****** fun *******/
 
-addr_t find_add_x0_x0_0x40_ret(void) {
+CACHED_FIND_UINT64(find_add_x0_x0_0x40_ret) {
 	addr_t off;
 	uint32_t *k;
 	k = (uint32_t *)(kernel + xnucore_base);
@@ -707,7 +710,7 @@ addr_t find_add_x0_x0_0x40_ret(void) {
 	return 0;
 }
 
-uint64_t find_allproc(void) {
+CACHED_FIND_UINT64(find_allproc) {
 	// Find the first reference to the string
 	addr_t ref = find_strref("\"pgrp_add : pgrp is dead adding process\"", 1, 0);
 	if (!ref) {
@@ -742,7 +745,7 @@ uint64_t find_allproc(void) {
 	return val + kerndumpbase;
 }
 
-uint64_t find_copyout(void) {
+CACHED_FIND_UINT64(find_copyout) {
 	// Find the first reference to the string
 	addr_t ref = find_strref("\"%s(%p, %p, %lu) - transfer too large\"", 2, 0);
 	if (!ref) {
@@ -765,7 +768,7 @@ uint64_t find_copyout(void) {
 	return start + kerndumpbase;
 }
 
-uint64_t find_bzero(void) {
+CACHED_FIND_UINT64(find_bzero) {
 	// Just find SYS #3, c7, c4, #1, X3, then get the start of that function
 	addr_t off;
 	uint32_t *k;
@@ -785,7 +788,7 @@ uint64_t find_bzero(void) {
 	return start + kerndumpbase;
 }
 
-addr_t find_bcopy(void) {
+CACHED_FIND_UINT64(find_bcopy) {
 	// Jumps straight into memmove after switching x0 and x1 around
 	// Guess we just find the switch and that's it
 	addr_t off;
@@ -895,7 +898,7 @@ uint64_t _kread64(uint64_t where) {
     return out;
 }
 
-addr_t find_OSBoolean_True(void) {
+CACHED_FIND_UINT64(find_OSBoolean_True) {
     addr_t val;
     addr_t ref = find_strref("Delay Autounload", 0, 0);
     if (!ref) {
@@ -923,6 +926,6 @@ addr_t find_OSBoolean_True(void) {
     return _kread64(val + kerndumpbase);
 }
 
-addr_t find_OSBoolean_False(void) {
+CACHED_FIND_UINT64(find_OSBoolean_False) {
     return find_OSBoolean_True()+8;
 }

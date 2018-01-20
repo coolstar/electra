@@ -19,5 +19,9 @@
 	<true/>
 	<key>KeepAlive</key>
 	<true/>
+	<key>StandardErrorPath</key>
+	<string>/var/log/jailbreakd-stderr.log</string>
+	<key>StandardOutPath</key>
+	<string>/var/log/jailbreakd-stdout.log</string>
 </dict>
 </plist>

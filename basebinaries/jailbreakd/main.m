@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include "patchfinder64.h"
 #include "kern_utils.h"
-#include "offsets.h"
 
 #define JAILBREAKD_COMMAND_ENTITLE 1
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT 2
@@ -64,6 +63,8 @@ int remove_memory_limit(void) {
     return memorystatus_control(MEMORYSTATUS_CMD_SET_JETSAM_TASK_LIMIT, my_pid, 0, NULL, 0);
 }
 
+extern unsigned offsetof_ip_kobject;
+
 int runserver(){
     NSLog(@"[jailbreakd] Process Start!");
     remove_memory_limit();
@@ -74,8 +75,6 @@ int runserver(){
         return 5;
     }
 
-    offsets_init();
-
     init_kernel(kernel_base, NULL);
     // Get the slide
     kernel_slide = kernel_base - 0xFFFFFFF007004000;
@@ -83,20 +82,11 @@ int runserver(){
 
     user_client = prepare_user_client();
 
-    uint64_t cached_task_self_addr = 0;
-    uint64_t task_self = task_self_addr();
-    if (task_self == 0) {
-        NSLog(@"unable to disclose address of our task port");
-        sleep(10);
-        exit(EXIT_FAILURE);
-    }
-    NSLog(@"our task port is at 0x%llx", task_self);
-
     // From v0rtex - get the IOSurfaceRootUserClient port, and then the address of the actual client, and vtable
     uint64_t IOSurfaceRootUserClient_port = find_port(user_client); // UserClients are just mach_ports, so we find its address
     NSLog(@"Found port: 0x%llx", IOSurfaceRootUserClient_port);
 
-    uint64_t IOSurfaceRootUserClient_addr = rk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT)); // The UserClient itself (the C++ object) is at the kobject field
+    uint64_t IOSurfaceRootUserClient_addr = rk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject); // The UserClient itself (the C++ object) is at the kobject field
     NSLog(@"Found addr: 0x%llx", IOSurfaceRootUserClient_addr);
 
     uint64_t IOSurfaceRootUserClient_vtab = rk64(IOSurfaceRootUserClient_addr); // vtables in C++ are at *object
@@ -131,7 +121,7 @@ int runserver(){
     wk64(fake_client, fake_vtable);
 
     // Replace the user client with ours
-    wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), fake_client);
+    wk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject, fake_client);
 
     // Now the userclient port we have will look into our fake user client rather than the old one
 
@@ -168,14 +158,14 @@ int runserver(){
 
     if (bind(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
         NSLog(@"[jailbreakd] Error binding...");
-        wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
+        wk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject, IOSurfaceRootUserClient_addr);
         exit(-1);
     }
     NSLog(@"[jailbreakd] Server running!");
 
     char buf[1024];
 
-    int clientlen = sizeof(clientaddr);
+    socklen_t clientlen = sizeof(clientaddr);
     while (1){
         bzero(buf, 1024);
         int size = recvfrom(sockfd, buf, 1024, 0, (struct sockaddr *)&clientaddr, &clientlen);
@@ -244,7 +234,7 @@ int runserver(){
         }
         if (command == JAILBREAKD_COMMAND_EXIT){
             NSLog(@"Got Exit Command! Goodbye!");
-            wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
+            wk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject, IOSurfaceRootUserClient_addr);
             exit(0);
         }
     }

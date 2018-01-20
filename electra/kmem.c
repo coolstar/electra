@@ -162,7 +162,6 @@ void wkbuffer(uint64_t kaddr, void* buffer, uint32_t length) {
 
 void rkbuffer(uint64_t kaddr, void* buffer, uint32_t length) {
   kern_return_t err;
-  uint32_t val = 0;
   mach_vm_size_t outsize = 0;
   err = mach_vm_read_overwrite(tfp0,
                                (mach_vm_address_t)kaddr,
@@ -275,7 +274,7 @@ uint64_t kmem_alloc_wired(uint64_t size) {
 }
 
 void kmem_free(uint64_t kaddr, uint64_t size) {
-  return;
+#if 0
   if (tfp0 == MACH_PORT_NULL) {
     printf("attempt to deallocate kernel memory before any kernel memory write primitives available\n");
     sleep(3);
@@ -305,4 +304,5 @@ void kmem_protect(uint64_t kaddr, uint32_t size, int prot) {
     sleep(3);
     return;
   }
+#endif
 }
