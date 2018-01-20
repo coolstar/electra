@@ -106,7 +106,6 @@
 		F15B0265200888AA002CF5EE /* tweaksupport.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = tweaksupport.tar; sourceTree = "<group>"; };
 		F15B026C2008C679002CF5EE /* CSGradientView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CSGradientView.h; sourceTree = "<group>"; };
 		F15B026D2008C679002CF5EE /* CSGradientView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientView.m; sourceTree = "<group>"; };
-		F17480111FF99C4A009A37FB /* inject_launchd.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = inject_launchd.m; sourceTree = "<group>"; };
 		F17480171FF99C79009A37FB /* launchd_payload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = launchd_payload.m; sourceTree = "<group>"; };
 		F195400E200BFE85000D094F /* AppIcon76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon76x76.png; sourceTree = "<group>"; };
 		F195400F200BFE85000D094F /* AppIcon40x40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon40x40@3x.png"; sourceTree = "<group>"; };
@@ -126,7 +125,6 @@
 		F1C524DC1FF350E100A4B25E /* jailbreakd_client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = jailbreakd_client.m; sourceTree = "<group>"; };
 		F1CCDD1F20035688000191DC /* xpcproxy_payload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = xpcproxy_payload.m; sourceTree = "<group>"; };
 		F1F28F4B1FF052870074AA75 /* amfid_payload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = amfid_payload.m; sourceTree = "<group>"; };
-		F1F28F4E1FF052870074AA75 /* inject_amfid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = inject_amfid.m; sourceTree = "<group>"; };
 		F1F28F4F1FF052870074AA75 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = test.m; sourceTree = "<group>"; };
 		F1F28F511FF052870074AA75 /* ent.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -253,8 +251,6 @@
 				F1F28F4B1FF052870074AA75 /* amfid_payload.m */,
 				F17480171FF99C79009A37FB /* launchd_payload.m */,
 				F1CCDD1F20035688000191DC /* xpcproxy_payload.m */,
-				F1F28F4E1FF052870074AA75 /* inject_amfid.m */,
-				F17480111FF99C4A009A37FB /* inject_launchd.m */,
 				F1F28F4F1FF052870074AA75 /* test.m */,
 				F1F28F511FF052870074AA75 /* ent.plist */,
 				F1C524DC1FF350E100A4B25E /* jailbreakd_client.m */,

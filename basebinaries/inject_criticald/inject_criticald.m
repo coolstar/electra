@@ -1,7 +1,4 @@
-// xcrun -sdk iphoneos gcc -arch arm64 -framework Foundation -o inject_amfid inject_amfid.m
-// jtool --sign --inplace --ent ent.plist inject_amfid
-
-/* code comes from IB's triple_fetch patch_amfid.c */
+/* code comes from IB's triple_fetch inject_amfid.c */
 
 #include <dlfcn.h>
 #include <stdio.h>
@@ -18,7 +15,7 @@
 #include <spawn.h>
 #include <sys/stat.h>
 #include <pthread.h>
- #include <signal.h>
+#include <signal.h>
 
 #import <Foundation/Foundation.h>
 
@@ -498,10 +495,13 @@ uint64_t binary_load_address(mach_port_t tp) {
 }
 
 int main(int argc, char* argv[]) {
+	uint32_t pid = atoi(argv[1]);
+	char *loaded_dylib = argv[2];
+
 	task_t remoteTask;
-	kern_return_t kr = task_for_pid(mach_task_self(), atoi(argv[1]), &remoteTask);
+	kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
 	if (kr != KERN_SUCCESS) {
-		NSLog(@"Failed to get task for amfid!");
+		NSLog(@"Failed to get task for pid %u!", pid);
 		return -1;
 	}
 
@@ -519,13 +519,8 @@ int main(int argc, char* argv[]) {
 	NSLog(@"Address is at %016llx", actual_addr);
 
 	uint64_t slide = actual_addr - 0x0000000100000000;
-	// NSLog(@"Slide is at %016llx", slide);
 
-    call_remote(remoteTask, setuid, 1, REMOTE_LITERAL(0));
-
-    NSLog(@"amfid uid is now 0 - injecting our dylib");
-
-    uint64_t handler = call_remote(remoteTask, dlopen, 2, REMOTE_CSTRING("/bootstrap/amfid_payload.dylib"), REMOTE_LITERAL(RTLD_NOW));
+    uint64_t handler = call_remote(remoteTask, dlopen, 2, REMOTE_CSTRING(loaded_dylib), REMOTE_LITERAL(RTLD_NOW));
     uint64_t error = call_remote(remoteTask, dlerror, 0);
     if (error == 0) {
         NSLog(@"No error occured!");
