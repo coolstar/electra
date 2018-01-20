@@ -5,8 +5,16 @@ CC      = xcrun -sdk iphoneos cc -arch arm64
 # it is injected into trust cache by code
 # which only supports sha-256 signatures
 LDID    = ldid2
+CFLAGS  = -Wall
 
 .PHONY: all clean
+
+DEBUG ?= 0
+ifeq ($(DEBUG), 1)
+    CFLAGS += -DINJECT_CRITICALD_DEBUG
+else
+    CFLAGS += -O2
+endif
 
 all: $(OUTDIR)/$(TARGET)
 
