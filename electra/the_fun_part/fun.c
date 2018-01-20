@@ -617,12 +617,17 @@ do { \
         extractTarBinary();
         chmod(tar, 0755);
         inject_trusts(1, (const char **)&(const char*[]){tar});
-        
+
+        // old
         unlink("/bootstrap/inject_amfid");
-        unlink("/bootstrap/amfid_payload.dylib");
         unlink("/bootstrap/inject_launchd");
         unlink("/bootstrap/launchd_payload.dylib");
         unlink("/bootstrap/xpcproxy_payload.dylib");
+
+        unlink("/bootstrap/inject_ctriticald");
+        unlink("/bootstrap/pspawn_payload.dylib");
+
+        unlink("/bootstrap/amfid_payload.dylib");
         unlink("/bootstrap/launchjailbreak");
         unlink("/bootstrap/jailbreakd");
         
@@ -632,20 +637,18 @@ do { \
         printf("[fun] copied the required binaries into the right places\n");
     }
     
-    inject_trusts(4, (const char **)&(const char*[]){
-        "/bootstrap/inject_amfid",
+    inject_trusts(3, (const char **)&(const char*[]){
+        "/bootstrap/inject_criticald",
         "/bootstrap/amfid_payload.dylib",
-
-        "/bootstrap/inject_launchd",
-        "/bootstrap/launchd_payload.dylib",
+        "/bootstrap/pspawn_payload.dylib",
 
         // Don't forget to update number in beginning
     });
     
-#define BinaryLocation_amfid "/bootstrap/inject_amfid"
+#define BinaryLocation "/bootstrap/inject_criticald"
     
-    const char* args_amfid[] = {BinaryLocation_amfid, itoa(amfid_pid), NULL};
-    rv = posix_spawn(&pd, BinaryLocation_amfid, NULL, NULL, (char **)&args_amfid, NULL);
+    const char* args_amfid[] = {BinaryLocation, itoa(amfid_pid), "/bootstrap/amfid_payload.dylib", NULL};
+    rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&args_amfid, NULL);
     waitpid(pd, NULL, 0);
     
     //unlocknvram();
@@ -822,11 +825,9 @@ do { \
     
     kill(cfprefsd_pid, SIGKILL);
     
-#define BinaryLocation_launchd "/bootstrap/inject_launchd"
-    
     if (enable_tweaks){
-        const char* args_launchd[] = {BinaryLocation_launchd, itoa(1), NULL};
-        rv = posix_spawn(&pd, BinaryLocation_launchd, NULL, NULL, (char **)&args_launchd, NULL);
+        const char* args_launchd[] = {BinaryLocation, itoa(1), "/bootstrap/pspawn_payload.dylib", NULL};
+        rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&args_launchd, NULL);
         waitpid(pd, NULL, 0);
         
         const char* args_recache[] = {"/bootstrap/usr/bin/recache", "--no-respring", NULL};
