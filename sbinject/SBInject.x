@@ -86,6 +86,7 @@ NSArray *sbinjectGenerateDylibList() {
             }
         }
     }
+    [dylibsToInject sortUsingSelector:@selector(caseInsensitiveCompare:)];
     return dylibsToInject;
 }
 
