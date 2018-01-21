@@ -1,133 +1,20 @@
-#include <dlfcn.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <mach/mach.h>
 #include <mach-o/loader.h>
 #include <mach/error.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <sys/sysctl.h>
-#include <dlfcn.h>
-#include <sys/mman.h>
-#include <spawn.h>
-#include <sys/stat.h>
-#include <pthread.h>
 
 #import <Foundation/Foundation.h>
 #include <CommonCrypto/CommonDigest.h>
 
-kern_return_t mach_vm_allocate
-(
- vm_map_t target,
- mach_vm_address_t *address,
- mach_vm_size_t size,
- int flags
- );
-
-kern_return_t mach_vm_write
-(
- vm_map_t target_task,
- mach_vm_address_t address,
- vm_offset_t data,
- mach_msg_type_number_t dataCnt
- );
-
- extern kern_return_t mach_vm_deallocate
-(
- vm_map_t target,
- mach_vm_address_t address,
- mach_vm_size_t size
-);
-
-
-kern_return_t mach_vm_read_overwrite(vm_map_t target_task, mach_vm_address_t address, mach_vm_size_t size, mach_vm_address_t data, mach_vm_size_t *outsize);
-kern_return_t mach_vm_region(vm_map_t target_task, mach_vm_address_t *address, mach_vm_size_t *size, vm_region_flavor_t flavor, vm_region_info_t info, mach_msg_type_number_t *infoCnt, mach_port_t *object_name);
-
-size_t remote_read(uint64_t where, void *p, size_t size) {
-    int rv;
-    size_t offset = 0;
-    while (offset < size) {
-        mach_vm_size_t sz, chunk = 2048;
-        if (chunk > size - offset) {
-            chunk = size - offset;
-        }
-        rv = mach_vm_read_overwrite(mach_task_self(), where + offset, chunk, (mach_vm_address_t)p + offset, &sz);
-        if (rv || sz == 0) {
-            printf("[fun_utils] error on remote_read(0x%016llx)\n", (offset + where));
-            break;
-        }
-        offset += sz;
-    }
-    return offset;
-}
-
-uint64_t remote_read64(uint64_t where) {
-    uint64_t out;
-    remote_read(where, &out, sizeof(uint64_t));
-    return out;
-}
-
-void
-remote_read_overwrite(mach_port_t task_port,
-                      uint64_t remote_address,
-                      uint64_t local_address,
-                      uint64_t length)
-{
-  kern_return_t err;
-
-  mach_vm_size_t outsize = 0;
-  err = mach_vm_read_overwrite(task_port, (mach_vm_address_t)remote_address, (mach_vm_size_t)length, (mach_vm_address_t)local_address, &outsize);
-  if (err != KERN_SUCCESS){
-    NSLog(@"remote read failed\n");
-    return;
-  }
-
-  if (outsize != length){
-    NSLog(@"remote read was short (expected %llx, got %llx\n", length, outsize);
-    return;
-  }
-}
-
-void
-remote_write(mach_port_t remote_task_port,
-             uint64_t remote_address,
-             uint64_t local_address,
-             uint64_t length)
-{
-  kern_return_t err = mach_vm_write(remote_task_port,
-                                    (mach_vm_address_t)remote_address,
-                                    (vm_offset_t)local_address,
-                                    (mach_msg_type_number_t)length);
-  if (err != KERN_SUCCESS) {
-    NSLog(@"remote write failed: %s %x\n", mach_error_string(err), err);
-    return;
-  }
-}
-
-uint64_t binary_load_address() {
-  kern_return_t err;
-  mach_msg_type_number_t region_count = VM_REGION_BASIC_INFO_COUNT_64;
-  memory_object_name_t object_name = MACH_PORT_NULL; /* unused */
-  mach_vm_size_t target_first_size = 0x1000;
-  mach_vm_address_t target_first_addr = 0x0;
-  struct vm_region_basic_info_64 region = {0};
-  err = mach_vm_region(mach_task_self(), &target_first_addr, &target_first_size, VM_REGION_BASIC_INFO_64, (vm_region_info_t)&region, &region_count, &object_name);
-
-  if (err != KERN_SUCCESS) {
-    printf("failed to get the region\n");
-    return -1;
-  }
-
-  return target_first_addr;
-}
-
+#include "fishhook.h"
 
 uint32_t swap_uint32(uint32_t val) {
-	val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF );
-	return (val << 16) | (val >> 16);
+    val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF );
+    return (val << 16) | (val >> 16);
 }
-
 
 // see ldid.cpp around line 1250
 uint8_t *get_hash(uint8_t* code_dir, uint32_t* size) {
@@ -217,17 +104,14 @@ uint8_t *get_code_directory(const char* name, uint64_t file_off) {
 	return NULL;
 }
 
-uint64_t real_func = 0;
-
-typedef int (*t)(NSString* file, NSDictionary* options, NSMutableDictionary** info);
+int (*old_MISValidateSignatureAndCopyInfo)(NSString* file, NSDictionary* options, NSMutableDictionary** info);
 
 int fake_MISValidateSignatureAndCopyInfo(NSString* file, NSDictionary* options, NSMutableDictionary** info) {
     // NSString *file = (__bridge NSString *)fileStr;
     // NSDictionary *options = (__bridge NSDictionary*)opts;
     NSLog(@"We got called! %@ with %@ (info: %@)", file, options, *info);
 
-    t actual_func = (t)real_func;
-    int origret = actual_func(file, options, info);
+    int origret = old_MISValidateSignatureAndCopyInfo(file, options, info);
     NSLog(@"We got called! AFTER ACTUAL %@ with %@ (info: %@)", file, options, *info);
 
     if (![*info objectForKey:@"CdHash"]) {
@@ -252,52 +136,15 @@ int fake_MISValidateSignatureAndCopyInfo(NSString* file, NSDictionary* options, 
     return 0;
 }
 
+void rebind_mis(void) {
+    struct rebinding rebindings[] = {
+        {"MISValidateSignatureAndCopyInfo", (void *)fake_MISValidateSignatureAndCopyInfo, (void **)&old_MISValidateSignatureAndCopyInfo},
+    };
 
-
-void* thd_func(void* arg){
-    NSLog(@"In a new thread!");
-    NSLog(@"Base at %016llx", binary_load_address());
-    if (binary_load_address() == -1) {
-        return NULL;
-    }
-
-    /* Finding the location of MISValidateSignatureAndCopyInfo from Ian Beer's triple_fetch */
-    void* libmis_handle = dlopen("libmis.dylib", RTLD_NOW);
-    if (libmis_handle == NULL){
-        NSLog(@"Failed to open the dylib!");
-        return NULL;
-    }
-
-    void* sym = dlsym(libmis_handle, "MISValidateSignatureAndCopyInfo");
-    if (sym == NULL){
-        NSLog(@"unable to resolve MISValidateSignatureAndCopyInfo\n");
-        return NULL;
-    }
-
-    uint64_t buf_size = 0x8000;
-    uint8_t* buf = malloc(buf_size);
-
-    remote_read_overwrite(mach_task_self(), binary_load_address(), (uint64_t)buf, buf_size);
-    uint8_t* found_at = memmem(buf, buf_size, &sym, sizeof(sym));
-    if (found_at == NULL){
-        NSLog(@"unable to find MISValidateSignatureAndCopyInfo in __la_symbol_ptr\n");
-        return NULL;
-    }
-
-    uint64_t patch_offset = found_at - buf;
-
-    uint64_t fake_func_addr = (uint64_t)&fake_MISValidateSignatureAndCopyInfo;
-
-    real_func = remote_read64(binary_load_address()+patch_offset);
-
-    // Replace it with our version
-    remote_write(mach_task_self(), binary_load_address()+patch_offset, (uint64_t)&fake_func_addr, 8);
-    return NULL;
+    rebind_symbols(rebindings, 1);
 }
 
 __attribute__ ((constructor))
 static void ctor(void) {
-    NSLog(@"Hi there - creating the thread to do our stuff!");
-    pthread_t thd;
-    pthread_create(&thd, NULL, thd_func, NULL);
+    rebind_mis();
 }
