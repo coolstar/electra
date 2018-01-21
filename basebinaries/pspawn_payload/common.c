@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -24,36 +26,48 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID_AND_SIGCONT {
     int32_t PID;
 };
 
-void calljailbreakd(pid_t PID, uint8_t command) {
-#define BUFSIZE 1024
+int jailbreakd_sockfd;
+struct sockaddr_in jailbreakd_serveraddr;
+int jailbreakd_serverlen;
+struct hostent *jailbreakd_server;
+
+bool openedjailbreakd = false;
+
+void openjailbreakdsocket(){
+    char *hostname = "127.0.0.1";
+    int portno = 5;
     
-    int sockfd, portno, n;
-    int serverlen;
-    struct sockaddr_in serveraddr;
-    struct hostent *server;
-    char *hostname;
-    char buf[BUFSIZE];
-    
-    hostname = "127.0.0.1";
-    portno = 5;
-    
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0)
+    jailbreakd_sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (jailbreakd_sockfd < 0)
         printf("ERROR opening socket\n");
     
     /* gethostbyname: get the server's DNS entry */
-    server = gethostbyname(hostname);
-    if (server == NULL) {
+    jailbreakd_server = gethostbyname(hostname);
+    if (jailbreakd_server == NULL) {
         fprintf(stderr,"ERROR, no such host as %s\n", hostname);
         exit(0);
     }
     
     /* build the server's Internet address */
-    bzero((char *) &serveraddr, sizeof(serveraddr));
-    serveraddr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr,
-          (char *)&serveraddr.sin_addr.s_addr, server->h_length);
-    serveraddr.sin_port = htons(portno);
+    bzero((char *) &jailbreakd_serveraddr, sizeof(jailbreakd_serveraddr));
+    jailbreakd_serveraddr.sin_family = AF_INET;
+    bcopy((char *)jailbreakd_server->h_addr,
+          (char *)&jailbreakd_serveraddr.sin_addr.s_addr, jailbreakd_server->h_length);
+    jailbreakd_serveraddr.sin_port = htons(portno);
+    
+    jailbreakd_serverlen = sizeof(jailbreakd_serveraddr);
+}
+
+void calljailbreakd(pid_t PID, uint8_t command) {
+    if (!openedjailbreakd){
+        openjailbreakdsocket();
+        openedjailbreakd = true;
+    }
+    
+#define BUFSIZE 1024
+    
+    int n;
+    char buf[BUFSIZE];
     
     /* get a message from the user */
     bzero(buf, BUFSIZE);
@@ -64,8 +78,7 @@ void calljailbreakd(pid_t PID, uint8_t command) {
     
     memcpy(buf, &entitlePacket, sizeof(entitlePacket));
     
-    serverlen = sizeof(serveraddr);
-    n = sendto(sockfd, buf, sizeof(entitlePacket), 0, (const struct sockaddr *)&serveraddr, serverlen);
+    n = sendto(jailbreakd_sockfd, buf, sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT), 0, (const struct sockaddr *)&jailbreakd_serveraddr, jailbreakd_serverlen);
     if (n < 0)
         printf("Error in sendto\n");
 }
