@@ -26,12 +26,10 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID_AND_SIGCONT {
     int32_t PID;
 };
 
-int jailbreakd_sockfd;
+int jailbreakd_sockfd = -1;
 struct sockaddr_in jailbreakd_serveraddr;
 int jailbreakd_serverlen;
 struct hostent *jailbreakd_server;
-
-bool openedjailbreakd = false;
 
 void openjailbreakdsocket(){
     char *hostname = "127.0.0.1";
@@ -59,9 +57,8 @@ void openjailbreakdsocket(){
 }
 
 void calljailbreakd(pid_t PID, uint8_t command) {
-    if (!openedjailbreakd){
+    if (jailbreakd_sockfd == -1) {
         openjailbreakdsocket();
-        openedjailbreakd = true;
     }
     
 #define BUFSIZE 1024
@@ -82,3 +79,9 @@ void calljailbreakd(pid_t PID, uint8_t command) {
     if (n < 0)
         printf("Error in sendto\n");
 }
+
+void closejailbreakfd(void) {
+    close(jailbreakd_sockfd);
+    jailbreakd_sockfd = -1;
+}
+
