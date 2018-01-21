@@ -15,7 +15,7 @@
 
 #include "common.h"
 
-int file_exist(char *filename) {
+int file_exist(const char *filename) {
     struct stat buffer;
     int r = stat(filename, &buffer);
     return (r == 0);
