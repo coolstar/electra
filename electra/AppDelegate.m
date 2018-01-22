@@ -22,9 +22,24 @@ typedef CFStringRef (*w)(int e);
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  return YES;
+    [self jailbreakShortcut];
+    return YES;
 }
 
+- (void)jailbreakShortcut {
+    NSMutableArray *shortcutItems = [NSMutableArray array];
+    UIApplicationShortcutItem *jb =  [[UIApplicationShortcutItem alloc]initWithType:@"1" localizedTitle:@"JailbreakFTW"];
+    [shortcutItems addObject:jb];
+    [[UIApplication sharedApplication] setShortcutItems:shortcutItems];
+}
+
+- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL))completionHandler {
+    switch (shortcutItem.type.integerValue) {
+        case 1: {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"JailbreakFTW" object:self userInfo:@{@"type":@"1"}];
+        }   break;
+    }
+}
 
 - (void)applicationWillResignActive:(UIApplication *)application {
   // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
