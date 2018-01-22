@@ -5,7 +5,7 @@ Direct your jailbreaking questions to one of these fine communities:
   * https://reddit.com/r/jailbreak
   * http://www.jailbreakqa.com/
 
-Issues, which are not related to electra’s code, may be closed without comment.
+Issues which are not related to electra’s code, may be closed without comment.
 
 -->
 
