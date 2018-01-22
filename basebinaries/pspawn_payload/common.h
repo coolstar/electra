@@ -3,12 +3,13 @@
 
 #include <inttypes.h>
 
-int file_exist(char *filename);
+int file_exist(const char *filename);
 
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT 2
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY 4
 
 void calljailbreakd(pid_t PID, uint8_t command);
+void closejailbreakfd(void);
 
 #endif  // PAYLOADS_COMMON_H
 

@@ -21,7 +21,7 @@ endif
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
 
-$(OUTDIR)/$(TARGET): *.m | $(OUTDIR)
+$(OUTDIR)/$(TARGET): *.m *.c | $(OUTDIR)
 	$(CC) -dynamiclib -o $@ $^ -framework Foundation $(CFLAGS)
 	$(LDID) -S $@
 
