@@ -5,6 +5,7 @@
 #include <mach/error.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <dlfcn.h>
 
 #import <Foundation/Foundation.h>
 #include <CommonCrypto/CommonDigest.h>
@@ -105,6 +106,7 @@ uint8_t *get_code_directory(const char* name, uint64_t file_off) {
 }
 
 int (*old_MISValidateSignatureAndCopyInfo)(NSString* file, NSDictionary* options, NSMutableDictionary** info);
+int (*old_MISValidateSignatureAndCopyInfo_broken)(NSString* file, NSDictionary* options, NSMutableDictionary** info);
 
 int fake_MISValidateSignatureAndCopyInfo(NSString* file, NSDictionary* options, NSMutableDictionary** info) {
     // NSString *file = (__bridge NSString *)fileStr;
@@ -137,8 +139,10 @@ int fake_MISValidateSignatureAndCopyInfo(NSString* file, NSDictionary* options, 
 }
 
 void rebind_mis(void) {
+    void *libmis = dlopen("/usr/lib/libmis.dylib",RTLD_NOW); //Force binding now
+    old_MISValidateSignatureAndCopyInfo = dlsym(libmis, "MISValidateSignatureAndCopyInfo");
     struct rebinding rebindings[] = {
-        {"MISValidateSignatureAndCopyInfo", (void *)fake_MISValidateSignatureAndCopyInfo, (void **)&old_MISValidateSignatureAndCopyInfo},
+        {"MISValidateSignatureAndCopyInfo", (void *)fake_MISValidateSignatureAndCopyInfo, (void **)&old_MISValidateSignatureAndCopyInfo_broken},
     };
 
     rebind_symbols(rebindings, 1);
