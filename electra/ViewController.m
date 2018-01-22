@@ -99,7 +99,8 @@ __END_DECLS
 - (void)viewDidLoad {
   [super viewDidLoad];
   NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
-  [notificationCenter addObserver:self selector:@selector(doit:) name:@"JailbreakFTW" object:nil];
+  [notificationCenter addObserver:self selector:@selector(doit:) name:@"Jailbreak" object:nil];
+    
     if (kCFCoreFoundationVersionNumber < 1443 || kCFCoreFoundationVersionNumber > 1445.32){
         [jailbreak setEnabled:NO];
         [enableTweaks setEnabled:NO];

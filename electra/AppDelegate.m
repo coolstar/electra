@@ -28,7 +28,7 @@ typedef CFStringRef (*w)(int e);
 
 - (void)jailbreakShortcut {
     NSMutableArray *shortcutItems = [NSMutableArray array];
-    UIApplicationShortcutItem *jb =  [[UIApplicationShortcutItem alloc]initWithType:@"1" localizedTitle:@"JailbreakFTW"];
+    UIApplicationShortcutItem *jb =  [[UIApplicationShortcutItem alloc]initWithType:@"1" localizedTitle:@"Jailbreak"];
     [shortcutItems addObject:jb];
     [[UIApplication sharedApplication] setShortcutItems:shortcutItems];
 }
@@ -36,7 +36,7 @@ typedef CFStringRef (*w)(int e);
 - (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL))completionHandler {
     switch (shortcutItem.type.integerValue) {
         case 1: {
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"JailbreakFTW" object:self userInfo:@{@"type":@"1"}];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"Jailbreak" object:self userInfo:@{@"type":@"1"}];
         }   break;
     }
 }
