@@ -2,8 +2,7 @@
 #include "kexecute.h"
 #include "kern_utils.h"
 #include "patchfinder64.h"
-
-static unsigned offsetof_ip_kobject = 0x68;          // ipc_port_t::ip_kobject
+#include "offsetof.h"
 
 mach_port_t prepare_user_client(void) {
   kern_return_t err;
