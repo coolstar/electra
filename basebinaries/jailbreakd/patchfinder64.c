@@ -808,96 +808,6 @@ CACHED_FIND_UINT64(find_bcopy) {
 	return 0;
 }
 
-uint64_t find_rootvnode(void) {
-	// Find the first reference to the string
-	addr_t ref = find_strref("/var/run/.vfs_rsrc_streams_%p%x", 1, 0);
-	if (!ref) {
-		return 0;
-	}
-	ref -= kerndumpbase;
-	
-	uint64_t start = bof64(kernel, xnucore_base, ref);
-	if (!start) {
-		return 0;
-	}
-	
-	// Find MOV X9, #0x2000000000 - it's a pretty distinct instruction
-	addr_t weird_instruction = 0;
-	for (int i = 4; i < 4*0x100; i+=4) {
-		uint32_t op = *(uint32_t *)(kernel + ref - i);
-		if (op == 0xB25B03E9) {
-			weird_instruction = ref-i;
-			break;
-		}
-	}
-	if (!weird_instruction) {
-		return 0;
-	}
-	
-	uint64_t val = calc64(kernel, start, weird_instruction, 8);
-	if (!val) {
-		return 0;
-	}
-	
-	return val + kerndumpbase;
-}
-
-addr_t find_trustcache(void) {
-	addr_t call, func, val;
-	addr_t ref = find_strref("com.apple.MobileFileIntegrity", 1, 1);
-	if (!ref) {
-		return 0;
-	}
-	ref -= kerndumpbase;
-	call = step64(kernel, ref, 32, INSN_CALL);
-	if (!call) {
-		return 0;
-	}
-	call = step64(kernel, call+4, 32, INSN_CALL);
-	func = follow_call64(kernel, call);
-	if (!func) {
-		return 0;
-	}
-	val = calc64(kernel, func, func + 16, 8);
-	if (!val) {
-		return 0;
-	}
-	return val + kerndumpbase;
-}
-
-addr_t find_amficache(void) {
-	addr_t call, func, bof, val;
-	addr_t ref = find_strref("com.apple.MobileFileIntegrity", 1, 1);
-	if (!ref) {
-		return 0;
-	}
-	ref -= kerndumpbase;
-	call = step64(kernel, ref, 32, INSN_CALL);
-	if (!call) {
-		return 0;
-	}
-	call = step64(kernel, call+4, 32, INSN_CALL);
-	func = follow_call64(kernel, call);
-	if (!func) {
-		return 0;
-	}
-	bof = bof64(kernel, func - 256, func);
-	if (!bof) {
-		return 0;
-	}
-	val = calc64(kernel, bof, func, 9);
-	if (!val) {
-		return 0;
-	}
-	return val + kerndumpbase;
-}
-
-uint64_t _kread64(uint64_t where) {
-    uint64_t out;
-    kread(where, &out, sizeof(uint64_t));
-    return out;
-}
-
 CACHED_FIND_UINT64(find_OSBoolean_True) {
     addr_t val;
     addr_t ref = find_strref("Delay Autounload", 0, 0);
@@ -923,7 +833,7 @@ CACHED_FIND_UINT64(find_OSBoolean_True) {
         return 0;
     }
     
-    return _kread64(val + kerndumpbase);
+    return rk64(val + kerndumpbase);
 }
 
 CACHED_FIND_UINT64(find_OSBoolean_False) {
