@@ -67,42 +67,74 @@ uint8_t *get_hash(uint8_t* code_dir, uint32_t* size) {
 }
 
 uint8_t *get_code_directory(const char* name, uint64_t file_off) {
-	// Assuming it is a macho
+    // Assuming it is a macho
 
-	FILE* fd = fopen(name, "r");
+    FILE* fd = fopen(name, "r");
 
     if (fd == NULL) {
         NSLog(@"Couldn't open file");
         return NULL;
     }
 
+    fseek(fd, 0L, SEEK_END);
+    uint64_t file_len = ftell(fd);
+    fseek(fd, 0L, SEEK_SET);
+
+    if (file_off > file_len){
+        NSLog(@"Error: File offset greater than length.");
+        return NULL;
+    }
+
     uint64_t off = file_off;
     fseek(fd, off, SEEK_SET);
 
-	struct mach_header_64 mh;
-	fread(&mh, sizeof(struct mach_header_64), 1, fd);
+    struct mach_header_64 mh;
+    fread(&mh, sizeof(struct mach_header_64), 1, fd);
 
-	off += sizeof(struct mach_header_64);
-	for (int i = 0; i < mh.ncmds; i++) {
-		const struct load_command cmd;
-		fseek(fd, off, SEEK_SET);
-		fread((void*)&cmd, sizeof(struct load_command), 1, fd);
-		if (cmd.cmd == 0x1d) {
-			uint32_t off_cs;
-			fread(&off_cs, sizeof(uint32_t), 1, fd);
-			uint32_t size_cs;
-			fread(&size_cs, sizeof(uint32_t), 1, fd);
+    if (mh.magic != MH_MAGIC_64){
+        NSLog(@"Error: Invalid magic");
+        return NULL;
+    }
 
-			uint8_t *cd = malloc(size_cs);
-			fseek(fd, off_cs+file_off, SEEK_SET);
-			fread(cd, size_cs, 1, fd);
-			return cd;
-		} else {
-			off += cmd.cmdsize;
-		}
-	}
+    off += sizeof(struct mach_header_64);
+    if (off > file_len){
+        NSLog(@"Error: Unexpected end of file");
+        return NULL;
+    }
+    for (int i = 0; i < mh.ncmds; i++) {
+        if (off + sizeof(struct load_command) > file_len){
+            NSLog(@"Error: Unexpected end of file");
+            return NULL;
+        }
+
+        const struct load_command cmd;
+        fseek(fd, off, SEEK_SET);
+        fread((void*)&cmd, sizeof(struct load_command), 1, fd);
+        if (cmd.cmd == 0x1d) {
+            uint32_t off_cs;
+            fread(&off_cs, sizeof(uint32_t), 1, fd);
+            uint32_t size_cs;
+            fread(&size_cs, sizeof(uint32_t), 1, fd);
+
+            if (off_cs+file_off+size_cs > file_len){
+                NSLog(@"Error: Unexpected end of file");
+                return NULL;
+            }
+
+            uint8_t *cd = malloc(size_cs);
+            fseek(fd, off_cs+file_off, SEEK_SET);
+            fread(cd, size_cs, 1, fd);
+            return cd;
+        } else {
+            off += cmd.cmdsize;
+            if (off > file_len){
+                NSLog(@"Error: Unexpected end of file");
+                return NULL;
+            }
+        }
+    }
     NSLog(@"Didnt find the code signature");
-	return NULL;
+    return NULL;
 }
 
 int (*old_MISValidateSignatureAndCopyInfo)(NSString* file, NSDictionary* options, NSMutableDictionary** info);
