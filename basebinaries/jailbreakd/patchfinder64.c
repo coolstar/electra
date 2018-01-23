@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "patchfinder64.h"
+#include "kmem.h"
 
 #define CACHED_FIND_UINT64(name) CACHED_FIND(uint64_t, name)
 

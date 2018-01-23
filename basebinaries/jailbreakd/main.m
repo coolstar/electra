@@ -13,6 +13,7 @@
 #include "patchfinder64.h"
 #include "kern_utils.h"
 #include "kmem.h"
+#include "kexecute.h"
 
 #define JAILBREAKD_COMMAND_ENTITLE 1
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT 2
