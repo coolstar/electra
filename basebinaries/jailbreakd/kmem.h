@@ -10,3 +10,5 @@ uint64_t rk64(uint64_t kaddr);
 size_t kwrite(uint64_t where, const void *p, size_t size);
 void wk32(uint64_t kaddr, uint32_t val);
 void wk64(uint64_t kaddr, uint64_t val);
+
+uint64_t zm_fix_addr(uint64_t addr);
