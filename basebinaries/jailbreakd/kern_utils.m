@@ -126,7 +126,7 @@ uint64_t find_port(mach_port_name_t port){
                 uint32_t SetObjectWithCharP = 8*31;
 #define OSDictionary_SetItem(dict, str, val) {\
 uint64_t s = kalloc(strlen(str)+1); kwrite(s, str, strlen(str)); \
-kexecute(user_client, fake_client, rk64(rk64(dict)+SetObjectWithCharP), dict, s, val, 0, 0, 0, 0); \
+kexecute(rk64(rk64(dict)+SetObjectWithCharP), dict, s, val, 0, 0, 0, 0); \
 kfree(s, strlen(str)+1); \
             }
 #define OSString_CStringPtr(str) rk64(str+0x10)
@@ -249,7 +249,7 @@ void set_amfi_entitlements(uint64_t proc) {
     /*for (int idx = 0; idx < OSDictionary_ItemCount(amfi_entitlements); idx++) {
         uint64_t key = OSDictionary_ItemKey(OSDictionary_ItemBuffer(amfi_entitlements), idx);
         uint64_t keyOSStr = OSString_CStringPtr(key);
-        size_t length = kexecute(user_client, fake_client, 0xFFFFFFF00709BDE0+kernel_slide, keyOSStr, 0, 0, 0, 0, 0, 0); //strlen
+        size_t length = kexecute(0xFFFFFFF00709BDE0+kernel_slide, keyOSStr, 0, 0, 0, 0, 0, 0); //strlen
         char* s = (char*)calloc(length+1, 1);
         kread(keyOSStr, s, length);
         NSLog(@"Entitlement: %s", s);

