@@ -4,6 +4,7 @@
 #import "patchfinder64.h"
 #import "kexecute.h"
 #import "offsetof.h"
+#import "osobject.h"
 
 #define TF_PLATFORM 0x400
 
@@ -77,18 +78,6 @@ uint64_t find_port(mach_port_name_t port){
   uint64_t port_addr = rk64(is_table + (port_index * sizeof_ipc_entry_t));
   return port_addr;
 }
-
-#define OSDictionary_ItemCount(dict) rk32(dict+20)
-#define OSDictionary_ItemBuffer(dict) rk64(dict+32)
-#define OSDictionary_ItemKey(buffer, idx) rk64(buffer+16*idx)
-#define OSDictionary_ItemValue(buffer, idx) rk64(buffer+16*idx+8)
-                uint32_t SetObjectWithCharP = 8*31;
-#define OSDictionary_SetItem(dict, str, val) {\
-uint64_t s = kalloc(strlen(str)+1); kwrite(s, str, strlen(str)); \
-kexecute(rk64(rk64(dict)+SetObjectWithCharP), dict, s, val, 0, 0, 0, 0); \
-kfree(s, strlen(str)+1); \
-            }
-#define OSString_CStringPtr(str) rk64(str+0x10)
 
 int dumppid(int pd){
   uint64_t proc = proc_find(pd, 3);
