@@ -1,10 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "kern_utils.h"
+#import "kmem.h"
 #import "patchfinder64.h"
-
-extern mach_port_t tfpzero;
-extern uint64_t kernel_base;
-extern uint64_t kernel_slide;
 
 extern mach_port_t user_client;
 extern uint64_t fake_client;
@@ -81,109 +78,6 @@ unsigned offsetof_t_flags = 0x3a0; // task::t_flags
 #define CS_DEBUGGED         0x10000000  /* process is currently or has previously been debugged and allowed to run with invalid pages */
 #define CS_SIGNED         0x20000000  /* process has a signature (may have gone invalid) */
 #define CS_DEV_CODE         0x40000000  /* code is dev signed, cannot be loaded into prod signed code (will go away with rdar://problem/28322552) */
-
-size_t kread(uint64_t where, void *p, size_t size) {
-	int rv;
-	size_t offset = 0;
-	while (offset < size) {
-		mach_vm_size_t sz, chunk = 2048;
-		if (chunk > size - offset) {
-			chunk = size - offset;
-		}
-		rv = mach_vm_read_overwrite(tfpzero, where + offset, chunk, (mach_vm_address_t)p + offset, &sz);
-		if (rv || sz == 0) {
-			fprintf(stderr, "[e] error reading kernel @%p\n", (void *)(offset + where));
-			break;
-		}
-		offset += sz;
-	}
-	return offset;
-}
-
-size_t kwrite(uint64_t where, const void *p, size_t size) {
-	int rv;
-	size_t offset = 0;
-	while (offset < size) {
-		size_t chunk = 2048;
-		if (chunk > size - offset) {
-			chunk = size - offset;
-		}
-		rv = mach_vm_write(tfpzero, where + offset, (mach_vm_offset_t)p + offset, chunk);
-		if (rv) {
-			fprintf(stderr, "[e] error writing kernel @%p\n", (void *)(offset + where));
-			break;
-		}
-		offset += chunk;
-	}
-	return offset;
-}
-
-uint64_t kalloc(vm_size_t size){
-	mach_vm_address_t address = 0;
-	mach_vm_allocate(tfpzero, (mach_vm_address_t *)&address, size, VM_FLAGS_ANYWHERE);
-	return address;
-}
-
-void kfree(mach_vm_address_t address, vm_size_t size){
-    mach_vm_deallocate(tfpzero, address, size);
-}
-
-uint32_t rk32(uint64_t kaddr) {
-  kern_return_t err;
-  uint32_t val = 0;
-  mach_vm_size_t outsize = 0;
-	
-  err = mach_vm_read_overwrite(tfpzero,
-                               (mach_vm_address_t)kaddr,
-                               (mach_vm_size_t)sizeof(uint32_t),
-                               (mach_vm_address_t)&val,
-                               &outsize);
-  if (err != KERN_SUCCESS){
-    printf("tfp0 read failed %s addr: 0x%llx err:%x port:%x\n", mach_error_string(err), kaddr, err, tfpzero);
-    sleep(3);
-    return 0;
-  }
-  
-  if (outsize != sizeof(uint32_t)){
-    printf("tfp0 read was short (expected %lx, got %llx\n", sizeof(uint32_t), outsize);
-    sleep(3);
-    return 0;
-  }
-  return val;
-}
-
-uint64_t rk64(uint64_t kaddr) {
-  uint64_t lower = rk32(kaddr);
-  uint64_t higher = rk32(kaddr+4);
-  uint64_t full = ((higher<<32) | lower);
-  return full;
-}
-
-void wk32(uint64_t kaddr, uint32_t val) {
-  if (tfpzero == MACH_PORT_NULL) {
-    printf("attempt to write to kernel memory before any kernel memory write primitives available\n");
-    sleep(3);
-    return;
-  }
-  
-  kern_return_t err;
-  err = mach_vm_write(tfpzero,
-                      (mach_vm_address_t)kaddr,
-                      (vm_offset_t)&val,
-                      (mach_msg_type_number_t)sizeof(uint32_t));
-  
-  if (err != KERN_SUCCESS) {
-    printf("tfp0 write failed: %s %x\n", mach_error_string(err), err);
-    return;
-  }
-}
-
-void wk64(uint64_t kaddr, uint64_t val) {
-  uint32_t lower = (uint32_t)(val & 0xffffffff);
-  uint32_t higher = (uint32_t)(val >> 32);
-  wk32(kaddr, lower);
-  wk32(kaddr+4, higher);
-}
 
 mach_port_t prepare_user_client() {
   kern_return_t err;
