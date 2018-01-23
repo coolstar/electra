@@ -206,9 +206,7 @@ int dumppid(int pd){
   }
 }
 
-int setcsflagsandplatformize(int pid){
-  uint64_t proc = proc_find(pid, 3);
-  if (proc != 0) {
+void set_csflags(uint64_t proc) {
     uint32_t csflags = rk32(proc + offsetof_p_csflags);
 #ifdef JAILBREAKDDEBUG
     NSLog(@"Previous CSFlags: 0x%x", csflags);
@@ -218,7 +216,9 @@ int setcsflagsandplatformize(int pid){
     NSLog(@"New CSFlags: 0x%x", csflags);
 #endif
     wk32(proc + offsetof_p_csflags, csflags);
+}
 
+void set_tfplatform(uint64_t proc) {
     // task.t_flags & TF_PLATFORM
     uint64_t task = rk64(proc + offsetof_task);
     uint32_t t_flags = rk32(task + offsetof_t_flags);
@@ -230,22 +230,9 @@ int setcsflagsandplatformize(int pid){
 #ifdef JAILBREAKDDEBUG
     NSLog(@"New t_flags: 0x%x", t_flags);
 #endif
+}
 
-    // AMFI entitlements
-#ifdef JAILBREAKDDEBUG
-    NSLog(@"%@",@"AMFI:");
-#endif
-    uint64_t proc_ucred = rk64(proc+0x100);
-    uint64_t amfi_entitlements = rk64(rk64(proc_ucred+0x78)+0x8);
-#ifdef JAILBREAKDDEBUG
-    NSLog(@"%@",@"Setting Entitlements...");
-#endif
-
-    OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
-    OSDictionary_SetItem(amfi_entitlements, "com.apple.private.skip-library-validation", find_OSBoolean_True());
-
-    NSLog(@"Set Entitlements on PID %d", pid);
-
+void set_csblob(uint64_t proc) {
     uint64_t textvp = rk64(proc + offsetof_p_textvp); //vnode of executable
     off_t textoff = rk64(proc + offsetof_p_textoff);
     
@@ -296,6 +283,21 @@ int setcsflagsandplatformize(int pid){
           }
       }
     }
+}
+
+void set_amfi_entitlements(uint64_t proc) {
+    // AMFI entitlements
+#ifdef JAILBREAKDDEBUG
+    NSLog(@"%@",@"AMFI:");
+#endif
+    uint64_t proc_ucred = rk64(proc+0x100);
+    uint64_t amfi_entitlements = rk64(rk64(proc_ucred+0x78)+0x8);
+#ifdef JAILBREAKDDEBUG
+    NSLog(@"%@",@"Setting Entitlements...");
+#endif
+
+    OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
+    OSDictionary_SetItem(amfi_entitlements, "com.apple.private.skip-library-validation", find_OSBoolean_True());
 
     /*for (int idx = 0; idx < OSDictionary_ItemCount(amfi_entitlements); idx++) {
         uint64_t key = OSDictionary_ItemKey(OSDictionary_ItemBuffer(amfi_entitlements), idx);
@@ -306,7 +308,16 @@ int setcsflagsandplatformize(int pid){
         NSLog(@"Entitlement: %s", s);
         free(s);
     }*/
+}
 
+int setcsflagsandplatformize(int pid){
+  uint64_t proc = proc_find(pid, 3);
+  if (proc != 0) {
+    set_csflags(proc);
+    set_tfplatform(proc);
+    set_amfi_entitlements(proc);
+    set_csblob(proc);
+    NSLog(@"setcsflagsandplatformize on PID %d", pid);
     return 0;
   }
   NSLog(@"Unable to find PID %d to entitle!", pid);
