@@ -746,69 +746,6 @@ CACHED_FIND_UINT64(find_allproc) {
 	return val + kerndumpbase;
 }
 
-CACHED_FIND_UINT64(find_copyout) {
-	// Find the first reference to the string
-	addr_t ref = find_strref("\"%s(%p, %p, %lu) - transfer too large\"", 2, 0);
-	if (!ref) {
-		return 0;
-	}
-	ref -= kerndumpbase;
-	
-	uint64_t start = 0;
-	for (int i = 4; i < 0x100*4; i+=4) {
-		uint32_t op = *(uint32_t*)(kernel+ref-i);
-		if (op == 0xd10143ff) { // SUB SP, SP, #0x50
-			start = ref-i;
-			break;
-		}
-	}
-	if (!start) {
-		return 0;
-	}
-	
-	return start + kerndumpbase;
-}
-
-CACHED_FIND_UINT64(find_bzero) {
-	// Just find SYS #3, c7, c4, #1, X3, then get the start of that function
-	addr_t off;
-	uint32_t *k;
-	k = (uint32_t *)(kernel + xnucore_base);
-	for (off = 0; off < xnucore_size - 4; off += 4, k++) {
-		if (k[0] == 0xd50b7423) {
-			off += xnucore_base;
-			break;
-		}
-	}
-	
-	uint64_t start = bof64(kernel, xnucore_base, off);
-	if (!start) {
-		return 0;
-	}
-	
-	return start + kerndumpbase;
-}
-
-CACHED_FIND_UINT64(find_bcopy) {
-	// Jumps straight into memmove after switching x0 and x1 around
-	// Guess we just find the switch and that's it
-	addr_t off;
-	uint32_t *k;
-	k = (uint32_t *)(kernel + xnucore_base);
-	for (off = 0; off < xnucore_size - 4; off += 4, k++) {
-		if (k[0] == 0xAA0003E3 && k[1] == 0xAA0103E0 && k[2] == 0xAA0303E1 && k[3] == 0xd503201F) {
-			return off + xnucore_base + kerndumpbase;
-		}
-	}
-	k = (uint32_t *)(kernel + prelink_base);
-	for (off = 0; off < prelink_size - 4; off += 4, k++) {
-		if (k[0] == 0xAA0003E3 && k[1] == 0xAA0103E0 && k[2] == 0xAA0303E1 && k[3] == 0xd503201F) {
-			return off + prelink_base + kerndumpbase;
-		}
-	}
-	return 0;
-}
-
 CACHED_FIND_UINT64(find_OSBoolean_True) {
     addr_t val;
     addr_t ref = find_strref("Delay Autounload", 0, 0);
