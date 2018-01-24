@@ -98,13 +98,16 @@ __END_DECLS
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
-  [notificationCenter addObserver:self selector:@selector(doit:) name:@"Jailbreak" object:nil];
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    
+    BOOL enable3DTouch = YES;
     
     if (kCFCoreFoundationVersionNumber < 1443 || kCFCoreFoundationVersionNumber > 1445.32){
         [jailbreak setEnabled:NO];
         [enableTweaks setEnabled:NO];
         [jailbreak setTitle:@"Version Error" forState:UIControlStateNormal];
+        
+        enable3DTouch = NO;
     }
     
     uint32_t flags;
@@ -114,6 +117,12 @@ __END_DECLS
         [jailbreak setEnabled:NO];
         [enableTweaks setEnabled:NO];
         [jailbreak setTitle:@"Already Jailbroken" forState:UIControlStateNormal];
+        
+        enable3DTouch = NO;
+    }
+    
+    if (enable3DTouch){
+        [notificationCenter addObserver:self selector:@selector(doit:) name:@"Jailbreak" object:nil];
     }
   // Do any additional setup after loading the view, typically from a nib.
 }
