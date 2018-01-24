@@ -9,6 +9,10 @@ static uint32_t off_OSDictionary_Merge              = sizeof(void*) * 0x23;
 
 static uint32_t off_OSArray_Merge                   = sizeof(void*) * 0x1E;
 
+static uint32_t off_OSObject_Release                = sizeof(void*) * 0x05;
+static uint32_t off_OSObject_GetRetainCount         = sizeof(void*) * 0x03;
+static uint32_t off_OSObject_Retain                 = sizeof(void*) * 0x04;
+
 // 1 on success, 0 on error
 int OSDictionary_SetItem(uint64_t dict, const char *key, uint64_t val) {
 	size_t len = strlen(key) + 1;
@@ -98,4 +102,20 @@ uint64_t OSUnserializeXML(const char* buffer) {
 	}
 
 	return ret;
+}
+
+void OSObject_Release(uint64_t osobject) {
+	uint64_t vtab = rk64(osobject);
+	uint64_t f = rk64(vtab + off_OSObject_Release);
+	(void) kexecute(f, osobject, 0, 0, 0, 0, 0, 0);
+}
+
+void OSObject_Retain(uint64_t osobject) {
+	uint64_t vtab = rk64(osobject);
+	uint64_t f = rk64(vtab + off_OSObject_Release);
+	(void) kexecute(f, osobject, 0, 0, 0, 0, 0, 0);
+}
+
+uint64_t OSObject_GetRetainCount(uint64_t osobject) {
+
 }
