@@ -820,5 +820,5 @@ CACHED_FIND_UINT64(find_osunserializexml) {
     addr_t ref = find_strref("OSUnserializeXML: %s near line %d\n", 1, 0);
     ref -= kerndumpbase;
     uint64_t start = bof64(kernel, xnucore_base, ref);
-    return start;
+    return start + kerndumpbase;
 }
