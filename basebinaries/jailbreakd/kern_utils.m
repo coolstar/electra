@@ -180,6 +180,20 @@ void set_csblob(uint64_t proc) {
     }
 }
 
+uint64_t get_exception_osarray(void) {
+  static uint64_t cached = 0;
+
+  if (cached == 0) {
+    cached = OSUnserializeXML("<array>"
+    "<string>/bootstrap/</string>"
+    "<string>/Library/</string>"
+    "<string>/private/var/mobile/Library/</string>"
+    "</array>");
+  }
+
+  return cached;
+}
+
 void set_amfi_entitlements(uint64_t proc) {
     // AMFI entitlements
 #ifdef JAILBREAKDDEBUG
@@ -194,15 +208,24 @@ void set_amfi_entitlements(uint64_t proc) {
     OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
     OSDictionary_SetItem(amfi_entitlements, "com.apple.private.skip-library-validation", find_OSBoolean_True());
 
-    /*for (int idx = 0; idx < OSDictionary_ItemCount(amfi_entitlements); idx++) {
-        uint64_t key = OSDictionary_ItemKey(OSDictionary_ItemBuffer(amfi_entitlements), idx);
-        uint64_t keyOSStr = OSString_CStringPtr(key);
-        size_t length = kexecute(0xFFFFFFF00709BDE0+kernel_slide, keyOSStr, 0, 0, 0, 0, 0, 0); //strlen
-        char* s = (char*)calloc(length+1, 1);
-        kread(keyOSStr, s, length);
-        NSLog(@"Entitlement: %s", s);
-        free(s);
-    }*/
+    const char *exc_key = "com.apple.security.exception.files.absolute-path.read-only";
+
+    uint64_t present = OSDictionary_GetItem(amfi_entitlements, exc_key);
+
+    int rv = 0;
+
+    if (present == 0) {
+      rv = OSDictionary_SetItem(amfi_entitlements, exc_key, get_exception_osarray());
+    } else {
+      printf("present != 0 (0x%llx)! item count: %d\n", present, OSArray_ItemCount(present));
+      // XXX what if we somehow get called twice on same amfi_entitlements
+      // and keep expanding array more and more?
+      rv = OSArray_Merge(present, get_exception_osarray());
+    }
+
+    if (rv != 1) {
+      printf("Setting exc FAILED! amfi_entitlements: 0x%llx present: 0x%llx\n", amfi_entitlements, present);
+    }
 }
 
 int setcsflagsandplatformize(int pid){
