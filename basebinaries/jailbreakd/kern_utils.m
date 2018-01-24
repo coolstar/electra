@@ -216,15 +216,27 @@ void set_amfi_entitlements(uint64_t proc) {
 
     if (present == 0) {
       rv = OSDictionary_SetItem(amfi_entitlements, exc_key, get_exception_osarray());
-    } else {
-      printf("present != 0 (0x%llx)! item count: %d\n", present, OSArray_ItemCount(present));
+    } else if (present != get_exception_osarray()) {
+      NSLog(@"present != 0 (0x%llx)! item count: %d\n", present, OSArray_ItemCount(present));
       // XXX what if we somehow get called twice on same amfi_entitlements
+      // (which aren't empty)
       // and keep expanding array more and more?
+      // happens with safari for example
+      // easiest solution is to keep set of arrays known to be already patched
+      // we might also retain them so we don't think that freshly allocated array
+      // with same address is array we've patched
+      // and also walk them from time to time checking their retain count
+      // and releasing if it's 1
+      // that sounds really awful, but is simpliest
+      // another option -- do some OSSet magic?
       rv = OSArray_Merge(present, get_exception_osarray());
+    } else {
+      NSLog(@"Not going to merge array with itself :P");
+      rv = 1;
     }
 
     if (rv != 1) {
-      printf("Setting exc FAILED! amfi_entitlements: 0x%llx present: 0x%llx\n", amfi_entitlements, present);
+      NSLog(@"Setting exc FAILED! amfi_entitlements: 0x%llx present: 0x%llx\n", amfi_entitlements, present);
     }
 }
 
