@@ -185,7 +185,7 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
             log_file = NULL;
         }
 #endif
-        calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY);
+        calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY);
         // dont leak jbd fd into execd process
         closejailbreakfd();
         origret = old(pid, path, file_actions, newattrp, argv, newenvp);

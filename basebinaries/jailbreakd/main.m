@@ -15,10 +15,14 @@
 #include "kmem.h"
 #include "kexecute.h"
 
+#define PROC_PIDPATHINFO_MAXSIZE  (4*MAXPATHLEN)
+int proc_pidpath(pid_t pid, void *buffer, uint32_t buffersize);
+
 #define JAILBREAKD_COMMAND_ENTITLE 1
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT 2
 #define JAILBREAKD_COMMAND_ENTITLE_PLATFORMIZE 3
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY 4
+#define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY 5
 #define JAILBREAKD_COMMAND_DUMP_CRED 7
 #define JAILBREAKD_COMMAND_EXIT 13
 
@@ -176,10 +180,39 @@ int runserver(){
             struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
             NSLog(@"Entitle+SIGCONT PID %d", entitleSIGCONTPacket->Pid);
             __block int PID = entitleSIGCONTPacket->Pid;
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            dispatch_queue_t queue = dispatch_queue_create("org.coolstar.jailbreakd.delayqueue", NULL);
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), queue, ^{
                 setcsflagsandplatformize(PID);
                 kill(PID, SIGCONT);
             });
+            dispatch_release(queue);
+        }
+        if (command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY){
+            if (size < sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
+                NSLog(@"Error: ENTITLE_SIGCONT packet is too small");
+                continue;
+            }
+            struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
+            NSLog(@"Entitle+SIGCONT PID %d", entitleSIGCONTPacket->Pid);
+            __block int PID = entitleSIGCONTPacket->Pid;
+            
+            dispatch_queue_t queue = dispatch_queue_create("org.coolstar.jailbreakd.delayqueue", NULL);
+            dispatch_async(queue, ^{
+                char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
+                bzero(pathbuf, sizeof(pathbuf));
+                
+                NSLog(@"%@", @"Waiting to ensure it's not xpcproxy anymore...");
+                int ret = proc_pidpath(PID, pathbuf, sizeof(pathbuf));
+                while (ret > 0 && strcmp(pathbuf, "/usr/libexec/xpcproxy") == 0){
+                    proc_pidpath(PID, pathbuf, sizeof(pathbuf));
+                    usleep(100);
+                }
+                
+                NSLog(@"%@",@"Continuing!");
+                setcsflagsandplatformize(PID);
+                kill(PID, SIGCONT);
+            });
+            dispatch_release(queue);
         }
         if (command == JAILBREAKD_COMMAND_DUMP_CRED){
             if (size < sizeof(struct JAILBREAKD_DUMP_CRED)){
