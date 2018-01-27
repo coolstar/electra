@@ -84,28 +84,6 @@ uint64_t find_port(mach_port_name_t port){
   return port_addr;
 }
 
-int dumppid(int pd){
-  uint64_t proc = proc_find(pd, 3);
-  if (proc != 0) {
-    uid_t p_uid = rk32(proc + offsetof_p_uid);
-    gid_t p_gid = rk32(proc + offsetof_p_gid);
-    uid_t p_ruid = rk32(proc + offsetof_p_ruid);
-    gid_t p_rgid = rk32(proc + offsetof_p_rgid);
-
-    uint64_t ucred = rk64(proc + offsetof_p_ucred);
-    uid_t cr_uid = rk32(ucred + offsetof_ucred_cr_uid);
-    uid_t cr_ruid = rk32(ucred + offsetof_ucred_cr_ruid);
-    uid_t cr_svuid = rk32(ucred + offsetof_ucred_cr_svuid);
-
-    NSLog(@"Found PID %d", pd);
-    NSLog(@"UID: %d GID: %d RUID: %d RGID: %d", p_uid, p_gid, p_ruid, p_rgid);
-    NSLog(@"CR_UID: %d CR_RUID: %d CR_SVUID: %d", cr_uid, cr_ruid, cr_svuid);
-    return 0;
-  } else {
-    return 1;
-  }
-}
-
 void fixupsetuid(int pid){
     char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
     bzero(pathbuf, sizeof(pathbuf));

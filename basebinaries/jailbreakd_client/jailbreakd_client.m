@@ -12,7 +12,6 @@
 #define JAILBREAKD_COMMAND_ENTITLE 1
 #define JAILBREAKD_COMMAND_PLATFORMIZE 2
 #define JAILBREAKD_COMMAND_FIXUP_SETUID 6
-#define JAILBREAKD_COMMAND_DUMP_CRED 7
 
 struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
     uint8_t Command;
@@ -28,7 +27,7 @@ int main(int argc, char **argv, char **envp) {
         printf("\t6 = fixup setuid in the target PID\n");
         return 0;
     }
-    if (atoi(argv[2]) != 1 && atoi(argv[2]) != 2 && atoi(argv[2]) != 6 && atoi(argv[2]) != 7){
+    if (atoi(argv[2]) != 1 && atoi(argv[2]) != 2 && atoi(argv[2]) != 6){
         printf("Usage: \n");
         printf("jailbreakd_client <pid> <1 | 2 | 6>\n");
         printf("\t1 = entitle the target PID\n");
@@ -78,8 +77,6 @@ int main(int argc, char **argv, char **envp) {
         entitlePacket.Command = JAILBREAKD_COMMAND_PLATFORMIZE;
     else if (arg == 6)
         entitlePacket.Command = JAILBREAKD_COMMAND_FIXUP_SETUID;
-    else if (arg == 7)
-        entitlePacket.Command = JAILBREAKD_COMMAND_DUMP_CRED;
 
     memcpy(buf, &entitlePacket, sizeof(struct JAILBREAKD_ENTITLE_PID));
     

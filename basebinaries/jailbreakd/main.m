@@ -24,7 +24,6 @@ int proc_pidpath(pid_t pid, void *buffer, uint32_t buffersize);
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY 4
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY 5
 #define JAILBREAKD_COMMAND_FIXUP_SETUID 6
-#define JAILBREAKD_COMMAND_DUMP_CRED 7
 #define JAILBREAKD_COMMAND_EXIT 13
 
 struct __attribute__((__packed__)) JAILBREAKD_PACKET {
@@ -50,11 +49,6 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PLATFORMIZE_PID {
     uint8_t Command;
     int32_t EntitlePID;
     int32_t PlatformizePID;
-};
-
-struct __attribute__((__packed__)) JAILBREAKD_DUMP_CRED {
-    uint8_t Command;
-    int32_t Pid;
 };
 
 mach_port_t tfpzero;
@@ -228,15 +222,6 @@ int runserver(){
             struct JAILBREAKD_FIXUP_SETUID *setuidPacket = (struct JAILBREAKD_FIXUP_SETUID *)buf;
             NSLog(@"Fixup setuid PID %d", setuidPacket->Pid);
             fixupsetuid(setuidPacket->Pid);
-        }
-        if (command == JAILBREAKD_COMMAND_DUMP_CRED){
-            if (size < sizeof(struct JAILBREAKD_DUMP_CRED)){
-                NSLog(@"Error: DUMP_CRED packet is too small");
-                continue;
-            }
-            struct JAILBREAKD_DUMP_CRED *dumpCredPacket = (struct JAILBREAKD_DUMP_CRED *)buf;
-            NSLog(@"Dump PID %d", dumpCredPacket->Pid);
-            dumppid(dumpCredPacket->Pid);
         }
         if (command == JAILBREAKD_COMMAND_EXIT){
             NSLog(@"Got Exit Command! Goodbye!");
