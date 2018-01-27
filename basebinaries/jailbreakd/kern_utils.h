@@ -78,5 +78,6 @@ mach_port_t prepare_user_client();
 uint64_t find_port(mach_port_name_t port);
 
 int dumppid(int pd);
+int rootify(int pid);
 int setcsflagsandplatformize(int pd);
 

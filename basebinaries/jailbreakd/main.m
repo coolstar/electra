@@ -17,6 +17,8 @@
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT 2
 #define JAILBREAKD_COMMAND_ENTITLE_PLATFORMIZE 3
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY 4
+#define JAILBREAKD_COMMAND_ROOTIFY 5
+#define JAILBREAKD_COMMAND_ROOTIFY_AFTER_DELAY 6
 #define JAILBREAKD_COMMAND_DUMP_CRED 7
 #define JAILBREAKD_COMMAND_EXIT 13
 
@@ -30,6 +32,11 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
 };
 
 struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID_AND_SIGCONT {
+    uint8_t Command;
+    int32_t Pid;
+};
+
+struct __attribute__((__packed__)) JAILBREAKD_ROOTIFY {
     uint8_t Command;
     int32_t Pid;
 };
@@ -229,6 +236,27 @@ int runserver(){
                 kill(PID, SIGCONT);
             });
         }
+		if (command == JAILBREAKD_COMMAND_ROOTIFY) {
+			if (size < sizeof(struct JAILBREAKD_ROOTIFY)) {
+				NSLog(@"Error: ROOTIFY packet is too small");
+				continue;
+			}
+			struct JAILBREAKD_ROOTIFY *rootifyPacket = (struct JAILBREAKD_ROOTIFY *)buf;
+			NSLog(@"Rootify PID %d",rootifyPacket->Pid);
+			rootify(rootifyPacket->Pid);
+		}
+		if (command == JAILBREAKD_COMMAND_ROOTIFY_AFTER_DELAY) {
+			if (size < sizeof(struct JAILBREAKD_ROOTIFY)) {
+				NSLog(@"Error: ROOTIFY packet is too small");
+				continue;
+			}
+			struct JAILBREAKD_ROOTIFY *rootifyPacket = (struct JAILBREAKD_ROOTIFY *)buf;
+			NSLog(@"Rootify PID %d",rootifyPacket->Pid);
+			__block int PID = rootifyPacket->Pid;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+				rootify(PID);
+			});
+		}
         if (command == JAILBREAKD_COMMAND_DUMP_CRED){
             if (size < sizeof(struct JAILBREAKD_DUMP_CRED)){
                 NSLog(@"Error: DUMP_CRED packet is too small");

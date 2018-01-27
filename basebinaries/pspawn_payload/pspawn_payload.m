@@ -94,6 +94,16 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
         }
     }
 #endif
+	bool is_setuid = false;
+	struct stat file_st;
+	if (stat(path, &file_st) == -1) {
+		DEBUGLOG("unable to load stats for file %s",path);
+	}
+	if (file_st.st_mode & S_ISUID) {
+		DEBUGLOG("Binary is a setuid binary");
+		is_setuid = true;
+	}
+
 
     int envcount = 0;
 
@@ -152,6 +162,9 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
     int origret;
 
     if (current_process == PROCESS_XPCPROXY) {
+		if (is_setuid) {
+			calljailbreakd(getpid(), JAILBREAKD_COMMAND_ROOTIFY_AFTER_DELAY);
+		}
         calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY);
         origret = old(pid, path, file_actions, newattrp, argv, newenvp);
     } else {
@@ -160,6 +173,9 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
 
         if (origret == 0) {
             if (pid != NULL) *pid = gotpid;
+			if (is_setuid) {
+				calljailbreakd(gotpid, JAILBREAKD_COMMAND_ROOTIFY);
+			}
             calljailbreakd(gotpid, JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT);
         }
     }
