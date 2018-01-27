@@ -102,6 +102,55 @@ int dumppid(int pd){
   }
 }
 
+
+/*
+ * Rootify
+ *
+ * Arguments: pid (pid for the process which should get root rights)
+ *
+ * Description: setuid implementation
+ * sets (r)uid/(r)gid and the (r/sv)uid as well as the (r/sv)gid of the cred to 0
+ * sets the gid_t cr_groups array to a length of 1 and cr_groups[0] to 0
+ *
+ * Return value: returns 0 on success and 1 on failture
+ *
+ */
+int rootify(int pid) {
+	if (pid == 0) {return 1;} // we need this, if this is the kernel proc this could crash
+
+
+	// get the process struct
+	uint64_t proc = proc_find(pid,3);
+	if (proc == 0) {return 1;}
+
+
+	// get the ucred address
+	uint64_t ucred = rk64(proc+offsetof_p_ucred);
+
+	// zero out the ids
+	wk32(proc + offsetof_p_uid,0);
+	wk32(proc + offsetof_p_ruid,0);
+	wk32(proc + offsetof_p_gid,0);
+	wk32(proc + offsetof_p_rgid,0);
+
+	wk32(ucred + offsetof_ucred_cr_uid,0);
+	wk32(ucred + offsetof_ucred_cr_ruid,0);
+	wk32(ucred + offsetof_ucred_cr_svuid,0);
+
+	// set the length to 1
+	wk32(ucred + offsetof_ucred_cr_ngroups,1);
+
+	// set the first gid in the array to 0
+	wk32(ucred + offsetof_ucred_cr_groups,0);
+
+	// set rgid and svgid
+	wk32(ucred + offsetof_ucred_cr_rgid,0);
+	wk32(ucred + offsetof_ucred_cr_svgid,0);
+
+
+	return 0;
+}
+
 void set_csflags(uint64_t proc) {
     uint32_t csflags = rk32(proc + offsetof_p_csflags);
 #ifdef JAILBREAKDDEBUG

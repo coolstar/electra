@@ -23,6 +23,10 @@ extern unsigned offsetof_ipc_space_is_table;
 extern unsigned offsetof_ucred_cr_uid;
 extern unsigned offsetof_ucred_cr_ruid;
 extern unsigned offsetof_ucred_cr_svuid;
+extern unsigned offsetof_ucred_cr_ngroups;
+extern unsigned offsetof_ucred_cr_groups;
+extern unsigned offsetof_ucred_cr_rgid;
+extern unsigned offsetof_ucred_cr_svgid;
 
 extern unsigned offsetof_v_type;
 extern unsigned offsetof_v_id;

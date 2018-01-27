@@ -24,6 +24,10 @@ unsigned offsetof_ipc_space_is_table = 0x20;  // ipc_space::is_table?..
 unsigned offsetof_ucred_cr_uid = 0x18;        // ucred::cr_uid
 unsigned offsetof_ucred_cr_ruid = 0x1c;       // ucred::cr_ruid
 unsigned offsetof_ucred_cr_svuid = 0x20;      // ucred::cr_svuid
+unsigned offsetof_ucred_cr_ngroups = 0x24;    // ucred::cr_ngroups
+unsigned offsetof_ucred_cr_groups = 0x28;     // ucred::cr_groups
+unsigned offsetof_ucred_cr_rgid = 0x68;       // ucred::cr_rgid
+unsigned offsetof_ucred_cr_svgid = 0x6c;      // ucred::cr_svgid
 
 unsigned offsetof_v_type = 0x70;              // vnode::v_type
 unsigned offsetof_v_id = 0x74;                // vnode::v_id
