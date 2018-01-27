@@ -348,7 +348,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0910;
-				ORGANIZATIONNAME = "Electra Contributors";
+				ORGANIZATIONNAME = "Electra Team";
 				TargetAttributes = {
 					B07A02381FB09B6F0018ACE5 = {
 						CreatedOnToolsVersion = 9.1;
