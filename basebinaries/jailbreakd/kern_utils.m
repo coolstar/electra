@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <sys/stat.h>
 #import "kern_utils.h"
 #import "kmem.h"
 #import "patchfinder64.h"
@@ -6,6 +7,9 @@
 #import "offsetof.h"
 #import "osobject.h"
 #import "sandbox.h"
+
+#define PROC_PIDPATHINFO_MAXSIZE  (4*MAXPATHLEN)
+int proc_pidpath(pid_t pid, void *buffer, uint32_t buffersize);
 
 #define TF_PLATFORM 0x400
 
@@ -100,6 +104,39 @@ int dumppid(int pd){
   } else {
     return 1;
   }
+}
+
+void fixupsetuid(int pid){
+    char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
+    bzero(pathbuf, sizeof(pathbuf));
+    
+    int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
+    if (ret < 0){
+        NSLog(@"Unable to get path for PID %d", pid);
+        return;
+    }
+    struct stat file_st;
+    if (lstat(pathbuf, &file_st) == -1){
+        NSLog(@"Unable to get stat for file %s", pathbuf);
+        return;
+    }
+    if (file_st.st_mode & S_ISUID){
+        uid_t fileUID = file_st.st_uid;
+        NSLog(@"Fixing up setuid for file owned by %ld", fileUID);
+        
+        uint64_t proc = proc_find(pid, 3);
+        if (proc != 0) {
+            uint64_t ucred = rk64(proc + offsetof_p_ucred);
+            
+            uid_t cr_svuid = rk32(ucred + offsetof_ucred_cr_svuid);
+            NSLog(@"Original sv_uid: %ld", cr_svuid);
+            wk32(ucred + offsetof_ucred_cr_svuid, fileUID);
+            NSLog(@"New sv_uid: %ld", fileUID);
+        }
+    } else {
+        NSLog(@"File %s is not setuid!", pathbuf);
+        return;
+    }
 }
 
 void set_csflags(uint64_t proc) {

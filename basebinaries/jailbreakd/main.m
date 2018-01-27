@@ -23,6 +23,7 @@ int proc_pidpath(pid_t pid, void *buffer, uint32_t buffersize);
 #define JAILBREAKD_COMMAND_ENTITLE_PLATFORMIZE 3
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY 4
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY 5
+#define JAILBREAKD_COMMAND_FIXUP_SETUID 6
 #define JAILBREAKD_COMMAND_DUMP_CRED 7
 #define JAILBREAKD_COMMAND_EXIT 13
 
@@ -36,6 +37,11 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
 };
 
 struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID_AND_SIGCONT {
+    uint8_t Command;
+    int32_t Pid;
+};
+
+struct __attribute__((__packed__)) JAILBREAKD_FIXUP_SETUID {
     uint8_t Command;
     int32_t Pid;
 };
@@ -213,6 +219,15 @@ int runserver(){
                 kill(PID, SIGCONT);
             });
             dispatch_release(queue);
+        }
+        if (command == JAILBREAKD_COMMAND_FIXUP_SETUID){
+            if (size < sizeof(struct JAILBREAKD_FIXUP_SETUID)){
+                NSLog(@"Error: ENTITLE packet is too small");
+                continue;
+            }
+            struct JAILBREAKD_FIXUP_SETUID *setuidPacket = (struct JAILBREAKD_FIXUP_SETUID *)buf;
+            NSLog(@"Fixup setuid PID %d", setuidPacket->Pid);
+            fixupsetuid(setuidPacket->Pid);
         }
         if (command == JAILBREAKD_COMMAND_DUMP_CRED){
             if (size < sizeof(struct JAILBREAKD_DUMP_CRED)){
