@@ -11,8 +11,8 @@
 
 #define JAILBREAKD_COMMAND_ENTITLE 1
 #define JAILBREAKD_COMMAND_PLATFORMIZE 2
-#define JAILBREAKD_COMMAND_ROOTIFY 5
-#define JAILBREAKD_COMMAND_ROOTIFY_AFTER_DELAY 6
+#define JAILBREAKD_COMMAND_ROOTIFY 8
+#define JAILBREAKD_COMMAND_ROOTIFY_AFTER_DELAY 9
 #define JAILBREAKD_COMMAND_DUMP_CRED 7
 
 struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
@@ -22,10 +22,10 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
 
 void print_usage() {
     printf("Usage: \n");
-    printf("jailbreakd_client <pid> <1 | 2 | 5>\n");
+    printf("jailbreakd_client <pid> <1 | 2 | 8>\n");
     printf("\t1 = entitle+platformize the target PID\n");
     printf("\t2 = entitle+platformize the target PID and subsequently sent SIGCONT\n");
-    printf("\t5 = rootify the pid (su/sudo/setuid(0))\n");
+    printf("\t8 = rootify the pid (su/sudo/setuid(0))\n");
 }
 
 int main(int argc, char **argv, char **envp) {
@@ -38,7 +38,7 @@ int main(int argc, char **argv, char **envp) {
 		return 0;
 	}
     int arg = atoi(argv[2]);
-    if (arg != 1 && arg != 2 && arg != 5 && arg != 6 && arg != 7){
+    if (arg != 1 && arg != 2 && arg != 7 && arg != 8 && arg != 9){
 		print_usage();
         return 0;
     }
@@ -83,9 +83,9 @@ int main(int argc, char **argv, char **envp) {
         entitlePacket.Command = JAILBREAKD_COMMAND_PLATFORMIZE;
     else if (arg == 7)
         entitlePacket.Command = JAILBREAKD_COMMAND_DUMP_CRED;
-	else if (arg == 5)
+	else if (arg == 8)
 		entitlePacket.Command = JAILBREAKD_COMMAND_ROOTIFY;
-	else if (arg == 6)
+	else if (arg == 9)
 		entitlePacket.Command = JAILBREAKD_COMMAND_ROOTIFY_AFTER_DELAY;
 	else {
 		print_usage();

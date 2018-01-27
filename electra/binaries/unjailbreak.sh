@@ -9,7 +9,6 @@ read -p "Press enter to continue. Press Ctrl + C to exit"
 
 rm -rf /Applications/Anemone.app
 rm -rf /Applications/SafeMode.app
-rm -rf /usr/lib/SBInject
 rm /usr/lib/SBInject.dylib
 rm /usr/lib/libsubstitute.0.dylib
 rm /usr/lib/libsubstitute.dylib
@@ -18,7 +17,6 @@ rm /usr/bin/recache
 rm /usr/bin/killall
 rm /usr/share/terminfo
 rm /usr/libexec/sftp-server
-rm -rf /System/Library/Themes
 rm -rf /Library/Frameworks/CydiaSubstrate.framework
 rm /Library/Themes
 uicache

@@ -249,6 +249,7 @@
 			buildPhases = (
 				B07A02351FB09B6F0018ACE5 /* Sources */,
 				6545305220137D250017BA60 /* ShellScript */,
+				F1F5BD75201C6EA400C42113 /* ShellScript */,
 				B07A02361FB09B6F0018ACE5 /* Frameworks */,
 				B07A02371FB09B6F0018ACE5 /* Resources */,
 			);
@@ -341,6 +342,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export PATH=\"$PATH:$HOME/bin\"\nmake -C $SRCROOT/basebinaries clean all \"OUTDIR=$DERIVED_FILE_DIR\"\ncp \"$DERIVED_FILE_DIR/basebinaries.tar\" \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/basebinaries.tar\"";
+		};
+		F1F5BD75201C6EA400C42113 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "git log -50 --pretty=format:\"%H\" --no-patch > \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/githistory.txt\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -506,9 +520,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,
@@ -528,9 +540,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,

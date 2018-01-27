@@ -20,24 +20,26 @@
 
 #ifdef PSPAWN_PAYLOAD_DEBUG
 #define LAUNCHD_LOG_PATH "/tmp/pspawn_payload_launchd.log"
-FILE *launchd_log_file;
+// XXX multiple xpcproxies opening same file
+// XXX not closing logfile before spawn
+#define XPCPROXY_LOG_PATH "/tmp/pspawn_payload_xpcproxy.log"
+FILE *log_file;
 #define DEBUGLOG(fmt, args...)\
     do {\
-        if (current_process == PROCESS_LAUNCHD) {\
-            if (launchd_log_file == NULL) launchd_log_file = fopen(LAUNCHD_LOG_PATH, "a"); \
-            if (launchd_log_file == NULL) break; \
-            fprintf(launchd_log_file, fmt "\n", ##args); \
-            fflush(launchd_log_file); \
-        } else { \
-            NSLog(@"" fmt, ##args);\
-        }\
+        if (log_file == NULL) {\
+            log_file = fopen((current_process == PROCESS_LAUNCHD) ? LAUNCHD_LOG_PATH : XPCPROXY_LOG_PATH, "a"); \
+            if (log_file == NULL) break; \
+        } \
+        fprintf(log_file, fmt "\n", ##args); \
+        fflush(log_file); \
     } while(0)
 #else
 #define DEBUGLOG(fmt, args...)
 #endif
 
-#define LAUNCHD_DYLIB "/bootstrap/pspawn_payload.dylib"
-#define XPCPROXY_DYLIB "/usr/lib/SBInject.dylib"
+#define PSPAWN_PAYLOAD_DYLIB "/bootstrap/pspawn_payload.dylib"
+#define AMFID_PAYLOAD_DYLIB "/bootstrap/amfid_payload.dylib"
+#define SBINJECT_PAYLOAD_DYLIB "/usr/lib/SBInject.dylib"
 
 // since this dylib should only be loaded into launchd and xpcproxy
 // it's safe to assume that we're in xpcproxy if getpid() != 1
@@ -63,26 +65,47 @@ typedef int (*pspawn_t)(pid_t * pid, const char* path, const posix_spawn_file_ac
 pspawn_t old_pspawn, old_pspawnp;
 
 int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_file_actions_t *file_actions, posix_spawnattr_t *attrp, char const* argv[], const char* envp[], pspawn_t old) {
-    if (current_process == PROCESS_XPCPROXY && !file_exist(XPCPROXY_DYLIB)) {
-        return old(pid, path, file_actions, attrp, argv, envp);
-    } else if (current_process == PROCESS_LAUNCHD && !file_exist(LAUNCHD_DYLIB)) {
-        return old(pid, path, file_actions, attrp, argv, envp);
-    } else if (current_process == PROCESS_LAUNCHD && file_exist(LAUNCHD_DYLIB)){
-        if ((strcmp(path, "/usr/libexec/xpcproxy") == 0) && argv[1] != NULL) {
-            const char **blacklist = xpcproxy_blacklist;
+    DEBUGLOG("We got called (fake_posix_spawn)! %s", path);
 
-            while (*blacklist) {
-                if (strstr(argv[1], *blacklist)) {
-                    DEBUGLOG("xpcproxy for %s which is in blacklist, not injecting", argv[1]);
-                    return old(pid, path, file_actions, attrp, argv, envp);
+    const char *inject_me = NULL;
+
+    if (current_process == PROCESS_LAUNCHD) {
+        if (strcmp(path, "/usr/libexec/xpcproxy") == 0) {
+            inject_me = PSPAWN_PAYLOAD_DYLIB;
+
+            const char* startd = argv[1];
+            if (startd != NULL) {
+                const char **blacklist = xpcproxy_blacklist;
+
+                while (*blacklist) {
+                    if (strstr(startd, *blacklist)) {
+                        DEBUGLOG("xpcproxy for '%s' which is in blacklist, not injecting", startd);
+                        inject_me = NULL;
+                        break;
+                    }
+
+                    ++blacklist;
                 }
-
-                ++blacklist;
             }
+        }
+    } else if (current_process == PROCESS_XPCPROXY) {
+        // XXX inject both SBInject & amfid payload into amfid?
+        // note: DYLD_INSERT_LIBRARIES=libfoo1.dylib:libfoo2.dylib
+        if (strcmp(path, "/usr/libexec/amfid") == 0) {
+            DEBUGLOG("Starting amfid -- special handling");
+            inject_me = AMFID_PAYLOAD_DYLIB;
+        } else {
+            inject_me = SBINJECT_PAYLOAD_DYLIB;
         }
     }
 
-    DEBUGLOG("We got called (fake_posix_spawn)! %s", path);
+    // XXX log different err on inject_me == NULL and nonexistent inject_me
+    if (inject_me == NULL || !file_exist(inject_me)) {
+        DEBUGLOG("Nothing to inject");
+        return old(pid, path, file_actions, attrp, argv, envp);
+    }
+
+    DEBUGLOG("Injecting %s into %s", inject_me, path);
 
 #ifdef PSPAWN_PAYLOAD_DEBUG
     if (argv != NULL){
@@ -128,11 +151,14 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
         newenvp[i] = envp[j];
         j++;
     }
-    if (current_process == PROCESS_LAUNCHD) {
-        newenvp[j] =  "DYLD_INSERT_LIBRARIES=" LAUNCHD_DYLIB;
-    } else if (current_process == PROCESS_XPCPROXY) {
-        newenvp[j] = "DYLD_INSERT_LIBRARIES=" XPCPROXY_DYLIB;
-    }
+
+    char *envp_inject = malloc(strlen("DYLD_INSERT_LIBRARIES=") + strlen(inject_me) + 1);
+    
+    envp_inject[0] = '\0';
+    strcat(envp_inject, "DYLD_INSERT_LIBRARIES=");
+    strcat(envp_inject, inject_me);
+
+    newenvp[j] = envp_inject;
     newenvp[j+1] = NULL;
 
 #if PSPAWN_PAYLOAD_DEBUG
@@ -162,10 +188,19 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
     int origret;
 
     if (current_process == PROCESS_XPCPROXY) {
+        // dont leak logging fd into execd process
+#ifdef PSPAWN_PAYLOAD_DEBUG
+        if (log_file != NULL) {
+            fclose(log_file);
+            log_file = NULL;
+        }
+#endif
 		if (is_setuid) {
 			calljailbreakd(getpid(), JAILBREAKD_COMMAND_ROOTIFY_AFTER_DELAY);
 		}
-        calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_AFTER_DELAY);
+        calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY);
+        // dont leak jbd fd into execd process
+        closejailbreakfd();
         origret = old(pid, path, file_actions, newattrp, argv, newenvp);
     } else {
         int gotpid;

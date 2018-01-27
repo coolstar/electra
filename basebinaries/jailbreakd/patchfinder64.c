@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "patchfinder64.h"
+#include "kmem.h"
 
 #define CACHED_FIND_UINT64(name) CACHED_FIND(uint64_t, name)
 
@@ -623,6 +624,7 @@ term_kernel(void)
 #define INSN_CALL 0x94000000, 0xFC000000
 #define INSN_B    0x14000000, 0xFC000000
 #define INSN_CBZ  0x34000000, 0xFC000000
+#define INSN_ADRP 0x90000000, 0x9F000000
 
 addr_t
 find_register_value(addr_t where, int reg)
@@ -745,159 +747,6 @@ CACHED_FIND_UINT64(find_allproc) {
 	return val + kerndumpbase;
 }
 
-CACHED_FIND_UINT64(find_copyout) {
-	// Find the first reference to the string
-	addr_t ref = find_strref("\"%s(%p, %p, %lu) - transfer too large\"", 2, 0);
-	if (!ref) {
-		return 0;
-	}
-	ref -= kerndumpbase;
-	
-	uint64_t start = 0;
-	for (int i = 4; i < 0x100*4; i+=4) {
-		uint32_t op = *(uint32_t*)(kernel+ref-i);
-		if (op == 0xd10143ff) { // SUB SP, SP, #0x50
-			start = ref-i;
-			break;
-		}
-	}
-	if (!start) {
-		return 0;
-	}
-	
-	return start + kerndumpbase;
-}
-
-CACHED_FIND_UINT64(find_bzero) {
-	// Just find SYS #3, c7, c4, #1, X3, then get the start of that function
-	addr_t off;
-	uint32_t *k;
-	k = (uint32_t *)(kernel + xnucore_base);
-	for (off = 0; off < xnucore_size - 4; off += 4, k++) {
-		if (k[0] == 0xd50b7423) {
-			off += xnucore_base;
-			break;
-		}
-	}
-	
-	uint64_t start = bof64(kernel, xnucore_base, off);
-	if (!start) {
-		return 0;
-	}
-	
-	return start + kerndumpbase;
-}
-
-CACHED_FIND_UINT64(find_bcopy) {
-	// Jumps straight into memmove after switching x0 and x1 around
-	// Guess we just find the switch and that's it
-	addr_t off;
-	uint32_t *k;
-	k = (uint32_t *)(kernel + xnucore_base);
-	for (off = 0; off < xnucore_size - 4; off += 4, k++) {
-		if (k[0] == 0xAA0003E3 && k[1] == 0xAA0103E0 && k[2] == 0xAA0303E1 && k[3] == 0xd503201F) {
-			return off + xnucore_base + kerndumpbase;
-		}
-	}
-	k = (uint32_t *)(kernel + prelink_base);
-	for (off = 0; off < prelink_size - 4; off += 4, k++) {
-		if (k[0] == 0xAA0003E3 && k[1] == 0xAA0103E0 && k[2] == 0xAA0303E1 && k[3] == 0xd503201F) {
-			return off + prelink_base + kerndumpbase;
-		}
-	}
-	return 0;
-}
-
-uint64_t find_rootvnode(void) {
-	// Find the first reference to the string
-	addr_t ref = find_strref("/var/run/.vfs_rsrc_streams_%p%x", 1, 0);
-	if (!ref) {
-		return 0;
-	}
-	ref -= kerndumpbase;
-	
-	uint64_t start = bof64(kernel, xnucore_base, ref);
-	if (!start) {
-		return 0;
-	}
-	
-	// Find MOV X9, #0x2000000000 - it's a pretty distinct instruction
-	addr_t weird_instruction = 0;
-	for (int i = 4; i < 4*0x100; i+=4) {
-		uint32_t op = *(uint32_t *)(kernel + ref - i);
-		if (op == 0xB25B03E9) {
-			weird_instruction = ref-i;
-			break;
-		}
-	}
-	if (!weird_instruction) {
-		return 0;
-	}
-	
-	uint64_t val = calc64(kernel, start, weird_instruction, 8);
-	if (!val) {
-		return 0;
-	}
-	
-	return val + kerndumpbase;
-}
-
-addr_t find_trustcache(void) {
-	addr_t call, func, val;
-	addr_t ref = find_strref("com.apple.MobileFileIntegrity", 1, 1);
-	if (!ref) {
-		return 0;
-	}
-	ref -= kerndumpbase;
-	call = step64(kernel, ref, 32, INSN_CALL);
-	if (!call) {
-		return 0;
-	}
-	call = step64(kernel, call+4, 32, INSN_CALL);
-	func = follow_call64(kernel, call);
-	if (!func) {
-		return 0;
-	}
-	val = calc64(kernel, func, func + 16, 8);
-	if (!val) {
-		return 0;
-	}
-	return val + kerndumpbase;
-}
-
-addr_t find_amficache(void) {
-	addr_t call, func, bof, val;
-	addr_t ref = find_strref("com.apple.MobileFileIntegrity", 1, 1);
-	if (!ref) {
-		return 0;
-	}
-	ref -= kerndumpbase;
-	call = step64(kernel, ref, 32, INSN_CALL);
-	if (!call) {
-		return 0;
-	}
-	call = step64(kernel, call+4, 32, INSN_CALL);
-	func = follow_call64(kernel, call);
-	if (!func) {
-		return 0;
-	}
-	bof = bof64(kernel, func - 256, func);
-	if (!bof) {
-		return 0;
-	}
-	val = calc64(kernel, bof, func, 9);
-	if (!val) {
-		return 0;
-	}
-	return val + kerndumpbase;
-}
-
-uint64_t _kread64(uint64_t where) {
-    uint64_t out;
-    kread(where, &out, sizeof(uint64_t));
-    return out;
-}
-
 CACHED_FIND_UINT64(find_OSBoolean_True) {
     addr_t val;
     addr_t ref = find_strref("Delay Autounload", 0, 0);
@@ -923,9 +772,60 @@ CACHED_FIND_UINT64(find_OSBoolean_True) {
         return 0;
     }
     
-    return _kread64(val + kerndumpbase);
+    return rk64(val + kerndumpbase);
 }
 
 CACHED_FIND_UINT64(find_OSBoolean_False) {
     return find_OSBoolean_True()+8;
+}
+
+CACHED_FIND_UINT64(find_zone_map_ref) {
+    // \"Nothing being freed to the zone_map. start = end = %p\\n\"
+    uint64_t val = kerndumpbase;
+
+    addr_t ref = find_strref("\"Nothing being freed to the zone_map. start = end = %p\\n\"", 1, 0);
+    ref -= kerndumpbase;
+
+    // skip add & adrp for panic str
+    ref -= 8;
+
+    // adrp xX, #_zone_map@PAGE
+    ref = step64_back(kernel, ref, 30, INSN_ADRP);
+
+    uint32_t *insn = (uint32_t*)(kernel+ref);
+    // get pc
+    val += ((uint8_t*)(insn) - kernel) & ~0xfff;
+    uint8_t xm = *insn & 0x1f;
+
+    // don't ask, I wrote this at 5am
+    val += (*insn<<9 & 0x1ffffc000) | (*insn>>17 & 0x3000);
+
+    // ldr x, [xX, #_zone_map@PAGEOFF]
+    ++insn;
+    if ((*insn & 0xF9C00000) != 0xF9400000) {
+        return 0;
+    }
+
+    // xd == xX, xn == xX,
+    if ((*insn&0x1f) != xm || ((*insn>>5)&0x1f) != xm) {
+        return 0;
+    }
+
+    val += ((*insn >> 10) & 0xFFF) << 3;
+
+    return val;
+}
+
+CACHED_FIND_UINT64(find_osunserializexml) {
+    addr_t ref = find_strref("OSUnserializeXML: %s near line %d\n", 1, 0);
+    ref -= kerndumpbase;
+    uint64_t start = bof64(kernel, xnucore_base, ref);
+    return start + kerndumpbase;
+}
+
+CACHED_FIND_UINT64(find_smalloc) {
+    addr_t ref = find_strref("sandbox memory allocation failure", 1, 1);
+    ref -= kerndumpbase;
+    uint64_t start = bof64(kernel, prelink_base, ref);
+    return start + kerndumpbase;
 }
