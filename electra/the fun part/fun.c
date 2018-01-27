@@ -283,7 +283,7 @@ do { \
         unlink("/bootstrap/jailbreakd");
         
         rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("basebinaries.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
-        waitpid(pd, NULL, 0);
+        waitpid(pd, &rv, 0);
         
         printf("[fun] copied the required binaries into the right places\n");
     }

@@ -25,7 +25,6 @@
 		B07A02491FB09B6F0018ACE5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B07A02471FB09B6F0018ACE5 /* LaunchScreen.storyboard */; };
 		B07A024C1FB09B6F0018ACE5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B07A024B1FB09B6F0018ACE5 /* main.m */; };
 		B07A02541FB09C3D0018ACE5 /* async_wake.c in Sources */ = {isa = PBXBuildFile; fileRef = B07A02521FB09C3D0018ACE5 /* async_wake.c */; };
-		B0D79D621FDED41000B4F233 /* README in Resources */ = {isa = PBXBuildFile; fileRef = B0D79D611FDED41000B4F233 /* README */; };
 		B0EF11141FCC6F9C00C1D14E /* kcall.c in Sources */ = {isa = PBXBuildFile; fileRef = B0EF11121FCC6F9C00C1D14E /* kcall.c */; };
 		B0EF11171FCC784B00C1D14E /* symbols.c in Sources */ = {isa = PBXBuildFile; fileRef = B0EF11151FCC784B00C1D14E /* symbols.c */; };
 		B0F5AA3F1FDE87E90073FD88 /* early_kalloc.c in Sources */ = {isa = PBXBuildFile; fileRef = B0F5AA3D1FDE87E80073FD88 /* early_kalloc.c */; };
@@ -349,7 +348,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0910;
-				ORGANIZATIONNAME = "Ian Beer";
+				ORGANIZATIONNAME = "Electra Contributors";
 				TargetAttributes = {
 					B07A02381FB09B6F0018ACE5 = {
 						CreatedOnToolsVersion = 9.1;
@@ -385,7 +384,6 @@
 				F195401F200BFE86000D094F /* AppIcon60x60@3x.png in Resources */,
 				F195401C200BFE86000D094F /* AppIcon40x40@2x.png in Resources */,
 				F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */,
-				B0D79D621FDED41000B4F233 /* README in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
 				F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */,
 				17C74A00200E7298008B0276 /* dropbear.plist in Resources */,

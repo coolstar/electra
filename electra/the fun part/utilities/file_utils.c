@@ -3,7 +3,7 @@
 //  electra
 //
 //  Created by Jamie on 27/01/2018.
-//  Copyright © 2018 Ian Beer. All rights reserved.
+//  Copyright © 2018 Electra Contributors. All rights reserved.
 //
 
 #include "file_utils.h"
