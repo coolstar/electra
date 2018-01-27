@@ -11,6 +11,6 @@
 
 #include <stdio.h>
 
-//int system(const char *cmd);
+int run(const char *cmd);
 
 #endif /* utils_h */

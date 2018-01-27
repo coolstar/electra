@@ -252,8 +252,6 @@ do { \
         fputs(ln, stdout);
     fclose(fp);
     
-    int (*run)(const char *) = (int (*)(const char *))dlsym(RTLD_DEFAULT, "system");
-    
     pid_t pd;
     int rv = 0;
     
