@@ -132,23 +132,6 @@ BOOL safeMode = false;
 __attribute__ ((constructor))
 static void ctor(void) {
     @autoreleasepool {
-        if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.WebKit.Databases"] || 
-            [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.WebKit.Networking"] ||
-            [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.WebKit.WebContent"] ||
-            [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.InCallService"] ||
-            [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.StreamingUnzipService"]){
-            NSLog(@"%@", @"Webkit, InCallService and StreamingUnzipService can't afford to be exited. Not checking sandbox.");
-        } else {
-            int fd = open("/bootstrap/jailbreakd", O_RDONLY);
-            if (fd == -1){
-                NSLog(@"%@", @"Not unsandboxed. Exiting and hoping we get restarted.");
-                exit(-1);
-            } else {
-                close(fd);
-            }
-        }
-
-
         if (NSBundle.mainBundle.bundleIdentifier == nil || ![NSBundle.mainBundle.bundleIdentifier isEqualToString:@"org.coolstar.SafeMode"]){
             safeMode = false;
             if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"]){
