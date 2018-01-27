@@ -696,6 +696,24 @@ do { \
     }
     
     if (enable_tweaks){
+        if (file_exist("/System/Library/Themes")) {
+            printf("removing /System/Library/Themes\n");
+            
+            rv = posix_spawn(&pd, "/"BOOTSTRAP_PREFIX"/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/System/Library/Themes", NULL }, NULL);
+            waitpid(pd, NULL, 0);
+            
+            unlink("/"BOOTSTRAP_PREFIX"/Library/Themes");
+            
+            if (file_exist("/usr/lib/SBInject")) {
+                printf("removing /usr/lib/SBInject\n");
+                
+                rv = posix_spawn(&pd, "/bootstrap/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/usr/lib/SBInject", NULL }, NULL);
+                waitpid(pd, NULL, 0);
+                
+                unlink("/"BOOTSTRAP_PREFIX"/Library/SBInject");
+            }
+        }
+        
         rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
         waitpid(pd, NULL, 0);
         
@@ -709,7 +727,7 @@ do { \
 
     if (enable_tweaks){
         if (runUICache){
-            const char *uicache = "/" BOOTSTRAP_PREFIX "/usr/local/bin/uicache";
+            const char *uicache = "/"BOOTSTRAP_PREFIX"/usr/local/bin/uicache";
             rv = posix_spawn(&pd, uicache, NULL, NULL, (char **)&(const char*[]){ uicache, NULL }, NULL);
             waitpid(pd, NULL, 0);
         }
@@ -722,16 +740,8 @@ do { \
     symlink("/"BOOTSTRAP_PREFIX"/usr/share/terminfo","/usr/share/terminfo");
     
     if (enable_tweaks){
-        if (!file_exist("/System/Library/Themes")) {
-            printf("making /System/Library/Themes");
-            mkdir("/System/Library/Themes", 0755);
-        }
-        
-        unlink("/"BOOTSTRAP_PREFIX"/Library/Themes");
-        symlink("/System/Library/Themes","/"BOOTSTRAP_PREFIX"/Library/Themes");
-        
         unlink("/Library/Themes");
-        symlink("/System/Library/Themes","/Library/Themes");
+        symlink("/bootstrap/Library/Themes","/Library/Themes");
         
         unlink("/usr/lib/SBInject.dylib");
         cp("/usr/lib/SBInject.dylib","/bootstrap/usr/lib/SBInject.dylib");
@@ -745,18 +755,18 @@ do { \
         unlink("/usr/lib/libsubstrate.dylib");
         cp("/usr/lib/libsubstrate.dylib","/bootstrap/usr/lib/libsubstrate.dylib");
         
-        rv = posix_spawn(&pd, "/bootstrap/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/Library/Frameworks/CydiaSubstrate.framework", NULL }, NULL);
+        rv = posix_spawn(&pd, "/"BOOTSTRAP_PREFIX"/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/Library/Frameworks/CydiaSubstrate.framework", NULL }, NULL);
         waitpid(pd, NULL, 0);
         
         mkdir("/Library/Frameworks/CydiaSubstrate.framework", 0755);
         symlink("/usr/lib/libsubstrate.dylib", "/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate");
         
         unlink("/usr/bin/recache");
-        cp("/usr/bin/recache","/bootstrap/usr/bin/recache");
+        cp("/usr/bin/recache","/"BOOTSTRAP_PREFIX"/usr/bin/recache");
         chmod("/usr/bin/recache", 0755);
         
         unlink("/usr/bin/killall");
-        cp("/usr/bin/killall","/bootstrap/usr/bin/killall");
+        cp("/usr/bin/killall","/"BOOTSTRAP_PREFIX"/usr/bin/killall");
         chmod("/usr/bin/killall", 0755);
         
         if (!file_exist("/usr/lib/SBInject")) {
@@ -769,6 +779,7 @@ do { \
         }
     }
     
+    unlink("/bootstrap/unjailbreak.sh");
     cp("/bootstrap/unjailbreak.sh",progname("unjailbreak.sh"));
     
     printf("Dropbear would be up soon\n");
