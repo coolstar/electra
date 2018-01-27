@@ -822,3 +822,10 @@ CACHED_FIND_UINT64(find_osunserializexml) {
     uint64_t start = bof64(kernel, xnucore_base, ref);
     return start + kerndumpbase;
 }
+
+CACHED_FIND_UINT64(find_smalloc) {
+    addr_t ref = find_strref("sandbox memory allocation failure", 1, 1);
+    ref -= kerndumpbase;
+    uint64_t start = bof64(kernel, prelink_base, ref);
+    return start + kerndumpbase;
+}
