@@ -19,6 +19,9 @@
     __block NSArray *gitHistory = [rawgitHistory componentsSeparatedByString:@"\n"];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0ul), ^{
         NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://coolstar.org/electra/gitlatest.txt"]];
+        // User isn't on a network, or the request failed
+        if (data == nil) return;
+        
         NSString *gitCommit = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         
         if (![gitHistory containsObject:gitCommit]){
