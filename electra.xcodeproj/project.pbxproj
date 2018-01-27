@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		176718D5201C9B3600FDF1CF /* file_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718D3201C9B3600FDF1CF /* file_utils.c */; };
+		176718D9201CA00F00FDF1CF /* amfi_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718D7201CA00F00FDF1CF /* amfi_utils.c */; };
+		176718DE201CB8B100FDF1CF /* offsetof.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718DC201CB8B100FDF1CF /* offsetof.c */; };
+		176718E1201CC80B00FDF1CF /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718DF201CC80A00FDF1CF /* utils.c */; };
 		17C74A00200E7298008B0276 /* dropbear.plist in Resources */ = {isa = PBXBuildFile; fileRef = 17C749FF200E7297008B0276 /* dropbear.plist */; };
 		4A7B89692010255800CB6439 /* jailbreakd.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4A7B89682010255800CB6439 /* jailbreakd.plist */; };
 		6545304C200E8F600017BA60 /* remap_tfp_set_hsp.c in Sources */ = {isa = PBXBuildFile; fileRef = 6545304B200E8F600017BA60 /* remap_tfp_set_hsp.c */; };
@@ -53,6 +57,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		176718D3201C9B3600FDF1CF /* file_utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = file_utils.c; sourceTree = "<group>"; };
+		176718D4201C9B3600FDF1CF /* file_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = file_utils.h; sourceTree = "<group>"; };
+		176718D6201C9F0900FDF1CF /* codesign.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = codesign.h; sourceTree = "<group>"; };
+		176718D7201CA00F00FDF1CF /* amfi_utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = amfi_utils.c; sourceTree = "<group>"; };
+		176718D8201CA00F00FDF1CF /* amfi_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = amfi_utils.h; sourceTree = "<group>"; };
+		176718DB201CA98800FDF1CF /* IOKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IOKit.h; sourceTree = "<group>"; };
+		176718DC201CB8B100FDF1CF /* offsetof.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = offsetof.c; sourceTree = "<group>"; };
+		176718DD201CB8B100FDF1CF /* offsetof.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = offsetof.h; sourceTree = "<group>"; };
+		176718DF201CC80A00FDF1CF /* utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
+		176718E0201CC80B00FDF1CF /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		17C749FF200E7297008B0276 /* dropbear.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = dropbear.plist; sourceTree = "<group>"; };
 		4A7B89682010255800CB6439 /* jailbreakd.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = jailbreakd.plist; sourceTree = "<group>"; };
 		6545304A200E8F600017BA60 /* remap_tfp_set_hsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = remap_tfp_set_hsp.h; sourceTree = "<group>"; };
@@ -130,6 +144,101 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		176718CC201C98EB00FDF1CF /* bootstrap */ = {
+			isa = PBXGroup;
+			children = (
+				F1F28F4A1FF052870074AA75 /* binaries */,
+				F1531E102009709700DD5051 /* tar.gz */,
+				F158610D1FEA002000795B90 /* gnubinpack.tar */,
+				F15B0265200888AA002CF5EE /* tweaksupport.tar */,
+				F15B0263200888A6002CF5EE /* anemoneapp.tar */,
+				F1531E50200983DD00DD5051 /* safemode.tar */,
+				17C749FF200E7297008B0276 /* dropbear.plist */,
+				4A7B89682010255800CB6439 /* jailbreakd.plist */,
+			);
+			path = bootstrap;
+			sourceTree = "<group>";
+		};
+		176718CD201C991F00FDF1CF /* exploit */ = {
+			isa = PBXGroup;
+			children = (
+				B0D79D611FDED41000B4F233 /* README */,
+				B04E250A1FCF083A00F09CCE /* arm64_state.h */,
+				B07A02521FB09C3D0018ACE5 /* async_wake.c */,
+				B07A02531FB09C3D0018ACE5 /* async_wake.h */,
+				B0F5AA3D1FDE87E80073FD88 /* early_kalloc.c */,
+				B0F5AA3E1FDE87E80073FD88 /* early_kalloc.h */,
+				B003EB361FC5863800C58441 /* find_port.c */,
+				B003EB371FC5863800C58441 /* find_port.h */,
+				B0EF11121FCC6F9C00C1D14E /* kcall.c */,
+				B0EF11131FCC6F9C00C1D14E /* kcall.h */,
+				B003EB391FC58F4900C58441 /* kdbg.c */,
+				B003EB3A1FC58F4900C58441 /* kdbg.h */,
+				B003EB331FC583CA00C58441 /* kmem.c */,
+				B003EB341FC583CA00C58441 /* kmem.h */,
+				B0EF11151FCC784B00C1D14E /* symbols.c */,
+				B0EF11161FCC784B00C1D14E /* symbols.h */,
+			);
+			path = exploit;
+			sourceTree = "<group>";
+		};
+		176718CE201C995A00FDF1CF /* app */ = {
+			isa = PBXGroup;
+			children = (
+				176718D1201C9A6D00FDF1CF /* controllers */,
+				176718CF201C9A4D00FDF1CF /* view */,
+				B07A023C1FB09B6F0018ACE5 /* AppDelegate.h */,
+				B07A023D1FB09B6F0018ACE5 /* AppDelegate.m */,
+				B07A02471FB09B6F0018ACE5 /* LaunchScreen.storyboard */,
+				B07A02421FB09B6F0018ACE5 /* Main.storyboard */,
+			);
+			path = app;
+			sourceTree = "<group>";
+		};
+		176718CF201C9A4D00FDF1CF /* view */ = {
+			isa = PBXGroup;
+			children = (
+				F15B026C2008C679002CF5EE /* CSGradientView.h */,
+				F15B026D2008C679002CF5EE /* CSGradientView.m */,
+			);
+			path = view;
+			sourceTree = "<group>";
+		};
+		176718D1201C9A6D00FDF1CF /* controllers */ = {
+			isa = PBXGroup;
+			children = (
+				B07A023F1FB09B6F0018ACE5 /* ViewController.h */,
+				B07A02401FB09B6F0018ACE5 /* ViewController.m */,
+			);
+			path = controllers;
+			sourceTree = "<group>";
+		};
+		176718D2201C9B0B00FDF1CF /* utilities */ = {
+			isa = PBXGroup;
+			children = (
+				176718D3201C9B3600FDF1CF /* file_utils.c */,
+				176718D4201C9B3600FDF1CF /* file_utils.h */,
+				176718D7201CA00F00FDF1CF /* amfi_utils.c */,
+				176718D8201CA00F00FDF1CF /* amfi_utils.h */,
+				B04E25071FCD6DB300F09CCE /* kutils.c */,
+				B04E25081FCD6DB300F09CCE /* kutils.h */,
+				176718DC201CB8B100FDF1CF /* offsetof.c */,
+				176718DD201CB8B100FDF1CF /* offsetof.h */,
+				176718DF201CC80A00FDF1CF /* utils.c */,
+				176718E0201CC80B00FDF1CF /* utils.h */,
+			);
+			path = utilities;
+			sourceTree = "<group>";
+		};
+		176718DA201CA97000FDF1CF /* headers */ = {
+			isa = PBXGroup;
+			children = (
+				176718D6201C9F0900FDF1CF /* codesign.h */,
+				176718DB201CA98800FDF1CF /* IOKit.h */,
+			);
+			path = headers;
+			sourceTree = "<group>";
+		};
 		B07A02301FB09B6F0018ACE5 = {
 			isa = PBXGroup;
 			children = (
@@ -149,45 +258,15 @@
 		B07A023B1FB09B6F0018ACE5 /* electra */ = {
 			isa = PBXGroup;
 			children = (
-				F1F28F4A1FF052870074AA75 /* binaries */,
-				F1531E102009709700DD5051 /* tar.gz */,
-				F158610D1FEA002000795B90 /* gnubinpack.tar */,
-				F15B0265200888AA002CF5EE /* tweaksupport.tar */,
-				F15B0263200888A6002CF5EE /* anemoneapp.tar */,
-				F1531E50200983DD00DD5051 /* safemode.tar */,
-				17C749FF200E7297008B0276 /* dropbear.plist */,
-				4A7B89682010255800CB6439 /* jailbreakd.plist */,
-				B07A023C1FB09B6F0018ACE5 /* AppDelegate.h */,
-				B07A023D1FB09B6F0018ACE5 /* AppDelegate.m */,
-				B04E250A1FCF083A00F09CCE /* arm64_state.h */,
+				176718DA201CA97000FDF1CF /* headers */,
+				176718CE201C995A00FDF1CF /* app */,
+				176718CC201C98EB00FDF1CF /* bootstrap */,
+				176718CD201C991F00FDF1CF /* exploit */,
+				BCF206541FE32E1D0081CBE5 /* the fun part */,
 				B07A02451FB09B6F0018ACE5 /* Assets.xcassets */,
-				B07A02521FB09C3D0018ACE5 /* async_wake.c */,
-				B07A02531FB09C3D0018ACE5 /* async_wake.h */,
-				B0F5AA3D1FDE87E80073FD88 /* early_kalloc.c */,
-				B0F5AA3E1FDE87E80073FD88 /* early_kalloc.h */,
-				B003EB361FC5863800C58441 /* find_port.c */,
-				B003EB371FC5863800C58441 /* find_port.h */,
 				B07A024A1FB09B6F0018ACE5 /* Info.plist */,
-				B0EF11121FCC6F9C00C1D14E /* kcall.c */,
-				B0EF11131FCC6F9C00C1D14E /* kcall.h */,
-				B003EB391FC58F4900C58441 /* kdbg.c */,
-				B003EB3A1FC58F4900C58441 /* kdbg.h */,
-				B003EB331FC583CA00C58441 /* kmem.c */,
-				B003EB341FC583CA00C58441 /* kmem.h */,
-				B04E25071FCD6DB300F09CCE /* kutils.c */,
-				B04E25081FCD6DB300F09CCE /* kutils.h */,
-				B07A02471FB09B6F0018ACE5 /* LaunchScreen.storyboard */,
 				B07A024B1FB09B6F0018ACE5 /* main.m */,
-				B07A02421FB09B6F0018ACE5 /* Main.storyboard */,
-				B0D79D611FDED41000B4F233 /* README */,
-				B0EF11151FCC784B00C1D14E /* symbols.c */,
-				B0EF11161FCC784B00C1D14E /* symbols.h */,
-				BCF206541FE32E1D0081CBE5 /* the_fun_part */,
-				B07A023F1FB09B6F0018ACE5 /* ViewController.h */,
-				B07A02401FB09B6F0018ACE5 /* ViewController.m */,
 				BC9969031FE66CE200A4EDB9 /* ent.plist */,
-				F15B026C2008C679002CF5EE /* CSGradientView.h */,
-				F15B026D2008C679002CF5EE /* CSGradientView.m */,
 				F1531E0D2009702B00DD5051 /* NSData+GZip.m */,
 				F1531E0F2009703900DD5051 /* NSData+GZip.h */,
 				F198765C200AA12800D4BB56 /* Resources */,
@@ -195,9 +274,10 @@
 			path = electra;
 			sourceTree = "<group>";
 		};
-		BCF206541FE32E1D0081CBE5 /* the_fun_part */ = {
+		BCF206541FE32E1D0081CBE5 /* the fun part */ = {
 			isa = PBXGroup;
 			children = (
+				176718D2201C9B0B00FDF1CF /* utilities */,
 				BC8EE46A1FE272CF00402F32 /* fun.c */,
 				BC8EE46B1FE272CF00402F32 /* fun.h */,
 				BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */,
@@ -210,7 +290,7 @@
 				6545304A200E8F600017BA60 /* remap_tfp_set_hsp.h */,
 				6545304B200E8F600017BA60 /* remap_tfp_set_hsp.c */,
 			);
-			path = the_fun_part;
+			path = "the fun part";
 			sourceTree = "<group>";
 		};
 		F198765C200AA12800D4BB56 /* Resources */ = {
@@ -368,9 +448,11 @@
 				F198765B200A8A0F00D4BB56 /* unlocknvram.c in Sources */,
 				6545304C200E8F600017BA60 /* remap_tfp_set_hsp.c in Sources */,
 				B07A02411FB09B6F0018ACE5 /* ViewController.m in Sources */,
+				176718D5201C9B3600FDF1CF /* file_utils.c in Sources */,
 				BC8EE46C1FE272CF00402F32 /* fun.c in Sources */,
 				B04E25091FCD6DB300F09CCE /* kutils.c in Sources */,
 				BC8B64C41FE5252F00EDF749 /* fun_objc.m in Sources */,
+				176718DE201CB8B100FDF1CF /* offsetof.c in Sources */,
 				F1531E0E2009702B00DD5051 /* NSData+GZip.m in Sources */,
 				B07A024C1FB09B6F0018ACE5 /* main.m in Sources */,
 				B003EB381FC5863800C58441 /* find_port.c in Sources */,
@@ -379,6 +461,8 @@
 				B07A023E1FB09B6F0018ACE5 /* AppDelegate.m in Sources */,
 				F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */,
 				BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */,
+				176718E1201CC80B00FDF1CF /* utils.c in Sources */,
+				176718D9201CA00F00FDF1CF /* amfi_utils.c in Sources */,
 				B003EB3B1FC58F4900C58441 /* kdbg.c in Sources */,
 				B0EF11141FCC6F9C00C1D14E /* kcall.c in Sources */,
 				B0F5AA3F1FDE87E90073FD88 /* early_kalloc.c in Sources */,
@@ -515,7 +599,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = N78R6QBX22;
+				DEVELOPMENT_TEAM = AHEHG4CE9W;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -535,7 +619,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = N78R6QBX22;
+				DEVELOPMENT_TEAM = AHEHG4CE9W;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
