@@ -82,24 +82,42 @@ uint64_t zm_fix_addr(uint64_t addr) {
   static kmap_hdr_t zm_hdr = {0, 0, 0, 0};
 
   if (zm_hdr.start == 0) {
-    // xxx rk64(0) ?!
-    uint64_t zone_map = rk64(find_zone_map_ref());
-    // hdr is at offset 0x10, mutexes at start
-    size_t r = kread(zone_map + 0x10, &zm_hdr, sizeof(zm_hdr));
-    printf("zm_range: 0x%llx - 0x%llx (read 0x%zx, exp 0x%zx)\n", zm_hdr.start, zm_hdr.end, r, sizeof(zm_hdr));
+	// xxx rk64(0) ?!
+	uint64_t zone_map = rk64(find_zone_map_ref());
+	// hdr is at offset 0x10, mutexes at start
+	size_t r = kread(zone_map + 0x10, &zm_hdr, sizeof(zm_hdr));
+	printf("zm_range: 0x%llx - 0x%llx (read 0x%zx, exp 0x%zx)\n", zm_hdr.start, zm_hdr.end, r, sizeof(zm_hdr));
 
-    if (r != sizeof(zm_hdr) || zm_hdr.start == 0 || zm_hdr.end == 0) {
-      printf("kread of zone_map failed!\n");
-      exit(1);
-    }
+	if (r != sizeof(zm_hdr) || zm_hdr.start == 0 || zm_hdr.end == 0) {
+	  printf("kread of zone_map failed!\n");
+	  exit(1);
+	}
 
-    if (zm_hdr.end - zm_hdr.start > 0x100000000) {
-        printf("zone_map is too big, sorry.\n");
-        exit(1);
-    }
+	if (zm_hdr.end - zm_hdr.start > 0x100000000) {
+		printf("zone_map is too big, sorry.\n");
+		exit(1);
+	}
   }
 
   uint64_t zm_tmp = (zm_hdr.start & 0xffffffff00000000) | ((addr) & 0xffffffff);
 
   return zm_tmp < zm_hdr.start ? zm_tmp + 0x100000000 : zm_tmp;
+}
+
+int kstrcmp(uint64_t kstr, const char* str) {
+	// XXX be safer, dont just assume you wont cause any
+	// page faults by this
+	size_t len = strlen(str) + 1;
+	char *local = malloc(len + 1);
+	local[len] = '\0';
+
+	int ret = 1;
+
+	if (kread(kstr, local, len) == len) {
+		ret = strcmp(local, str);
+	}
+
+	free(local);
+
+	return ret;
 }

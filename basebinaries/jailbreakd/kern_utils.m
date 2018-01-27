@@ -5,6 +5,7 @@
 #import "kexecute.h"
 #import "offsetof.h"
 #import "osobject.h"
+#import "sandbox.h"
 
 #define TF_PLATFORM 0x400
 
@@ -180,10 +181,20 @@ void set_csblob(uint64_t proc) {
     }
 }
 
+const char* abs_path_exceptions[] = {
+  "/bootstrap",
+  "/Library",
+  // XXX there's some weird stuff about linking and special
+  // handling for /private/var/mobile/* in sandbox
+  "/private/var/mobile/Library",
+  NULL
+};
+
 uint64_t get_exception_osarray(void) {
   static uint64_t cached = 0;
 
   if (cached == 0) {
+    // XXX use abs_path_exceptions
     cached = OSUnserializeXML("<array>"
     "<string>/bootstrap/</string>"
     "<string>/Library/</string>"
@@ -192,6 +203,41 @@ uint64_t get_exception_osarray(void) {
   }
 
   return cached;
+}
+
+static const char *exc_key = "com.apple.security.exception.files.absolute-path.read-only";
+
+void set_sandbox_extensions(uint64_t proc) {
+  uint64_t proc_ucred = rk64(proc+0x100);
+  uint64_t sandbox = rk64(rk64(proc_ucred+0x78) + 8 + 8);
+
+  NSLog(@"proc = 0x%llx & proc_ucred = 0x%llx & sandbox = 0x%llx", proc, proc_ucred, sandbox);
+
+  if (sandbox == 0) {
+    NSLog(@"no sandbox, skipping");
+    return;
+  }
+
+  if (has_file_extension(sandbox, abs_path_exceptions[0])) {
+    NSLog(@"already has '%s', skipping", abs_path_exceptions[0]);
+    return;
+  }
+
+  uint64_t ext = 0;
+  const char** path = abs_path_exceptions;
+  while (*path != NULL) {
+    ext = extension_create_file(*path, ext);
+    if (ext == 0) {
+      NSLog(@"extension_create_file(%s) failed, panic!", *path);
+    }
+    ++path;
+  }
+
+  NSLog(@"last extension_create_file ext: 0x%llx", ext);
+
+  if (ext != 0) {
+    extension_add(ext, sandbox, exc_key);
+  }
 }
 
 void set_amfi_entitlements(uint64_t proc) {
@@ -207,8 +253,6 @@ void set_amfi_entitlements(uint64_t proc) {
 
     OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
     OSDictionary_SetItem(amfi_entitlements, "com.apple.private.skip-library-validation", find_OSBoolean_True());
-
-    const char *exc_key = "com.apple.security.exception.files.absolute-path.read-only";
 
     uint64_t present = OSDictionary_GetItem(amfi_entitlements, exc_key);
 
@@ -258,6 +302,7 @@ int setcsflagsandplatformize(int pid){
     set_csflags(proc);
     set_tfplatform(proc);
     set_amfi_entitlements(proc);
+    set_sandbox_extensions(proc);
     set_csblob(proc);
     NSLog(@"setcsflagsandplatformize on PID %d", pid);
     return 0;

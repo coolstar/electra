@@ -22,5 +22,6 @@ uint64_t find_OSBoolean_True(void);
 uint64_t find_OSBoolean_False(void);
 uint64_t find_zone_map_ref(void);
 uint64_t find_osunserializexml(void);
+uint64_t find_smalloc(void);
 
 #endif
