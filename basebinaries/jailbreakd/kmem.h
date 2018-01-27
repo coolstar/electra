@@ -12,3 +12,5 @@ void wk32(uint64_t kaddr, uint32_t val);
 void wk64(uint64_t kaddr, uint64_t val);
 
 uint64_t zm_fix_addr(uint64_t addr);
+
+int kstrcmp(uint64_t kstr, const char* str);
