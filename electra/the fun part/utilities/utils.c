@@ -25,7 +25,7 @@ int run(const char *cmd) {
     };
 
     char *argv[] = {"sh", "-c", (char*)cmd, NULL};
-    rv = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
+    rv = posix_spawn(&pid, "/bootstrap/bin/sh", NULL, NULL, argv, environ);
 
     if (rv == 0) {
         if (waitpid(pid, &rv, 0) == -1)
