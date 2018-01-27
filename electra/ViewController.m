@@ -96,8 +96,27 @@ __END_DECLS
 
 @implementation ViewController
 
+- (void)checkVersion {
+    NSString *rawgitHistory = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"githistory" ofType:@"txt"] encoding:NSUTF8StringEncoding error:nil];
+    __block NSArray *gitHistory = [rawgitHistory componentsSeparatedByString:@"\n"];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0ul), ^{
+        NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://coolstar.org/electra/gitlatest.txt"]];
+        NSString *gitCommit = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        
+        if (![gitHistory containsObject:gitCommit]){
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Update Available!" message:@"An update for Electra is available! Please visit https://coolstar.org/electra/ on a computer to download the latest IPA!" preferredStyle:UIAlertControllerStyleAlert];
+                [alertController addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+                [self presentViewController:alertController animated:YES completion:nil];
+            });
+        }
+    });
+}
+
 - (void)viewDidLoad {
   [super viewDidLoad];
+    [self checkVersion];
+    
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     
     BOOL enable3DTouch = YES;
