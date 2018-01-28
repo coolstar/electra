@@ -134,7 +134,8 @@ static void ctor(void) {
     @autoreleasepool {
         if (NSBundle.mainBundle.bundleIdentifier == nil || ![NSBundle.mainBundle.bundleIdentifier isEqualToString:@"org.coolstar.SafeMode"]){
             safeMode = false;
-            if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"]){
+            NSString *processName = [[NSProcessInfo processInfo] processName];
+            if ([processName isEqualToString:@"backboardd"] || [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"]){
                 struct sigaction action;
                 memset(&action, 0, sizeof(action));
                 action.sa_sigaction = &SpringBoardSigHandler;
@@ -153,11 +154,11 @@ static void ctor(void) {
 
                 if (file_exist("/var/mobile/.sbinjectSafeMode")){
                     safeMode = true;
-                    unlink("/var/mobile/.sbinjectSafeMode");
-
-                    NSLog(@"Entering Safe Mode!");
-
-                    %init(SafeMode);
+                    if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"]){
+                        unlink("/var/mobile/.sbinjectSafeMode");
+                        NSLog(@"Entering Safe Mode!");
+                        %init(SafeMode);
+                    }
                 }
             }
 

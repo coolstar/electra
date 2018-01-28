@@ -12,10 +12,10 @@ Currently implemented:
 - amfi**d** fixing up
 - jailbreakd that keeps tfp0 task port open and runs a local server listening for commands
 - Basic dylib injection into running process
+- working setuid (after calling jailbreakd to fix it up)
 
 Planned:
 - Dpkg/APT port (and maybe Cydia?)
-- working setuid0
 - structure filesystem more like a traditional jailbreak
 
 If libproc.h doesn't exist, delete the line

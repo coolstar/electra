@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <sys/stat.h>
 #import "kern_utils.h"
 #import "kmem.h"
 #import "patchfinder64.h"
@@ -6,6 +7,9 @@
 #import "offsetof.h"
 #import "osobject.h"
 #import "sandbox.h"
+
+#define PROC_PIDPATHINFO_MAXSIZE  (4*MAXPATHLEN)
+int proc_pidpath(pid_t pid, void *buffer, uint32_t buffersize);
 
 #define TF_PLATFORM 0x400
 
@@ -80,26 +84,37 @@ uint64_t find_port(mach_port_name_t port){
   return port_addr;
 }
 
-int dumppid(int pd){
-  uint64_t proc = proc_find(pd, 3);
-  if (proc != 0) {
-    uid_t p_uid = rk32(proc + offsetof_p_uid);
-    gid_t p_gid = rk32(proc + offsetof_p_gid);
-    uid_t p_ruid = rk32(proc + offsetof_p_ruid);
-    gid_t p_rgid = rk32(proc + offsetof_p_rgid);
-
-    uint64_t ucred = rk64(proc + offsetof_p_ucred);
-    uid_t cr_uid = rk32(ucred + offsetof_ucred_cr_uid);
-    uid_t cr_ruid = rk32(ucred + offsetof_ucred_cr_ruid);
-    uid_t cr_svuid = rk32(ucred + offsetof_ucred_cr_svuid);
-
-    NSLog(@"Found PID %d", pd);
-    NSLog(@"UID: %d GID: %d RUID: %d RGID: %d", p_uid, p_gid, p_ruid, p_rgid);
-    NSLog(@"CR_UID: %d CR_RUID: %d CR_SVUID: %d", cr_uid, cr_ruid, cr_svuid);
-    return 0;
-  } else {
-    return 1;
-  }
+void fixupsetuid(int pid){
+    char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
+    bzero(pathbuf, sizeof(pathbuf));
+    
+    int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
+    if (ret < 0){
+        NSLog(@"Unable to get path for PID %d", pid);
+        return;
+    }
+    struct stat file_st;
+    if (lstat(pathbuf, &file_st) == -1){
+        NSLog(@"Unable to get stat for file %s", pathbuf);
+        return;
+    }
+    if (file_st.st_mode & S_ISUID){
+        uid_t fileUID = file_st.st_uid;
+        NSLog(@"Fixing up setuid for file owned by %ld", fileUID);
+        
+        uint64_t proc = proc_find(pid, 3);
+        if (proc != 0) {
+            uint64_t ucred = rk64(proc + offsetof_p_ucred);
+            
+            uid_t cr_svuid = rk32(ucred + offsetof_ucred_cr_svuid);
+            NSLog(@"Original sv_uid: %ld", cr_svuid);
+            wk32(ucred + offsetof_ucred_cr_svuid, fileUID);
+            NSLog(@"New sv_uid: %ld", fileUID);
+        }
+    } else {
+        NSLog(@"File %s is not setuid!", pathbuf);
+        return;
+    }
 }
 
 void set_csflags(uint64_t proc) {
@@ -187,6 +202,7 @@ const char* abs_path_exceptions[] = {
   // XXX there's some weird stuff about linking and special
   // handling for /private/var/mobile/* in sandbox
   "/private/var/mobile/Library",
+  "/private/var/mnt",
   NULL
 };
 
@@ -199,6 +215,7 @@ uint64_t get_exception_osarray(void) {
     "<string>/bootstrap/</string>"
     "<string>/Library/</string>"
     "<string>/private/var/mobile/Library/</string>"
+    "<string>/private/var/mnt/</string>"
     "</array>");
   }
 
