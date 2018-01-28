@@ -224,7 +224,7 @@ do { \
 		wk32(v_mount + offsetof_mnt_flag, v_flag & ~MNT_ROOTFS);
 		
 		char *nmz = strdup("/dev/disk0s1s1");
-        int rv = mount("apfs", "/", MNT_UPDATE, (void *)&nmz);
+                int rv = mount("apfs", "/", MNT_UPDATE, (void *)&nmz);
 		printf("remounting: %d\n", rv);
 		
 		v_mount = rk64(rootfs_vnode + offsetof_v_mount);
@@ -283,7 +283,7 @@ do { \
         unlink("/bootstrap/jailbreakd");
         
         rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("basebinaries.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
-        waitpid(pd, &rv, 0);
+        waitpid(pd, NULL, 0);
         
         printf("[fun] copied the required binaries into the right places\n");
     }

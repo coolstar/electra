@@ -3,7 +3,7 @@
 //  electra
 //
 //  Created by Jamie on 27/01/2018.
-//  Copyright © 2018 Electra Contributors. All rights reserved.
+//  Copyright © 2018 Electra Team. All rights reserved.
 //
 
 #include "utils.h"
@@ -25,7 +25,7 @@ int run(const char *cmd) {
     };
 
     char *argv[] = {"sh", "-c", (char*)cmd, NULL};
-    rv = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
+    rv = posix_spawn(&pid, "/bootstrap/bin/sh", NULL, NULL, argv, environ);
 
     if (rv == 0) {
         if (waitpid(pid, &rv, 0) == -1)
