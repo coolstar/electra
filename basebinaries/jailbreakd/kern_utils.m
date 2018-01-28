@@ -202,6 +202,7 @@ const char* abs_path_exceptions[] = {
   // XXX there's some weird stuff about linking and special
   // handling for /private/var/mobile/* in sandbox
   "/private/var/mobile/Library",
+  "/private/var/mnt",
   NULL
 };
 
@@ -214,6 +215,7 @@ uint64_t get_exception_osarray(void) {
     "<string>/bootstrap/</string>"
     "<string>/Library/</string>"
     "<string>/private/var/mobile/Library/</string>"
+    "<string>/private/var/mnt/</string>"
     "</array>");
   }
 
