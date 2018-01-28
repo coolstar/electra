@@ -317,6 +317,23 @@ do { \
     chmod("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0600);
     chown("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0, 0);
     
+    if (file_exists("/bootstrap/._amfid_payload.dylib")){
+        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/bootstrap", "-name", "._*", "-delete", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
+    if (file_exists("/Applications/Anemone.app/._Info.plist")){
+        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/Applications/Anemone.app", "-name", "._*", "-delete", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
+    if (file_exists("/Applications/SafeMode.app/._Info.plist")){
+        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/Applications/SafeMode.app", "-name", "._*", "-delete", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
+    if (file_exists("/usr/lib/SBInject/._AnemoneCore.dylib")){
+        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/usr/lib/SBInject", "-name", "._*", "-delete", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
+    
     bool runUICache = true;
     if (file_exists("/Applications/Anemone.app"))
         runUICache = false;
@@ -326,13 +343,14 @@ do { \
         if (file_exists("/System/Library/Themes")) {
             printf("removing /System/Library/Themes\n");
             
-            run("rm -rf /System/Library/Themes");
+            rv = posix_spawn(&pd, "/"BOOTSTRAP_PREFIX"/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/System/Library/Themes", NULL }, NULL);
+            waitpid(pd, NULL, 0);
             unlink("/"BOOTSTRAP_PREFIX"/Library/Themes");
             
             if (file_exists("/usr/lib/SBInject")) {
                 printf("removing /usr/lib/SBInject\n");
                 
-                run("rm -rf /usr/lib/SBInject");
+                rv = posix_spawn(&pd, "/bootstrap/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/usr/lib/SBInject", NULL }, NULL);
                 unlink("/"BOOTSTRAP_PREFIX"/Library/SBInject");
             }
         }
@@ -349,8 +367,11 @@ do { \
     }
     unlink(tar);
 
-    if (enable_tweaks && runUICache)
-        run("/$BOOTSTRAP_PREFIX/usr/local/bin/uicache");
+    if (enable_tweaks && runUICache){
+        const char *uicache = "/"BOOTSTRAP_PREFIX"/usr/local/bin/uicache";
+        rv = posix_spawn(&pd, uicache, NULL, NULL, (char **)&(const char*[]){ uicache, NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
     
     unlink("/usr/libexec/sftp-server");
     symlink("/"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server","/usr/libexec/sftp-server");
@@ -371,7 +392,8 @@ do { \
         unlink("/usr/lib/libsubstrate.dylib");
         cp("/usr/lib/libsubstrate.dylib","/bootstrap/usr/lib/libsubstrate.dylib");
         
-        run("rm -rf /Library/Frameworks/CydiaSubstrate.framework");
+        rv = posix_spawn(&pd, "/"BOOTSTRAP_PREFIX"/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/Library/Frameworks/CydiaSubstrate.framework", NULL }, NULL);
+        waitpid(pd, NULL, 0);
         
         mkdir("/Library/Frameworks/CydiaSubstrate.framework", 0755);
         symlink("/usr/lib/libsubstrate.dylib", "/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate");
@@ -383,12 +405,22 @@ do { \
         unlink("/usr/bin/killall");
         cp("/usr/bin/killall","/"BOOTSTRAP_PREFIX"/usr/bin/killall");
         chmod("/usr/bin/killall", 0755);
+        
+        if (!file_exists("/usr/lib/SBInject")) {
+            rename("/"BOOTSTRAP_PREFIX"/Library/SBInject", "/usr/lib/SBInject");
+            symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
+        } else {
+            rv = posix_spawn(&pd, "/bootstrap/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/"BOOTSTRAP_PREFIX"/Library/SBInject", NULL }, NULL);
+            waitpid(pd, NULL, 0);
+            symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
+        }
     }
     
     unlink("/bootstrap/unjailbreak.sh");
     cp("/bootstrap/unjailbreak.sh",progname("unjailbreak.sh"));
 	
-    run("launchctl load /$BOOTSTRAP_PREFIX/Library/LaunchDaemons/dropbear.plist");
+    rv = posix_spawn(&pd, "/bootstrap/bin/launchctl", NULL, NULL, (char **)&(const char*[]){ "launchctl", "load", "/"BOOTSTRAP_PREFIX"/Library/LaunchDaemons/dropbear.plist", NULL }, NULL);
+    waitpid(pd, NULL, 0);
 
     // MARK: - Cleanup
     
