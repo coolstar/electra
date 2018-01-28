@@ -11,59 +11,88 @@
 #include <CommonCrypto/CommonDigest.h>
 
 #include "fishhook.h"
+#include "cs_blobs.h"
 
-uint32_t swap_uint32(uint32_t val) {
-    val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF );
-    return (val << 16) | (val >> 16);
+static unsigned int
+hash_rank(const CodeDirectory *cd)
+{
+    uint32_t type = cd->hashType;
+    unsigned int n;
+    
+    for (n = 0; n < sizeof(hashPriorities) / sizeof(hashPriorities[0]); ++n)
+        if (hashPriorities[n] == type)
+            return n + 1;
+    return 0;    /* not supported */
 }
 
 // see ldid.cpp around line 1250
-uint8_t *get_hash(uint8_t* code_dir, uint32_t* size) {
-    uint32_t* code_dir_int = (uint32_t*)code_dir;
-
-    int cd_off = 0;
-    while (code_dir_int[cd_off] != 0) {
-        cd_off += 1;
-    }
-    cd_off += 1;
-    int actual_off = swap_uint32(code_dir_int[cd_off]);
-
-    code_dir_int = (uint32_t*)(code_dir+actual_off);
-    uint32_t realsize = swap_uint32(code_dir_int[1]);
-
-    if (swap_uint32(code_dir_int[0]) != 0xfade0c02) {
+uint8_t *get_hash(const CodeDirectory* directory, uint32_t* size) {
+    uint32_t realsize = ntohl(directory->length);
+    
+    if (ntohl(directory->magic) != 0xfade0c02) {
         NSLog(@"[get_hash] wtf, not CSMAGIC_CODEDIRECTORY?!");
         return NULL;
     }
-
+    
     // 2 uint32s in Blob (magic, length)
     // 7 uint32s in CodeDirectory (version, flags, ..., codeLimit)
     // 1 uint8 (hashSize)
-    uint8_t hash_type = ((uint8_t*)code_dir_int)[9*4 + 1];
-
-    // uint32_t realsize = 0;
-    // for (int j = 0; j < 1000; j++) {
-    //     if (swap_uint32(code_dir_int[j]) == 0xfade0c02) {
-    //         realsize = swap_uint32(code_dir_int[j+1]);
-    //         code_dir += 4*j;
-    //     }
-    // }
-
+    uint8_t hash_type = directory->hashType;
+    
     uint8_t *out = NULL;
     if (hash_type == 1) {
         *size = CC_SHA1_DIGEST_LENGTH;
         out = malloc(*size);
-        CC_SHA1(code_dir_int, realsize, out);
+        CC_SHA1(directory, realsize, out);
     } else if (hash_type == 2) {
         *size = CC_SHA256_DIGEST_LENGTH;
         out = malloc(*size);
-        CC_SHA256(code_dir_int, realsize, out);
+        CC_SHA256(directory, realsize, out);
     } else {
         NSLog(@"[get_hash] Unknown hash type: 0x%x", hash_type);
         out = NULL;
     }
-
+    
     return out;
+}
+
+//see cs_validate_csblob in xnu bsd/kern/ubc_subr.c
+uint8_t *parse_superblob(uint8_t *code_dir, uint32_t *size){
+    const CS_SuperBlob *sb = (const CS_SuperBlob *)code_dir;
+    uint32_t* code_dir_int = (uint32_t*)code_dir;
+    
+    uint8_t *highest_cd_hash = NULL;
+    uint8_t highest_cd_hash_rank = 0;
+    
+    for (int n = 0; n < ntohl(sb->count); n++){
+        const CS_BlobIndex *blobIndex = &sb->index[n];
+        uint32_t type = ntohl(blobIndex->type);
+        uint32_t offset = ntohl(blobIndex->offset);
+        if (ntohl(sb->length) < offset)
+            return NULL;
+        
+        const CodeDirectory *subBlob = (const CodeDirectory *)(const void *)(code_dir + offset);
+        size_t subLength = ntohl(subBlob->length);
+        
+        if (type == CSSLOT_CODEDIRECTORY || (type >= CSSLOT_ALTERNATE_CODEDIRECTORIES && type < CSSLOT_ALTERNATE_CODEDIRECTORY_LIMIT)) {
+            uint8_t rank = hash_rank(subBlob);
+            
+            if (hash_rank(subBlob) > highest_cd_hash_rank){
+                if (highest_cd_hash){
+                    free(highest_cd_hash);
+                    highest_cd_hash = NULL;
+                }
+                
+                uint32_t newSize;
+                uint8_t *cd_hash = get_hash(subBlob, &newSize);
+                
+                highest_cd_hash = cd_hash;
+                highest_cd_hash_rank = rank;
+                *size = newSize;
+            }
+        }
+    }
+    return highest_cd_hash;
 }
 
 uint8_t *get_code_directory(const char* name, uint64_t file_off) {
@@ -157,7 +186,7 @@ int fake_MISValidateSignatureAndCopyInfo(NSString* file, NSDictionary* options, 
             return origret;
 
         uint32_t size;
-        uint8_t* cd_hash = get_hash(code_directory, &size);
+        uint8_t* cd_hash = parse_superblob(code_directory, &size);
 
         if (!cd_hash)
             return origret;
