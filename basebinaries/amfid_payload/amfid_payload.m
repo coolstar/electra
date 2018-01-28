@@ -194,6 +194,8 @@ int fake_MISValidateSignatureAndCopyInfo(NSString* file, NSDictionary* options, 
         *info = [[NSMutableDictionary alloc] init];
         [*info setValue:[[NSData alloc] initWithBytes:cd_hash length:size] forKey:@"CdHash"];
         NSLog(@"ours: %@", *info);
+        
+        free(cd_hash);
     }
 
     return 0;
