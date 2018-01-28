@@ -6,7 +6,10 @@ https://coolstar.org/electra/
 
 This jailbreak is by the community, and was developed open source.
 
-## Currently implemented:
+## Roadmap
+See the [open issues](https://github.com/coolstar/electra/issues) for smaller things to work on.
+
+### Currently implemented:
 - setuid(0) - no panic
 - KCALL - call kernel functions given an address and up to six arguments
 - mount / as rw
@@ -16,7 +19,7 @@ This jailbreak is by the community, and was developed open source.
 - Basic dylib injection into running process
 - Working setuid (after calling jailbreakd to fix it up)
 
-## Planned:
+### Planned:
 - Dpkg/APT port (and maybe Cydia?)
 - Structure filesystem more like a traditional jailbreak
 
