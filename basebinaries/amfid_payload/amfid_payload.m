@@ -25,79 +25,74 @@ hash_rank(const CodeDirectory *cd)
     return 0;    /* not supported */
 }
 
-// see ldid.cpp around line 1250
-uint8_t *get_hash(const CodeDirectory* directory, uint32_t* size) {
+// 0 on success
+int get_hash(const CodeDirectory* directory, uint8_t dst[CS_CDHASH_LEN]) {
     uint32_t realsize = ntohl(directory->length);
     
-    if (ntohl(directory->magic) != 0xfade0c02) {
+    if (ntohl(directory->magic) != CSMAGIC_CODEDIRECTORY) {
         NSLog(@"[get_hash] wtf, not CSMAGIC_CODEDIRECTORY?!");
-        return NULL;
+        return 1;
     }
     
-    // 2 uint32s in Blob (magic, length)
-    // 7 uint32s in CodeDirectory (version, flags, ..., codeLimit)
-    // 1 uint8 (hashSize)
+    uint8_t out[CS_HASH_MAX_SIZE];
     uint8_t hash_type = directory->hashType;
-    
-    uint8_t *out = NULL;
-    if (hash_type == 1) {
-        *size = CC_SHA1_DIGEST_LENGTH;
-        out = malloc(*size);
-        CC_SHA1(directory, realsize, out);
-    } else if (hash_type == 2) {
-        *size = CC_SHA256_DIGEST_LENGTH;
-        out = malloc(*size);
-        CC_SHA256(directory, realsize, out);
-    } else {
-        NSLog(@"[get_hash] Unknown hash type: 0x%x", hash_type);
-        out = NULL;
+
+    switch (hash_type) {
+        case CS_HASHTYPE_SHA1:
+            CC_SHA1(directory, realsize, out);
+            break;
+
+        case CS_HASHTYPE_SHA256:
+        case CS_HASHTYPE_SHA256_TRUNCATED:
+            CC_SHA256(directory, realsize, out);
+            break;
+
+        case CS_HASHTYPE_SHA384:
+            CC_SHA384(directory, realsize, out);
+            break;
+
+        default:
+            NSLog(@"[get_hash] Unknown hash type: 0x%x", hash_type);
+            return 2;
     }
-    
-    return out;
+
+    memcpy(dst, out, CS_CDHASH_LEN);
+    return 0;
 }
 
-//see cs_validate_csblob in xnu bsd/kern/ubc_subr.c
-uint8_t *parse_superblob(uint8_t *code_dir, uint32_t *size){
+// see cs_validate_csblob in xnu bsd/kern/ubc_subr.c
+// 0 on success
+int parse_superblob(uint8_t *code_dir, uint8_t dst[CS_CDHASH_LEN]) {
+    int ret = 1;
     const CS_SuperBlob *sb = (const CS_SuperBlob *)code_dir;
-    uint32_t* code_dir_int = (uint32_t*)code_dir;
-    
-    uint8_t *highest_cd_hash = NULL;
     uint8_t highest_cd_hash_rank = 0;
     
     for (int n = 0; n < ntohl(sb->count); n++){
         const CS_BlobIndex *blobIndex = &sb->index[n];
         uint32_t type = ntohl(blobIndex->type);
         uint32_t offset = ntohl(blobIndex->offset);
-        if (ntohl(sb->length) < offset)
-            return NULL;
+        if (ntohl(sb->length) < offset) {
+            NSLog(@"offset of blob #%d overflows superblob length", n);
+            return 1;
+        }
         
-        const CodeDirectory *subBlob = (const CodeDirectory *)(const void *)(code_dir + offset);
-        size_t subLength = ntohl(subBlob->length);
+        const CodeDirectory *subBlob = (const CodeDirectory *)(code_dir + offset);
+        // size_t subLength = ntohl(subBlob->length);
         
         if (type == CSSLOT_CODEDIRECTORY || (type >= CSSLOT_ALTERNATE_CODEDIRECTORIES && type < CSSLOT_ALTERNATE_CODEDIRECTORY_LIMIT)) {
             uint8_t rank = hash_rank(subBlob);
             
-            if (hash_rank(subBlob) > highest_cd_hash_rank){
-                if (highest_cd_hash){
-                    free(highest_cd_hash);
-                    highest_cd_hash = NULL;
-                }
-                
-                uint32_t newSize;
-                uint8_t *cd_hash = get_hash(subBlob, &newSize);
-                
-                highest_cd_hash = cd_hash;
+            if (rank > highest_cd_hash_rank) {
+                ret = get_hash(subBlob, dst);
                 highest_cd_hash_rank = rank;
-                *size = newSize;
             }
         }
     }
-    return highest_cd_hash;
+
+    return ret;
 }
 
 uint8_t *get_code_directory(const char* name, uint64_t file_off) {
-    // Assuming it is a macho
-
     FILE* fd = fopen(name, "r");
 
     if (fd == NULL) {
@@ -182,27 +177,28 @@ int fake_MISValidateSignatureAndCopyInfo(NSString* file, NSDictionary* options, 
         uint64_t file_off = [file_offset unsignedLongLongValue];
 
         uint8_t* code_directory = get_code_directory([file UTF8String], file_off);
-        if (!code_directory)
+        if (!code_directory) {
+            NSLog(@"Can't get code_directory");
             return origret;
+        }
 
-        uint32_t size;
-        uint8_t* cd_hash = parse_superblob(code_directory, &size);
+        uint8_t cd_hash[CS_CDHASH_LEN];
 
-        if (!cd_hash)
+        if (parse_superblob(code_directory, cd_hash)) {
+            NSLog(@"Ours failed");
             return origret;
+        }
 
         *info = [[NSMutableDictionary alloc] init];
-        [*info setValue:[[NSData alloc] initWithBytes:cd_hash length:size] forKey:@"CdHash"];
+        [*info setValue:[[NSData alloc] initWithBytes:cd_hash length:sizeof(cd_hash)] forKey:@"CdHash"];
         NSLog(@"ours: %@", *info);
-        
-        free(cd_hash);
     }
 
     return 0;
 }
 
 void rebind_mis(void) {
-    void *libmis = dlopen("/usr/lib/libmis.dylib",RTLD_NOW); //Force binding now
+    void *libmis = dlopen("/usr/lib/libmis.dylib", RTLD_NOW); //Force binding now
     old_MISValidateSignatureAndCopyInfo = dlsym(libmis, "MISValidateSignatureAndCopyInfo");
     struct rebinding rebindings[] = {
         {"MISValidateSignatureAndCopyInfo", (void *)fake_MISValidateSignatureAndCopyInfo, (void **)&old_MISValidateSignatureAndCopyInfo_broken},

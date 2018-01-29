@@ -100,16 +100,16 @@ void fixupsetuid(int pid){
     }
     if (file_st.st_mode & S_ISUID){
         uid_t fileUID = file_st.st_uid;
-        NSLog(@"Fixing up setuid for file owned by %ld", fileUID);
+        NSLog(@"Fixing up setuid for file owned by %u", fileUID);
         
         uint64_t proc = proc_find(pid, 3);
         if (proc != 0) {
             uint64_t ucred = rk64(proc + offsetof_p_ucred);
             
             uid_t cr_svuid = rk32(ucred + offsetof_ucred_cr_svuid);
-            NSLog(@"Original sv_uid: %ld", cr_svuid);
+            NSLog(@"Original sv_uid: %u", cr_svuid);
             wk32(ucred + offsetof_ucred_cr_svuid, fileUID);
-            NSLog(@"New sv_uid: %ld", fileUID);
+            NSLog(@"New sv_uid: %u", fileUID);
         }
     } else {
         NSLog(@"File %s is not setuid!", pathbuf);
