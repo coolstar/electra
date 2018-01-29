@@ -1,4 +1,31 @@
-# Electra Jailbreak Tookit 
+## Thank Comes First
+Thanks to u/jakibaki for showing da wae to accomplish this.
+
+## Apps Excluded From Unsandboxing
+- PayPal
+- Showmax
+- Ticketmaster
+- Barclays
+- Barclaycard
+- Vipps
+- Halifax
+- Standard/Stanbic Bank
+- FNBApp
+- Lloyds Bank
+- Axis Mobile
+- SkyBell HD
+- Sparkasse
+- PushTAN
+- MARIO RUN
+- ﾊﾟｽﾜｰﾄﾞｶｰﾄﾞ
+- 우리은행 원터치개인뱅킹
+- ISP/페이북
+- PAYCO - 페이코, 혜택까지 똑똑한 간편결제
+
+## Request For More Apps
+Create a pull request that adds the apps' name and the bundle identifier (if possible) in the README.md.
+
+# Electra Jailbreak Tookit
 for iOS 11.0-11.1.2.
 https://coolstar.org/electra/
 
