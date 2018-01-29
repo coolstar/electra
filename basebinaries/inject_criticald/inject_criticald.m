@@ -288,7 +288,7 @@ uint64_t call_remote(mach_port_t task_port, void* fptr, int n_params, ...)
   // which will give the newly created thread the same TLS region as the main thread
 
 
-  _STRUCT_ARM_THREAD_STATE64 thread_state = {0};
+  _STRUCT_ARM_THREAD_STATE64 thread_state = {{0}};
   mach_msg_type_number_t thread_stateCnt = sizeof(thread_state)/4;
 
   // we'll start the thread running and call _pthread_set_self first:
