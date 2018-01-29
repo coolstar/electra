@@ -185,13 +185,14 @@ static void ctor(void) {
                 [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.barclaycardus.iphonesvc"]){
                     continue;
                     }
-
+else {
                     NSLog(@"Injecting %@ into %@", dylib, NSBundle.mainBundle.bundleIdentifier);
                     void *dl = dlopen([dylib UTF8String], RTLD_LAZY | RTLD_GLOBAL);
 
                     if (dl == NULL) {
                         NSLog(@"Injection failed: '%s'", dlerror());
                     }
+}
                 }
             }
         }
