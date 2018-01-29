@@ -63,6 +63,7 @@
     
     if (enable3DTouch){
         [notificationCenter addObserver:self selector:@selector(doit:) name:@"Jailbreak" object:nil];
+		[notificationCenter addObserver:self selector:@selector(startWithoutTweaks) name:@"Dropbear" object:nil];
     }
   // Do any additional setup after loading the view, typically from a nib.
 }
@@ -71,6 +72,11 @@
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Credits" message:@"Electra is brought to you by CoolStar, Ian Beer, theninjaprawn, stek29, Siguza and xerub.\n\nElectra includes the following software:\namfid patch by theninjaprawn\njailbreakd & tweak injection by CoolStar\nunlocknvram & sandbox fixes by stek29\nlibsubstitute by comex\nContains code from simject by angelXwind\nAnemone by CoolStar, kirb, isklikas and goeo\nPreferenceLoader by DHowett & rpetrich" preferredStyle:UIAlertControllerStyleAlert];
     [alertController addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alertController animated:YES completion:nil];
+}
+
+-(void)startWithoutTweaks{
+	[enableTweaks setOn:NO];
+	[self doit:nil];
 }
 
 - (IBAction)doit:(id)sender {
