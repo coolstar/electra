@@ -3,7 +3,7 @@ OUTDIR ?= bin
 
 .PHONY: all clean
 
-SUBPRJ = amfid_payload inject_criticald jailbreakd jailbreakd_client pspawn_payload
+SUBPRJ = amfid_payload inject_criticald jailbreakd jailbreakd_client pspawn_payload libjailbreak_xpc
 all: $(OUTDIR)/$(TARGET)
 
 MFLAGS = OUTDIR=$(abspath $(OUTDIR))

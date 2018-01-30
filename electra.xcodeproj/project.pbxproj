@@ -68,6 +68,7 @@
 		176718E0201CC80B00FDF1CF /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		17C749FF200E7297008B0276 /* dropbear.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = dropbear.plist; sourceTree = "<group>"; };
 		4A7B89682010255800CB6439 /* jailbreakd.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = jailbreakd.plist; sourceTree = "<group>"; };
+		4A9599892020080100A36B90 /* xpc_minimal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = xpc_minimal.h; sourceTree = "<group>"; };
 		6545304A200E8F600017BA60 /* remap_tfp_set_hsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = remap_tfp_set_hsp.h; sourceTree = "<group>"; };
 		6545304B200E8F600017BA60 /* remap_tfp_set_hsp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = remap_tfp_set_hsp.c; sourceTree = "<group>"; };
 		B003EB331FC583CA00C58441 /* kmem.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = kmem.c; sourceTree = "<group>"; };
@@ -234,6 +235,7 @@
 			children = (
 				176718D6201C9F0900FDF1CF /* codesign.h */,
 				176718DB201CA98800FDF1CF /* IOKit.h */,
+				4A9599892020080100A36B90 /* xpc_minimal.h */,
 			);
 			path = headers;
 			sourceTree = "<group>";

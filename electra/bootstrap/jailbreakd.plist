@@ -13,6 +13,11 @@
 		<key>KernelBase</key>
 		<string>0x746f6d6f68696d61</string>
 	</dict>
+	<key>MachServices</key>
+	<dict>
+		<key>org.coolstar.electra.jailbreakd.xpc</key>
+		<true/>
+	</dict>
 	<key>UserName</key>
 	<string>root</string>
 	<key>RunAtLoad</key>

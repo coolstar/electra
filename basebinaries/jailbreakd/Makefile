@@ -3,7 +3,7 @@ OUTDIR ?= bin
 
 CC      = xcrun -sdk iphoneos cc -arch arm64
 LDID    = ldid
-CFLAGS  = -Wall -Wno-unused-variable -Wno-unused-function
+CFLAGS  = -Wall -Wno-unused-variable -Wno-unused-function -I./apple_include
 
 .PHONY: all clean
 
@@ -20,7 +20,7 @@ $(OUTDIR):
 	mkdir -p $(OUTDIR)
 
 $(OUTDIR)/$(TARGET): *.c *.m | $(OUTDIR)
-	$(CC) -o $@ $^ -framework Foundation -framework IOKit $(CFLAGS)
+	$(CC) -o $@ $^ -framework Foundation -framework IOKit -framework LocalAuthentication $(CFLAGS)
 	$(LDID) -SEnt.plist $@
 
 clean:

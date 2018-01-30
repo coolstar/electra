@@ -16,7 +16,7 @@
 #include <pthread.h>
 #include <Foundation/Foundation.h>
 #include "fishhook.h"
-#include "common.h"
+#include "libjailbreak_xpc.h"
 
 #ifdef PSPAWN_PAYLOAD_DEBUG
 #define LAUNCHD_LOG_PATH "/tmp/pspawn_payload_launchd.log"
@@ -36,6 +36,13 @@ FILE *log_file;
 #else
 #define DEBUGLOG(fmt, args...)
 #endif
+
+int file_exist(const char *filename) {
+    struct stat buffer;
+    int r = stat(filename, &buffer);
+    return (r == 0);
+}
+
 
 #define PSPAWN_PAYLOAD_DYLIB "/bootstrap/pspawn_payload.dylib"
 #define AMFID_PAYLOAD_DYLIB "/bootstrap/amfid_payload.dylib"
@@ -143,7 +150,7 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
     }
 
     char *envp_inject = malloc(strlen("DYLD_INSERT_LIBRARIES=") + strlen(inject_me) + 1);
-    
+
     envp_inject[0] = '\0';
     strcat(envp_inject, "DYLD_INSERT_LIBRARIES=");
     strcat(envp_inject, inject_me);
@@ -185,9 +192,7 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
             log_file = NULL;
         }
 #endif
-        calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY);
-        // dont leak jbd fd into execd process
-        closejailbreakfd();
+        jb_oneshot_entitle_now(getpid(), FLAG_ENTITLE | FLAG_PLATFORMIZE | FLAG_SANDBOX | FLAG_SIGCONT | FLAG_WAIT_EXEC);
         origret = old(pid, path, file_actions, newattrp, argv, newenvp);
     } else {
         int gotpid;
@@ -195,7 +200,7 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
 
         if (origret == 0) {
             if (pid != NULL) *pid = gotpid;
-            calljailbreakd(gotpid, JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT);
+            jb_oneshot_entitle_now(gotpid, FLAG_ENTITLE | FLAG_PLATFORMIZE | FLAG_SANDBOX | FLAG_SIGCONT);
         }
     }
 

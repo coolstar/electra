@@ -1,4 +1,4 @@
-TARGET  = pspawn_payload.dylib
+TARGET  = libjailbreak_xpc.dylib
 OUTDIR ?= bin
 
 CC      = xcrun -sdk iphoneos cc -arch arm64
@@ -13,7 +13,7 @@ all: $(OUTDIR)/$(TARGET)
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
-    CFLAGS += -DPSPAWN_PAYLOAD_DEBUG
+    CFLAGS += -DLIBJAILBREAK_DEBUG
 else
     CFLAGS += -O2
 endif
@@ -21,8 +21,8 @@ endif
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
 
-$(OUTDIR)/$(TARGET): pspawn_payload.m fishhook.c libjailbreak_xpc.m | $(OUTDIR)
-	$(CC) -dynamiclib -o $@ $^ -framework Foundation $(CFLAGS)
+$(OUTDIR)/$(TARGET): libjailbreak_xpc.m | $(OUTDIR)
+	$(CC) -dynamiclib -o $@ $^ $(CFLAGS)
 	$(LDID) -S $@
 
 clean:

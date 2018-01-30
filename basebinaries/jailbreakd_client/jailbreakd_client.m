@@ -3,20 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-
-#define BUFSIZE 1024
-
-#define JAILBREAKD_COMMAND_ENTITLE 1
-#define JAILBREAKD_COMMAND_PLATFORMIZE 2
-#define JAILBREAKD_COMMAND_FIXUP_SETUID 6
-
-struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
-    uint8_t Command;
-    int32_t Pid;
-};
+#import <xpc/xpc.h>
 
 int main(int argc, char **argv, char **envp) {
     if (argc < 3){
@@ -36,55 +23,41 @@ int main(int argc, char **argv, char **envp) {
         return 0;
     }
 
-    int sockfd, portno, n;
-    int serverlen;
-    struct sockaddr_in serveraddr;
-    struct hostent *server;
-    char *hostname;
-    char buf[BUFSIZE];
-    
-    hostname = "127.0.0.1";
-    portno = 5;
-    
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0)
-        printf("ERROR opening socket\n");
-    
-    /* gethostbyname: get the server's DNS entry */
-    server = gethostbyname(hostname);
-    if (server == NULL) {
-        fprintf(stderr,"ERROR, no such host as %s\n", hostname);
-        exit(0);
-    }
-    
-    /* build the server's Internet address */
-    bzero((char *) &serveraddr, sizeof(serveraddr));
-    serveraddr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr,
-          (char *)&serveraddr.sin_addr.s_addr, server->h_length);
-    serveraddr.sin_port = htons(portno);
-    
-    /* get a message from the user */
-    bzero(buf, BUFSIZE);
+    xpc_connection_t connection = xpc_connection_create_mach_service("org.coolstar.electra.jailbreakd.xpc", NULL, 0);
+    xpc_connection_set_event_handler(connection, ^(xpc_object_t object) {
+        char *desc = xpc_copy_description(object);
+        printf("event handler: %s\n",  desc);
+        free(desc);
+    });
+    xpc_connection_resume(connection);
 
-    struct JAILBREAKD_ENTITLE_PID entitlePacket;
-    entitlePacket.Pid = atoi(argv[1]);
+    xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
 
     int arg = atoi(argv[2]);
-    if (arg == 1)
-        entitlePacket.Command = JAILBREAKD_COMMAND_ENTITLE;
-    else if (arg == 2)
-        entitlePacket.Command = JAILBREAKD_COMMAND_PLATFORMIZE;
-    else if (arg == 6)
-        entitlePacket.Command = JAILBREAKD_COMMAND_FIXUP_SETUID;
+    if (arg == 1) {
+        xpc_dictionary_set_string(message, "action", "entp");
+        xpc_dictionary_set_uint64(message, "flags", 7);
+    } else if (arg == 2) {
+        xpc_dictionary_set_string(message, "action", "entp");
+        xpc_dictionary_set_uint64(message, "flags", 15);
+    } else if (arg == 6) {
+        xpc_dictionary_set_string(message, "action", "suid");
+    }
 
-    memcpy(buf, &entitlePacket, sizeof(struct JAILBREAKD_ENTITLE_PID));
-    
-    serverlen = sizeof(serveraddr);
-    n = sendto(sockfd, buf, sizeof(struct JAILBREAKD_ENTITLE_PID), 0, (const struct sockaddr *)&serveraddr, serverlen);
-    if (n < 0)
-        printf("Error in sendto\n");
-    
+    xpc_dictionary_set_int64(message, "pid", atoi(argv[1]));
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        xpc_object_t reply = xpc_connection_send_message_with_reply_sync(connection, message);
+        char *desc = xpc_copy_description(reply);
+        printf("done: %s\n",  desc);
+        free(desc);
+
+        xpc_release(reply);
+        xpc_release(message);
+        exit(0);
+    });
+
+    dispatch_main();
 	return 0;
 }
 
