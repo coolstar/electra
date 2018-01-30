@@ -23,27 +23,25 @@
 #define JAILBREAKD_COMMAND_PLATFORMIZE 2
 #define JAILBREAKD_COMMAND_FIXUP_SETUID 6
 
-// Global socket variable
-static int sockfd;
-static struct hostent *server;
+struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
+    uint8_t Command;
+    int32_t Pid;
+};
 
 void send_packet(int command) {
+    int sockfd;
+    struct hostent *server;
     char buf[BUFSIZE];
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0)
+        printf("ERROR opening socket\n");
     
-    if (sockfd < 0) {
-        // No socket
-        sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-        if (sockfd < 0)
-            printf("ERROR opening socket\n");
-    }
-    
-    if (server == NULL) {
         /* gethostbyname: get the server's DNS entry */
-        server = gethostbyname(HOSTNAME);
-        if (server == NULL) {
-            fprintf(stderr,"ERROR, no such host as %s\n", HOSTNAME);
-            return;
-        }
+    server = gethostbyname(HOSTNAME);
+    if (server == NULL) {
+        fprintf(stderr,"ERROR, no such host as %s\n", HOSTNAME);
+        return;
     }
     
     /* build the server's Internet address */
@@ -78,5 +76,6 @@ void platformize(void) {
 
 void fix_setuid(void) {
     send_packet(JAILBREAKD_COMMAND_FIXUP_SETUID);
+    sleep(1);
     setuid(0);
 }
