@@ -8,6 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-void entitle(void);
-void platformize(void);
-void fix_setuid(void);
+void jb_entitle(void);
+void jb_platformize(void);
+void jb_fix_setuid(void);

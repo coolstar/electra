@@ -66,15 +66,15 @@ void send_packet(int command) {
     return;
 }
 
-void entitle(void) {
+void jb_entitle(void) {
     send_packet(JAILBREAKD_COMMAND_ENTITLE);
 }
 
-void platformize(void) {
+void jb_platformize(void) {
     send_packet(JAILBREAKD_COMMAND_PLATFORMIZE);
 }
 
-void fix_setuid(void) {
+void jb_fix_setuid(void) {
     send_packet(JAILBREAKD_COMMAND_FIXUP_SETUID);
     sleep(1);
     setuid(0);
