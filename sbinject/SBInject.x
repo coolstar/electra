@@ -164,12 +164,35 @@ static void ctor(void) {
 
             if (!safeMode){
                 for (NSString *dylib in sbinjectGenerateDylibList()) {
+            if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.showmax.main"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.ticketmaster.ios.TicketmasterApp"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.nintendo.zara"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"no.dnb.vipps"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.lloydstsb.LloydsTSB"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.axisbank.axismobile"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.yourcompany.PPClient"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.skybell.doorbell"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.halifax.mobilebank"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.standardbank.retail.banking"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.barclays.wealthdirect"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"za.co.fnb.connect.touch"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"jp.co.smbc.smotp"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.wooribank.smart.mpib"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.kvp.mobileisp"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.nhnent.TOASTPAY"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"de.starfinanz.Finanzstatus"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"de.starfinanz.pushTanApp"] ||
+                [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.barclaycardus.iphonesvc"]){
+                    continue;
+                    }
+else {
                     NSLog(@"Injecting %@ into %@", dylib, NSBundle.mainBundle.bundleIdentifier);
                     void *dl = dlopen([dylib UTF8String], RTLD_LAZY | RTLD_GLOBAL);
 
                     if (dl == NULL) {
                         NSLog(@"Injection failed: '%s'", dlerror());
                     }
+}
                 }
             }
         }

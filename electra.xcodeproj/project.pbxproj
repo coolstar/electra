@@ -597,7 +597,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = N78R6QBX22;
+				DEVELOPMENT_TEAM = 3R2SCR9JW4;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -607,7 +607,7 @@
 					"-framework",
 					IOKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.coolstar.electra;
+				PRODUCT_BUNDLE_IDENTIFIER = org.arinc9.electra;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -617,7 +617,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = N78R6QBX22;
+				DEVELOPMENT_TEAM = 3R2SCR9JW4;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -627,7 +627,7 @@
 					"-framework",
 					IOKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.coolstar.electra;
+				PRODUCT_BUNDLE_IDENTIFIER = org.arinc9.electra;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
