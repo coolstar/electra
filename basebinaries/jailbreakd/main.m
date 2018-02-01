@@ -90,7 +90,7 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
 
         /* see below! */
         if ((stuff & FLAG_WAIT_EXEC) == 0) {
-            dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
                 finish(stuff, pid);
             });
         }
@@ -127,14 +127,14 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
 
         /* hack: the pspawn payload won't exec until we reply, so just for
            FLAG_XPCPROXY, we'll pretend the operation completed before it actually does */
-        dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
             finish(stuff, pid);
         });
     }
 
     if (stuff & FLAG_DELAY) {
         dispatch_group_enter(waitgroup);
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
             dispatch_group_leave(waitgroup);
         });
     }
