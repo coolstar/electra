@@ -16,10 +16,11 @@
 #include <pthread.h>
 #include <Foundation/Foundation.h>
 #include "fishhook.h"
+#include <xpc/xpc.h>
 #include "libjailbreak_xpc.h"
 
 #ifdef PSPAWN_PAYLOAD_DEBUG
-#define LAUNCHD_LOG_PATH "/tmp/pspawn_payload_launchd.log"
+#define LAUNCHD_LOG_PATH "/var/root/pspawn_payload_launchd.log"
 // XXX multiple xpcproxies opening same file
 // XXX not closing logfile before spawn
 #define XPCPROXY_LOG_PATH "/tmp/pspawn_payload_xpcproxy.log"
@@ -43,6 +44,9 @@ int file_exist(const char *filename) {
     return (r == 0);
 }
 
+// LAUNCHD ONLY
+jb_connection_t global_jbc = NULL;
+// LAUNCHD ONLY
 
 #define PSPAWN_PAYLOAD_DYLIB "/bootstrap/pspawn_payload.dylib"
 #define AMFID_PAYLOAD_DYLIB "/bootstrap/amfid_payload.dylib"
@@ -184,6 +188,10 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
 
     int origret;
 
+// for logging purposes only
+#define FLAG_ATTRIBUTE_XPCPROXY (1 << 17)
+#define FLAG_ATTRIBUTE_LAUNCHD  (1 << 16)
+
     if (current_process == PROCESS_XPCPROXY) {
         // dont leak logging fd into execd process
 #ifdef PSPAWN_PAYLOAD_DEBUG
@@ -192,7 +200,7 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
             log_file = NULL;
         }
 #endif
-        jb_oneshot_entitle_now(getpid(), FLAG_ENTITLE | FLAG_PLATFORMIZE | FLAG_SANDBOX | FLAG_SIGCONT | FLAG_WAIT_EXEC);
+        jb_oneshot_entitle_now(getpid(), FLAG_ENTITLE | FLAG_PLATFORMIZE | FLAG_SANDBOX | FLAG_SIGCONT | FLAG_WAIT_EXEC | FLAG_ATTRIBUTE_XPCPROXY);
         origret = old(pid, path, file_actions, newattrp, argv, newenvp);
     } else {
         int gotpid;
@@ -200,9 +208,12 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
 
         if (origret == 0) {
             if (pid != NULL) *pid = gotpid;
-            jb_oneshot_entitle_now(gotpid, FLAG_ENTITLE | FLAG_PLATFORMIZE | FLAG_SANDBOX | FLAG_SIGCONT);
+            jb_entitle_now(global_jbc, gotpid, FLAG_ENTITLE | FLAG_PLATFORMIZE | FLAG_SANDBOX | FLAG_SIGCONT | FLAG_ATTRIBUTE_LAUNCHD);
         }
     }
+
+#undef FLAG_ATTRIBUTE_XPCPROXY
+#undef FLAG_ATTRIBUTE_LAUNCHD
 
     return origret;
 }
@@ -226,8 +237,55 @@ void rebind_pspawns(void) {
     rebind_symbols(rebindings, 2);
 }
 
+xpc_object_t xpc_pipe_create_from_port(mach_port_t, int);
+void stek(pid_t bootstrap_donor_pid) {
+    /* see: https://codeshare.frida.re/@stek29/launchd-xpc-hack/ */
+
+    void **once_table = dlsym(RTLD_DEFAULT, "_os_alloc_once_table") + 0x18;
+    void *xpg_gd__a = *(once_table);
+    void *xpg_gd__xpc_flags = *(once_table) + 0x8;
+    void *xpg_gd__task_bootstrap_port = *(once_table) + 0x10;
+    void *xpg_gd__xpc_bootstrap_pipe = *(once_table) + 0x18;
+
+    DEBUGLOG("stek:: %p %p %p %p", xpg_gd__a, xpg_gd__xpc_flags, xpg_gd__task_bootstrap_port, xpg_gd__xpc_bootstrap_pipe);
+
+    mach_port_t tfpwho = MACH_PORT_NULL;
+    task_for_pid(mach_task_self(), bootstrap_donor_pid, &tfpwho);
+
+    mach_port_t bp = MACH_PORT_NULL;
+    task_get_special_port(tfpwho, 4, &bp);
+
+    DEBUGLOG("stek:: tfp20 %x bp %x", tfpwho, bp);
+
+    memcpy(xpg_gd__task_bootstrap_port, &bp, 4);
+
+    // sync everywhere
+    task_set_special_port(mach_task_self(), 4, bp);
+    memcpy(dlsym(RTLD_DEFAULT, "bootstrap_port"), &bp, 4);
+
+    xpc_object_t bpipe = xpc_pipe_create_from_port(bp, 0);
+    memcpy(xpg_gd__xpc_bootstrap_pipe, &bpipe, 8);
+
+    uint64_t w = 0x1000000;
+    memcpy(xpg_gd__a, &w, 8); // likely initialization state
+}
+
 void* thd_func(void* arg){
-    NSLog(@"In a new thread!");
+    DEBUGLOG("In a new thread!");
+
+    int fd = open("/tmp/jailbreakd.pid", O_RDONLY, 0600);
+    if (fd < 0) {
+        DEBUGLOG("panic! jailbreakd's pidfile doesn't exist!!");
+    }
+    char pid[8] = {0};
+    read(fd, pid, 8);
+    pid_t donor = atoi(pid);
+    close(fd);
+
+    DEBUGLOG("who's that pokemon: %d", donor);
+
+    stek(donor);
+    global_jbc = jb_connect();
     rebind_pspawns();
     return NULL;
 }
