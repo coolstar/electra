@@ -90,7 +90,7 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
 
         /* see below! */
         if ((stuff & FLAG_WAIT_EXEC) == 0) {
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
                 finish(stuff, pid);
             });
         }
@@ -98,7 +98,9 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
 
     /* skip waitgroup nonsense if we can */
     if ((stuff & FLAG_WAITING_MASK) == 0) {
-        actually_do_what_were_supposed_to();
+        dispatch_async(dispatch_get_main_queue(), ^{
+            actually_do_what_were_supposed_to();
+        });
         return;
     }
 
@@ -108,6 +110,7 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         /* it's safe to get xpcproxy's path here --
            pspawn_payload won't exec until later */
         char *cmp_path = malloc(PROC_PIDPATHINFO_MAXSIZE);
+        memset(cmp_path, 0, PROC_PIDPATHINFO_MAXSIZE);
         proc_pidpath(pid, cmp_path, PROC_PIDPATHINFO_MAXSIZE);
 
         dispatch_group_async(waitgroup, dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
@@ -124,7 +127,7 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
 
         /* hack: the pspawn payload won't exec until we reply, so just for
            FLAG_XPCPROXY, we'll pretend the operation completed before it actually does */
-        dispatch_async(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
             finish(stuff, pid);
         });
     }
@@ -141,8 +144,8 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
 }
 
 static void do_suid_with_pid(pid_t pid, void(^finish)(pid_t pid)) {
-    fixupsetuid(pid);
     dispatch_async(dispatch_get_main_queue(), ^{
+        fixupsetuid(pid);
         finish(pid);
     });
 }
@@ -172,6 +175,7 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
             return;
         }
 
+        // TODO: use csops to restrict custom pid to entitlement?
         pid_t reqpid = (pid_t)xpc_dictionary_get_int64(msg, "pid");
         if (reqpid == 0) {
             reqpid = xpc_connection_get_pid(peer);
@@ -231,6 +235,15 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
 int main(int argc, char **argv, char **envp) {
     NSLog(@"jailbreakd: start");
 
+    unlink("/tmp/jailbreakd.pid");
+    int fd = open("/tmp/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
+    char mmmm[8] = {0};
+    int sz = snprintf(mmmm, 8, "%d", getpid());
+    write(fd, mmmm, sz);
+    close(fd);
+
+    NSLog(@"jailbreakd: dumped pid");
+
     kernel_base = strtoull(getenv("KernelBase"), NULL, 16);
     remove_memory_limit();
 
@@ -247,8 +260,11 @@ int main(int argc, char **argv, char **envp) {
     init_kexecute();
 
     @autoreleasepool {
+        /* About concurrency:
+             kernel calls run on the main thread ONLY. Everything else can run in dispatch global queues. */
         xpc_connection_t connection = xpc_connection_create_mach_service(
-            "org.coolstar.electra.jailbreakd.xpc", dispatch_get_main_queue(), XPC_CONNECTION_MACH_SERVICE_LISTENER);
+            "com.apple.uikit.viewservice.xxx.dainsleif.xpc",
+            NULL, XPC_CONNECTION_MACH_SERVICE_LISTENER);
         if (!connection) {
             NSLog(@"jailbreakd: no XPC service");
             xpc_release(connection);

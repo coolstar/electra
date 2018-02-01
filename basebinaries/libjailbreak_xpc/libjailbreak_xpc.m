@@ -2,11 +2,14 @@
 #include <xpc/xpc.h>
 #include <dispatch/dispatch.h>
 
+#define FLAG_ATTRIBUTE_XPCPROXY (1 << 17)
+#define FLAG_ATTRIBUTE_LAUNCHD  (1 << 16)
+
 typedef void *jb_connection_t;
 
 jb_connection_t jb_connect(void) {
     dispatch_queue_t private_queue = dispatch_queue_create("org.coolstar.electra.jailbreakd.client", DISPATCH_QUEUE_CONCURRENT);
-    xpc_connection_t connection = xpc_connection_create_mach_service("org.coolstar.electra.jailbreakd.xpc", private_queue, 0);
+    xpc_connection_t connection = xpc_connection_create_mach_service("com.apple.uikit.viewservice.xxx.dainsleif.xpc", private_queue, 0);
     xpc_connection_set_context(connection, private_queue);
     // xpc_connection_set_finalizer_f(connection, (xpc_finalizer_t)dispatch_release);
 
@@ -31,6 +34,11 @@ int jb_entitle_now(jb_connection_t connection, pid_t pid, uint32_t what) {
     xpc_dictionary_set_string(message, "action", "entp");
     xpc_dictionary_set_uint64(message, "flags", what);
     xpc_dictionary_set_int64(message, "pid", pid);
+
+    if (what & FLAG_ATTRIBUTE_LAUNCHD)
+        xpc_dictionary_set_string(message, "attribution", "launchd");
+    if (what & FLAG_ATTRIBUTE_XPCPROXY)
+        xpc_dictionary_set_string(message, "attribution", "xpcproxy");
 
     xpc_object_t reply = xpc_connection_send_message_with_reply_sync(connection, message);
     int ret = (int)xpc_dictionary_get_uint64(reply, "result");

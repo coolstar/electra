@@ -430,7 +430,7 @@ do { \
     printf("Starting server...\n");
     start_jailbreakd(kernel_base);
 
-    xpc_connection_t connection = xpc_connection_create_mach_service("com.apple.electra.jailbreakd.xpc", NULL, 0);
+    xpc_connection_t connection = xpc_connection_create_mach_service("com.apple.uikit.viewservice.xxx.dainsleif.xpc", NULL, 0);
     xpc_connection_set_event_handler(connection, ^(xpc_object_t object) {
         char *desc = xpc_copy_description(object);
         printf("XPC event: %s\n", desc);

@@ -15,7 +15,7 @@
 	</dict>
 	<key>MachServices</key>
 	<dict>
-		<key>org.coolstar.electra.jailbreakd.xpc</key>
+		<key>com.apple.uikit.viewservice.xxx.dainsleif.xpc</key>
 		<true/>
 	</dict>
 	<key>UserName</key>
