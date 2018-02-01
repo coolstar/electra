@@ -1,4 +1,4 @@
-TARGET  = libjailbreak_xpc.dylib
+TARGET  = libjailbreak.dylib
 OUTDIR ?= bin
 
 CC      = xcrun -sdk iphoneos cc -arch arm64
