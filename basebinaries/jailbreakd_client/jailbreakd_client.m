@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-#import <xpc/xpc.h>
+#include "libjailbreak_xpc.h"
 
 int main(int argc, char **argv, char **envp) {
     if (argc < 3){
@@ -23,42 +23,22 @@ int main(int argc, char **argv, char **envp) {
         return 0;
     }
 
-    xpc_connection_t connection = xpc_connection_create_mach_service("org.coolstar.electra.jailbreakd.xpc", NULL, 0);
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t object) {
-        char *desc = xpc_copy_description(object);
-        printf("event handler: %s\n",  desc);
-        free(desc);
-    });
-    xpc_connection_resume(connection);
+    jb_connection_t jbc = jb_connect();
 
-    xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-
+    pid_t pid = atoi(argv[1]);
     int arg = atoi(argv[2]);
+    int ret = 0;
+
     if (arg == 1) {
-        xpc_dictionary_set_string(message, "action", "entp");
-        xpc_dictionary_set_uint64(message, "flags", 7);
+        ret = jb_entitle_now(jbc, pid, 7 | FLAG_WAIT_EXEC);
     } else if (arg == 2) {
-        xpc_dictionary_set_string(message, "action", "entp");
-        xpc_dictionary_set_uint64(message, "flags", 15);
+        ret = jb_entitle_now(jbc, pid, 15);
     } else if (arg == 6) {
-        xpc_dictionary_set_string(message, "action", "suid");
+        ret = jb_fix_setuid_now(jbc, pid);
     }
 
-    xpc_dictionary_set_int64(message, "pid", atoi(argv[1]));
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        xpc_object_t reply = xpc_connection_send_message_with_reply_sync(connection, message);
-        char *desc = xpc_copy_description(reply);
-        printf("done: %s\n",  desc);
-        free(desc);
-
-        xpc_release(reply);
-        xpc_release(message);
-        exit(0);
-    });
-
-    dispatch_main();
-	return 0;
+    jb_disconnect(jbc);
+    return ret;
 }
 
 // vim:ft=objc
