@@ -27,43 +27,43 @@ struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID {
     int32_t Pid;
 };
 
-int jailbreakd_sockfd = -1;
-struct sockaddr_in jailbreakd_serveraddr;
-int jailbreakd_serverlen;
-struct hostent *jailbreakd_server;
+int sockfd = -1;
+struct sockaddr_in serveraddr;
+int serverlen;
+struct hostent *server;
 
 void open_socket() {
     char *hostname = "127.0.0.1";
     int portno = 5;
     
-    jailbreakd_sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (jailbreakd_sockfd < 0)
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0)
         printf("ERROR opening socket\n");
     
     /* gethostbyname: get the server's DNS entry */
-    jailbreakd_server = gethostbyname(hostname);
-    if (jailbreakd_server == NULL) {
+    server = gethostbyname(hostname);
+    if (server == NULL) {
         fprintf(stderr,"ERROR, no such host as %s\n", hostname);
         return;
     }
     
     /* build the server's Internet address */
-    bzero((char *) &jailbreakd_serveraddr, sizeof(jailbreakd_serveraddr));
-    jailbreakd_serveraddr.sin_family = AF_INET;
-    bcopy((char *)jailbreakd_server->h_addr,
-          (char *)&jailbreakd_serveraddr.sin_addr.s_addr, jailbreakd_server->h_length);
-    jailbreakd_serveraddr.sin_port = htons(portno);
+    bzero((char *) &serveraddr, sizeof(serveraddr));
+    serveraddr.sin_family = AF_INET;
+    bcopy((char *)server->h_addr,
+          (char *)&serveraddr.sin_addr.s_addr, server->h_length);
+    serveraddr.sin_port = htons(portno);
     
-    jailbreakd_serverlen = sizeof(jailbreakd_serveraddr);
+    serverlen = sizeof(serveraddr);
 }
 
 void close_socket() {
-    close(jailbreakd_sockfd);
-    jailbreakd_sockfd = -1;
+    close(sockfd);
+    sockfd = -1;
 }
 
 void call_jailbreakd(pid_t pid, int command) {
-    if (jailbreakd_sockfd == -1)
+    if (sockfd == -1)
         open_socket();
     
     char buf[BUFSIZE];
@@ -77,7 +77,7 @@ void call_jailbreakd(pid_t pid, int command) {
     
     memcpy(buf, &packet, sizeof(packet));
     
-    int rv = sendto(jailbreakd_sockfd, buf, sizeof(struct JAILBREAKD_ENTITLE_PID), 0, (const struct sockaddr *)&jailbreakd_serveraddr, jailbreakd_serverlen);
+    ssize_t rv = sendto(sockfd, buf, sizeof(struct JAILBREAKD_ENTITLE_PID), 0, (const struct sockaddr *)&serveraddr, serverlen);
     if (rv < 0)
         printf("Error in sendto\n");
     close_socket();
