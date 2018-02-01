@@ -20,7 +20,7 @@
 #include "libjailbreak_xpc.h"
 
 #ifdef PSPAWN_PAYLOAD_DEBUG
-#define LAUNCHD_LOG_PATH "/var/root/pspawn_payload_launchd.log"
+#define LAUNCHD_LOG_PATH "/tmp/pspawn_payload_launchd.log"
 // XXX multiple xpcproxies opening same file
 // XXX not closing logfile before spawn
 #define XPCPROXY_LOG_PATH "/tmp/pspawn_payload_xpcproxy.log"
@@ -243,11 +243,10 @@ void stek(pid_t bootstrap_donor_pid) {
 
     void **once_table = dlsym(RTLD_DEFAULT, "_os_alloc_once_table") + 0x18;
     void *xpg_gd__a = *(once_table);
-    void *xpg_gd__xpc_flags = *(once_table) + 0x8;
     void *xpg_gd__task_bootstrap_port = *(once_table) + 0x10;
     void *xpg_gd__xpc_bootstrap_pipe = *(once_table) + 0x18;
 
-    DEBUGLOG("stek:: %p %p %p %p", xpg_gd__a, xpg_gd__xpc_flags, xpg_gd__task_bootstrap_port, xpg_gd__xpc_bootstrap_pipe);
+    DEBUGLOG("stek:: %p %p %p", xpg_gd__a, xpg_gd__task_bootstrap_port, xpg_gd__xpc_bootstrap_pipe);
 
     mach_port_t tfpwho = MACH_PORT_NULL;
     task_for_pid(mach_task_self(), bootstrap_donor_pid, &tfpwho);
