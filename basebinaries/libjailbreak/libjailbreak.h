@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#include <stdint.h>
+#include <sys/types.h>
 
-void jb_entitle(void);
-void jb_platformize(void);
-void jb_fix_setuid(void);
+void jb_entitle(pid_t pid);
+void jb_platformize(pid_t pid);
+void jb_fix_setuid(pid_t pid);
