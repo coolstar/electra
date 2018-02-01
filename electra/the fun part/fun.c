@@ -368,7 +368,7 @@ do { \
     unlink(tar);
 
     if (enable_tweaks && runUICache){
-        const char *uicache = "/"BOOTSTRAP_PREFIX"/usr/local/bin/uicache";
+        const char *uicache = "/"BOOTSTRAP_PREFIX"/usr/bin/uicache";
         rv = posix_spawn(&pd, uicache, NULL, NULL, (char **)&(const char*[]){ uicache, NULL }, NULL);
         waitpid(pd, NULL, 0);
     }
@@ -414,6 +414,9 @@ do { \
             waitpid(pd, NULL, 0);
             symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
         }
+        
+        unlink("/Library/Themes");
+        symlink("/"BOOTSTRAP_PREFIX"/Library/Themes", "/Library/Themes");
     }
     
     unlink("/bootstrap/unjailbreak.sh");

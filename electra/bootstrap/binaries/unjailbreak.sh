@@ -10,6 +10,7 @@ read -p "Press enter to continue. Press Ctrl + C to exit"
 rm -rf /Applications/Anemone.app
 rm -rf /Applications/SafeMode.app
 rm /usr/lib/SBInject.dylib
+rm -rf /usr/lib/SBInject
 rm /usr/lib/libsubstitute.0.dylib
 rm /usr/lib/libsubstitute.dylib
 rm /usr/lib/libsubstrate.dylib

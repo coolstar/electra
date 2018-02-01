@@ -44,3 +44,9 @@ This jailbreak was written by open source contributors. See [the contributors li
 * Extensive contributions by stek29 (sandbox patches, lot's of other stuff)
 
 Please don't rip off any of the code in the jailbreak, but if you do, please credit @theninjaprawn and @coolstarorg.
+
+## License
+
+Note: the async_awake exploit by Ian Beer is not licensed
+
+However, for the additions by Electra, see LICENSE.md
