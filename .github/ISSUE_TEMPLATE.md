@@ -11,6 +11,8 @@
 
   Before opening an issue make sure you are using the latest version of Electra
   Newest version available at https://coolstar.org/electra/
+  
+  Please provide any relevant logs, error output, etc. via https://ghostbin.com/ links
 -->
 
   * iOS version:
