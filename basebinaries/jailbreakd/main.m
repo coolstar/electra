@@ -284,7 +284,18 @@ int main(int argc, char **argv, char **envp) {
     // Get the slide
     kernel_slide = kernel_base - 0xFFFFFFF007004000;
     NSLog(@"jailbreakd: slide: 0x%016llx", kernel_slide);
+
+    // prime offset caches
+    find_allproc();
+    find_add_x0_x0_0x40_ret();
+    find_OSBoolean_True();
+    find_OSBoolean_False();
+    find_zone_map_ref();
+    find_osunserializexml();
+    find_smalloc();
     init_kexecute();
+
+    term_kernel();
 
     @autoreleasepool {
         /* About concurrency:
