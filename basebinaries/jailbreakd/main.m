@@ -109,20 +109,26 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
     if (stuff & FLAG_WAIT_EXEC) {
         /* it's safe to get xpcproxy's path here --
            pspawn_payload won't exec until later */
-        char *cmp_path = malloc(PROC_PIDPATHINFO_MAXSIZE);
-        memset(cmp_path, 0, PROC_PIDPATHINFO_MAXSIZE);
-        proc_pidpath(pid, cmp_path, PROC_PIDPATHINFO_MAXSIZE);
+        // char *cmp_path = malloc(PROC_PIDPATHINFO_MAXSIZE);
+        // memset(cmp_path, 0, PROC_PIDPATHINFO_MAXSIZE);
+        // proc_pidpath(pid, cmp_path, PROC_PIDPATHINFO_MAXSIZE);
 
         dispatch_group_async(waitgroup, dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
             char pathbuf[PROC_PIDPATHINFO_MAXSIZE] = {0};
+            int32_t timeout = 1000000;
 
             NSLog(@"Waiting to ensure it's not xpcproxy anymore...");
             int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-            while (ret > 0 && strcmp(pathbuf, cmp_path) == 0){
+            while (timeout > 0 && ret > 0 && strcmp(pathbuf, "/usr/libexec/xpcproxy") == 0){
                 proc_pidpath(pid, pathbuf, sizeof(pathbuf));
+                timeout -= 100;
                 usleep(100);
             }
-            free(cmp_path);
+
+            if (timeout <= 0) {
+                NSLog(@"Warning! exited because of timeout!");
+            }
+            // free(cmp_path);
         });
 
         /* hack: the pspawn payload won't exec until we reply, so just for
@@ -185,37 +191,55 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
         if (!strcmp(action, JAILBREAKD_ACTION_ENTITLE)) {
             uint64_t flags = xpc_dictionary_get_uint64(msg, "flags");
             do_entp_stuff_with_pid(flags, reqpid, ^(uint64_t stuff, pid_t pid) {
+                char flgstr[7] = {0};
+                flags_to_string(flags, flgstr);
+                NSLog(@"jailbreakd: entitle operations: %s complete for pid %d", flgstr, reqpid);
+
                 xpc_object_t reply = xpc_dictionary_create_reply(msg);
+                if (!reply) {
+                    NSLog(@"jailbreakd: can't create reply. did the other end hang up too soon??");
+                    xpc_release(msg);
+                    return;
+                }
 
                 xpc_dictionary_set_string(reply, "action", action);
                 xpc_dictionary_set_uint64(reply, "flags", flags);
                 xpc_dictionary_set_uint64(reply, "result", 1);
 
-                char flgstr[7] = {0};
-                flags_to_string(flags, flgstr);
-                NSLog(@"jailbreakd: entitle operations: %s complete for pid %d", flgstr, reqpid);
                 xpc_connection_send_message(xpc_dictionary_get_remote_connection(msg), reply);
                 xpc_release(reply);
                 xpc_release(msg);
             });
         } else if (!strcmp(action, JAILBREAKD_ACTION_FIX_SETUID)) {
             do_suid_with_pid(reqpid, ^(pid_t pid) {
+                NSLog(@"jailbreakd: suid complete for pid %d", reqpid);
+
                 xpc_object_t reply = xpc_dictionary_create_reply(msg);
+                if (!reply) {
+                    NSLog(@"jailbreakd: can't create reply. did the other end hang up too soon??");
+                    xpc_release(msg);
+                    return;
+                }
 
                 xpc_dictionary_set_string(reply, "action", action);
                 xpc_dictionary_set_uint64(reply, "result", 1);
 
-                NSLog(@"jailbreakd: suid complete for pid %d", reqpid);
                 xpc_connection_send_message(xpc_dictionary_get_remote_connection(msg), reply);
                 xpc_release(reply);
                 xpc_release(msg);
             });
         } else if (!strcmp(action, JAILBREAKD_ACTION_PING)) {
+            NSLog(@"jailbreakd: ping complete for pid %d", reqpid);
             xpc_object_t reply = xpc_dictionary_create_reply(msg);
+            if (!reply) {
+                NSLog(@"jailbreakd: can't create reply. did the other end hang up too soon??");
+                xpc_release(msg);
+                return;
+            }
+
             xpc_dictionary_set_string(reply, "action", action);
             xpc_dictionary_set_uint64(reply, "result", 1);
 
-            NSLog(@"jailbreakd: ping complete for pid %d", reqpid);
             xpc_connection_send_message(xpc_dictionary_get_remote_connection(msg), reply);
             xpc_release(reply);
             xpc_release(msg);
@@ -224,9 +248,12 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
 
             NSLog(@"jailbreakd: exiting for pid %d!", reqpid);
 
-            term_kernel();
             term_kexecute();
             exit(0);
+        } else {
+            NSLog(@"jailbreakd: invalid action! %s", action);
+            xpc_release(msg);
+            xpc_connection_cancel(peer);
         }
     });
     xpc_connection_resume(who);
@@ -267,7 +294,6 @@ int main(int argc, char **argv, char **envp) {
             NULL, XPC_CONNECTION_MACH_SERVICE_LISTENER);
         if (!connection) {
             NSLog(@"jailbreakd: no XPC service");
-            xpc_release(connection);
             return 0;
         }
 
