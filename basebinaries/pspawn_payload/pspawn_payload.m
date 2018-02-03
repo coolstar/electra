@@ -208,7 +208,9 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
 
         if (origret == 0) {
             if (pid != NULL) *pid = gotpid;
-            jb_entitle_now(global_jbc, gotpid, FLAG_ENTITLE | FLAG_PLATFORMIZE | FLAG_SANDBOX | FLAG_SIGCONT | FLAG_ATTRIBUTE_LAUNCHD);
+            jb_entitle(global_jbc, gotpid, FLAG_ENTITLE | FLAG_PLATFORMIZE | FLAG_SANDBOX | FLAG_SIGCONT | FLAG_ATTRIBUTE_LAUNCHD, ^(int result) {
+                NSLog(@"gyuuuu");
+            });
         }
     }
 

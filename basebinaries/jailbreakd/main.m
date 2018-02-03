@@ -5,7 +5,7 @@
 #include "kern_utils.h"
 #include "patchfinder64.h"
 
-#define PROC_PIDPATHINFO_MAXSIZE  (4*MAXPATHLEN)
+#define PROC_PIDPATHINFO_MAXSIZE  (1024)
 int proc_pidpath(pid_t pid, void *buffer, uint32_t buffersize);
 
 #define MEMORYSTATUS_CMD_SET_JETSAM_TASK_LIMIT 6
@@ -113,20 +113,17 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         // memset(cmp_path, 0, PROC_PIDPATHINFO_MAXSIZE);
         // proc_pidpath(pid, cmp_path, PROC_PIDPATHINFO_MAXSIZE);
 
-        dispatch_group_async(waitgroup, dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+        dispatch_group_async(waitgroup, dispatch_get_main_queue(), ^{
             char pathbuf[PROC_PIDPATHINFO_MAXSIZE] = {0};
-            int32_t timeout = 1000000;
 
             NSLog(@"Waiting to ensure it's not xpcproxy anymore...");
             int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-            while (timeout > 0 && ret > 0 && strcmp(pathbuf, "/usr/libexec/xpcproxy") == 0){
-                proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-                timeout -= 100;
-                usleep(100);
-            }
+            NSLog(@"proc_pidpath %d -> %d %s", pid, ret, pathbuf);
 
-            if (timeout <= 0) {
-                NSLog(@"Warning! exited because of timeout!");
+            while (ret > 0 && strcmp(pathbuf, "/usr/libexec/xpcproxy") == 0){
+                ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
+                NSLog(@"proc_pidpath %d -> %d %s", pid, ret, pathbuf);
+                usleep(100);
             }
             // free(cmp_path);
         });
