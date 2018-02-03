@@ -21,7 +21,7 @@ endif
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
 
-$(OUTDIR)/$(TARGET): pspawn_payload.m fishhook.c libjailbreak_xpc.m | $(OUTDIR)
+$(OUTDIR)/$(TARGET): common.c pspawn_payload.m fishhook.c | $(OUTDIR)
 	$(CC) -dynamiclib -o $@ $^ -framework Foundation $(CFLAGS)
 	$(LDID) -S $@
 

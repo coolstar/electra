@@ -433,23 +433,10 @@ do { \
     printf("Starting server...\n");
     start_jailbreakd(kernel_base);
 
-    xpc_connection_t connection = xpc_connection_create_mach_service("com.apple.uikit.viewservice.xxx.dainsleif.xpc", NULL, 0);
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t object) {
-        char *desc = xpc_copy_description(object);
-        printf("XPC event: %s\n", desc);
-        free(desc);
-    });
-    xpc_connection_resume(connection);
-
-    xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-    xpc_dictionary_set_string(message, "action", "ping");
-
-    xpc_connection_send_message_with_reply_sync(connection, message);
-    // jailbreakd is alive past this point
-    xpc_connection_cancel(connection);
-
-    // XXX: we leak connection and message because i haven't bothered to
-    // pull the right declaration for xpc_release out of apple's headers
+    while (!file_exists("/var/tmp/jailbreakd.pid")){
+        printf("Waiting for jailbreakd...\n");
+        usleep(100000); //100 ms
+    }
 
     update_springboard_plist();
     
