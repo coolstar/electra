@@ -23,6 +23,8 @@
 
 int start_jailbreakd(uint64_t kernel_base) {
     unlink("/var/tmp/jailbreakd.pid");
+    unlink("/var/log/jailbreakd-stderr.log");
+    unlink("/var/log/jailbreakd-stdout.log");
     
     NSData *blob = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"jailbreakd" ofType:@"plist"]];
     NSMutableDictionary *job = [NSPropertyListSerialization propertyListWithData:blob options:NSPropertyListMutableContainers format:nil error:nil];

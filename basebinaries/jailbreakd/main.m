@@ -12,6 +12,10 @@
 #include "kern_utils.h"
 #include "patchfinder64.h"
 
+#define CS_OPS_STATUS       0   /* return status */
+#define CS_DEBUGGED         0x10000000  /* process is currently or has previously been debugged and allowed to run with invalid pages */
+int csops(pid_t pid, unsigned int  ops, void * useraddr, size_t usersize);
+
 #define PROC_PIDPATHINFO_MAXSIZE  (1024)
 int proc_pidpath(pid_t pid, void *buffer, uint32_t buffersize);
 
@@ -97,8 +101,22 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
     void (^actually_do_what_were_supposed_to)(void) = ^{
         /* FIXME: respect flags */
         setcsflagsandplatformize(pid);
+        
+        uint32_t flags;
+        csops(pid, CS_OPS_STATUS, &flags, 0);
+        NSLog(@"CSFlags for PID %d: 0x%x", pid, flags);
+        
+        if ((flags & CS_DEBUGGED) == 0){
+            NSLog(@"%@",@"Trying again...");
+            usleep(100 * 1000);
+            
+            setcsflagsandplatformize(pid);
+            csops(pid, CS_OPS_STATUS, &flags, 0);
+            NSLog(@"CSFlags for PID %d: 0x%x", pid, flags);
+        }
 
         if (stuff & FLAG_SIGCONT) {
+            NSLog(@"Sending SIGCONT to %d", pid);
             kill(pid, SIGCONT);
         }
 
