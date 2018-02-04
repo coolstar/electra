@@ -17,6 +17,8 @@
 #include <Foundation/Foundation.h>
 #include "fishhook.h"
 #include "common.h"
+#include <xpc/xpc.h>
+#include "libjailbreak_xpc.h"
 
 #ifdef PSPAWN_PAYLOAD_DEBUG
 #define LAUNCHD_LOG_PATH "/tmp/pspawn_payload_launchd.log"
@@ -177,6 +179,8 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
     
     int origret;
     
+#define FLAG_ATTRIBUTE_XPCPROXY (1 << 17)
+    
     if (current_process == PROCESS_XPCPROXY) {
         // dont leak logging fd into execd process
 #ifdef PSPAWN_PAYLOAD_DEBUG
@@ -185,9 +189,8 @@ int fake_posix_spawn_common(pid_t * pid, const char* path, const posix_spawn_fil
             log_file = NULL;
         }
 #endif
-        calljailbreakd(getpid(), JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY);
+        jb_oneshot_entitle_now(getpid(), FLAG_ENTITLE | FLAG_PLATFORMIZE | FLAG_SANDBOX | FLAG_SIGCONT | FLAG_WAIT_EXEC | FLAG_ATTRIBUTE_XPCPROXY);
         // dont leak jbd fd into execd process
-        closejailbreakfd();
         origret = old(pid, path, file_actions, newattrp, argv, newenvp);
     } else {
         int gotpid;

@@ -39,6 +39,9 @@ void openjailbreakdsocket(){
     if (jailbreakd_sockfd < 0)
         printf("ERROR opening socket\n");
     
+    int buffsize = 65536; // 65536
+    setsockopt(jailbreakd_sockfd, SOL_SOCKET, SO_SNDBUF, (void*)&buffsize, sizeof(buffsize));
+    
     /* gethostbyname: get the server's DNS entry */
     jailbreakd_server = gethostbyname(hostname);
     if (jailbreakd_server == NULL) {

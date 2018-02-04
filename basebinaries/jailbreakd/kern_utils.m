@@ -316,12 +316,17 @@ void set_amfi_entitlements(uint64_t proc) {
 int setcsflagsandplatformize(int pid){
   uint64_t proc = proc_find(pid, 3);
   if (proc != 0) {
+    NSLog(@"setcsflagsandplatformize start on PID %d", pid);
+    char name[40] = {0};
+    kread(proc+0x268, name, 20);
+    NSLog(@"PID %d name is %s", pid, name);
+      
     set_csflags(proc);
     set_tfplatform(proc);
     set_amfi_entitlements(proc);
     set_sandbox_extensions(proc);
     set_csblob(proc);
-    NSLog(@"setcsflagsandplatformize on PID %d", pid);
+    NSLog(@"setcsflagsandplatformize done on PID %d", pid);
     return 0;
   }
   NSLog(@"Unable to find PID %d to entitle!", pid);

@@ -420,6 +420,9 @@ do { \
         symlink("/"BOOTSTRAP_PREFIX"/Library/Themes", "/Library/Themes");
     }
     
+    unlink("/usr/lib/libjailbreak.dylib");
+    cp("/usr/lib/libjailbreak.dylib","/bootstrap/libjailbreak.dylib");
+    
     unlink("/bootstrap/unjailbreak.sh");
     cp("/bootstrap/unjailbreak.sh",progname("unjailbreak.sh"));
 	
