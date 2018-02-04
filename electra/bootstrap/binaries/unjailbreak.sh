@@ -14,6 +14,7 @@ rm -rf /usr/lib/SBInject
 rm /usr/lib/libsubstitute.0.dylib
 rm /usr/lib/libsubstitute.dylib
 rm /usr/lib/libsubstrate.dylib
+rm /usr/lib/libjailbreak.dylib
 rm /usr/bin/recache
 rm /usr/bin/killall
 rm /usr/share/terminfo
