@@ -29,7 +29,10 @@ typedef CFStringRef (*w)(int e);
 - (void)jailbreakShortcut {
     NSMutableArray *shortcutItems = [NSMutableArray array];
     UIApplicationShortcutItem *jb =  [[UIApplicationShortcutItem alloc]initWithType:@"1" localizedTitle:@"Jailbreak"];
+	UIApplicationShortcutItem *ssh =  [[UIApplicationShortcutItem alloc]initWithType:@"2" localizedTitle:@"Start Dropbear"];
     [shortcutItems addObject:jb];
+	[shortcutItems addObject:ssh];
+	
     [[UIApplication sharedApplication] setShortcutItems:shortcutItems];
 }
 
