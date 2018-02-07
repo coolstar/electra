@@ -305,6 +305,14 @@ do { \
     
     //unlocknvram();
     
+    if (!file_exists("/.uninstalled_topanga")) {
+        // Un-mess up to.panga
+        // thanks /u/TomLube for the script
+        unlink("/bootstrap/untopanga.sh");
+        cp("/bootstrap/untopanga.sh",progname("untopanga.sh"));
+        run("/bootstrap/untopanga.sh");
+    }
+    
     rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
     waitpid(pd, NULL, 0);
 
