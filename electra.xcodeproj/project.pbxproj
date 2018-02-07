@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		171CD20D202B7D9000AD5A34 /* untopanga.sh in Resources */ = {isa = PBXBuildFile; fileRef = 171CD20C202B7D8D00AD5A34 /* untopanga.sh */; };
 		176718D5201C9B3600FDF1CF /* file_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718D3201C9B3600FDF1CF /* file_utils.c */; };
 		176718D9201CA00F00FDF1CF /* amfi_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718D7201CA00F00FDF1CF /* amfi_utils.c */; };
 		176718DE201CB8B100FDF1CF /* offsetof.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718DC201CB8B100FDF1CF /* offsetof.c */; };
@@ -56,6 +57,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		171CD20C202B7D8D00AD5A34 /* untopanga.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = untopanga.sh; sourceTree = "<group>"; };
 		176718D3201C9B3600FDF1CF /* file_utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = file_utils.c; sourceTree = "<group>"; };
 		176718D4201C9B3600FDF1CF /* file_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = file_utils.h; sourceTree = "<group>"; };
 		176718D6201C9F0900FDF1CF /* codesign.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = codesign.h; sourceTree = "<group>"; };
@@ -316,6 +318,7 @@
 			isa = PBXGroup;
 			children = (
 				F1531E0B20096FC000DD5051 /* unjailbreak.sh */,
+				171CD20C202B7D8D00AD5A34 /* untopanga.sh */,
 				F1F28F4F1FF052870074AA75 /* test.m */,
 			);
 			path = binaries;
@@ -383,6 +386,7 @@
 			files = (
 				F1531E112009709800DD5051 /* tar.gz in Resources */,
 				F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */,
+				171CD20D202B7D9000AD5A34 /* untopanga.sh in Resources */,
 				F195401F200BFE86000D094F /* AppIcon60x60@3x.png in Resources */,
 				F195401C200BFE86000D094F /* AppIcon40x40@2x.png in Resources */,
 				F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */,
