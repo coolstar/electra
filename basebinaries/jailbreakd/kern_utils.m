@@ -90,29 +90,29 @@ void fixupsetuid(int pid){
     
     int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
     if (ret < 0){
-        NSLog(@"Unable to get path for PID %d", pid);
+        printf("Unable to get path for PID %d\n", pid);
         return;
     }
     struct stat file_st;
     if (lstat(pathbuf, &file_st) == -1){
-        NSLog(@"Unable to get stat for file %s", pathbuf);
+        printf("Unable to get stat for file %s\n", pathbuf);
         return;
     }
     if (file_st.st_mode & S_ISUID){
         uid_t fileUID = file_st.st_uid;
-        NSLog(@"Fixing up setuid for file owned by %u", fileUID);
+        printf("Fixing up setuid for file owned by %u\n", fileUID);
         
         uint64_t proc = proc_find(pid, 3);
         if (proc != 0) {
             uint64_t ucred = rk64(proc + offsetof_p_ucred);
             
             uid_t cr_svuid = rk32(ucred + offsetof_ucred_cr_svuid);
-            NSLog(@"Original sv_uid: %u", cr_svuid);
+            printf("Original sv_uid: %u\n", cr_svuid);
             wk32(ucred + offsetof_ucred_cr_svuid, fileUID);
-            NSLog(@"New sv_uid: %u", fileUID);
+            printf("New sv_uid: %u\n", fileUID);
         }
     } else {
-        NSLog(@"File %s is not setuid!", pathbuf);
+        printf("File %s is not setuid!\n", pathbuf);
         return;
     }
 }
@@ -120,11 +120,11 @@ void fixupsetuid(int pid){
 void set_csflags(uint64_t proc) {
     uint32_t csflags = rk32(proc + offsetof_p_csflags);
 #ifdef JAILBREAKDDEBUG
-    NSLog(@"Previous CSFlags: 0x%x", csflags);
+    printf("Previous CSFlags: 0x%x\n", csflags);
 #endif
     csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW | CS_DEBUGGED) & ~(CS_RESTRICT | CS_HARD | CS_KILL);
 #ifdef JAILBREAKDDEBUG
-    NSLog(@"New CSFlags: 0x%x", csflags);
+    printf("New CSFlags: 0x%x\n", csflags);
 #endif
     wk32(proc + offsetof_p_csflags, csflags);
 }
@@ -134,12 +134,12 @@ void set_tfplatform(uint64_t proc) {
     uint64_t task = rk64(proc + offsetof_task);
     uint32_t t_flags = rk32(task + offsetof_t_flags);
 #ifdef JAILBREAKDDEBUG
-    NSLog(@"Old t_flags: 0x%x", t_flags);
+    printf("Old t_flags: 0x%x\n", t_flags);
 #endif
     t_flags |= TF_PLATFORM;
     wk32(task+offsetof_t_flags, t_flags);
 #ifdef JAILBREAKDDEBUG
-    NSLog(@"New t_flags: 0x%x", t_flags);
+    printf("New t_flags: 0x%x\n", t_flags);
 #endif
 }
 
@@ -148,26 +148,26 @@ void set_csblob(uint64_t proc) {
     off_t textoff = rk64(proc + offsetof_p_textoff);
     
 #ifdef JAILBREAKDDEBUG
-    NSLog(@"\t__TEXT at 0x%llx. Offset: 0x%llx", textvp, textoff);
+    printf("\t__TEXT at 0x%llx. Offset: 0x%llx\n", textvp, textoff);
 #endif
     if (textvp != 0){
       uint32_t vnode_type_tag = rk32(textvp + offsetof_v_type);
       uint16_t vnode_type = vnode_type_tag & 0xffff;
       uint16_t vnode_tag = (vnode_type_tag >> 16);
 #ifdef JAILBREAKDDEBUG
-      NSLog(@"\tVNode Type: 0x%x. Tag: 0x%x.", vnode_type, vnode_tag);
+      printf("\tVNode Type: 0x%x. Tag: 0x%x.\n", vnode_type, vnode_tag);
 #endif
       
       if (vnode_type == 1){
           uint64_t ubcinfo = rk64(textvp + offsetof_v_ubcinfo);
 #ifdef JAILBREAKDDEBUG
-          NSLog(@"\t\tUBCInfo at 0x%llx.\n", ubcinfo);
+          printf("\t\tUBCInfo at 0x%llx.\n\n", ubcinfo);
 #endif
           
           uint64_t csblobs = rk64(ubcinfo + offsetof_ubcinfo_csblobs);
           while (csblobs != 0){
 #ifdef JAILBREAKDDEBUG
-              NSLog(@"\t\t\tCSBlobs at 0x%llx.", csblobs);
+              printf("\t\t\tCSBlobs at 0x%llx.\n", csblobs);
 #endif
               
               cpu_type_t csblob_cputype = rk32(csblobs + offsetof_csb_cputype);
@@ -179,16 +179,16 @@ void set_csblob(uint64_t proc) {
               unsigned int csb_platform_path = rk32(csblobs + offsetof_csb_platform_path);
 
 #ifdef JAILBREAKDDEBUG
-              NSLog(@"\t\t\tCSBlob CPU Type: 0x%x. Flags: 0x%x. Offset: 0x%llx", csblob_cputype, csblob_flags, csb_base_offset);
-              NSLog(@"\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d", csb_signer_type, csb_platform_binary, csb_platform_path);
+              printf("\t\t\tCSBlob CPU Type: 0x%x. Flags: 0x%x. Offset: 0x%llx\n", csblob_cputype, csblob_flags, csb_base_offset);
+              printf("\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d\n", csb_signer_type, csb_platform_binary, csb_platform_path);
 #endif
               wk32(csblobs + offsetof_csb_platform_binary, 1);
 
               csb_platform_binary = rk32(csblobs + offsetof_csb_platform_binary);
 #ifdef JAILBREAKDDEBUG
-              NSLog(@"\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d", csb_signer_type, csb_platform_binary, csb_platform_path);
+              printf("\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d\n", csb_signer_type, csb_platform_binary, csb_platform_path);
               
-              NSLog(@"\t\t\t\tEntitlements at 0x%llx.\n", csb_entitlements);
+              printf("\t\t\t\tEntitlements at 0x%llx.\n", csb_entitlements);
 #endif
               csblobs = rk64(csblobs);
           }
@@ -228,15 +228,15 @@ void set_sandbox_extensions(uint64_t proc) {
   uint64_t proc_ucred = rk64(proc+0x100);
   uint64_t sandbox = rk64(rk64(proc_ucred+0x78) + 8 + 8);
 
-  NSLog(@"proc = 0x%llx & proc_ucred = 0x%llx & sandbox = 0x%llx", proc, proc_ucred, sandbox);
+  printf("proc = 0x%llx & proc_ucred = 0x%llx & sandbox = 0x%llx\n", proc, proc_ucred, sandbox);
 
   if (sandbox == 0) {
-    NSLog(@"no sandbox, skipping");
+    printf("no sandbox, skipping");
     return;
   }
 
   if (has_file_extension(sandbox, abs_path_exceptions[0])) {
-    NSLog(@"already has '%s', skipping", abs_path_exceptions[0]);
+    printf("already has '%s', skipping\n", abs_path_exceptions[0]);
     return;
   }
 
@@ -245,12 +245,12 @@ void set_sandbox_extensions(uint64_t proc) {
   while (*path != NULL) {
     ext = extension_create_file(*path, ext);
     if (ext == 0) {
-      NSLog(@"extension_create_file(%s) failed, panic!", *path);
+      printf("extension_create_file(%s) failed, panic!\n", *path);
     }
     ++path;
   }
 
-  NSLog(@"last extension_create_file ext: 0x%llx", ext);
+  printf("last extension_create_file ext: 0x%llx\n", ext);
 
   if (ext != 0) {
     extension_add(ext, sandbox, exc_key);
@@ -260,12 +260,12 @@ void set_sandbox_extensions(uint64_t proc) {
 void set_amfi_entitlements(uint64_t proc) {
     // AMFI entitlements
 #ifdef JAILBREAKDDEBUG
-    NSLog(@"%@",@"AMFI:");
+    printf("%@",@"AMFI:");
 #endif
     uint64_t proc_ucred = rk64(proc+0x100);
     uint64_t amfi_entitlements = rk64(rk64(proc_ucred+0x78)+0x8);
 #ifdef JAILBREAKDDEBUG
-    NSLog(@"%@",@"Setting Entitlements...");
+    printf("%@",@"Setting Entitlements...");
 #endif
 
     OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
@@ -280,7 +280,7 @@ void set_amfi_entitlements(uint64_t proc) {
     } else if (present != get_exception_osarray()) {
         unsigned int itemCount = OSArray_ItemCount(present);
         
-        NSLog(@"present != 0 (0x%llx)! item count: %d", present, itemCount);
+        printf("present != 0 (0x%llx)! item count: %d\n", present, itemCount);
         
         BOOL foundEntitlements = NO;
         
@@ -288,7 +288,7 @@ void set_amfi_entitlements(uint64_t proc) {
         
         for (int i = 0; i < itemCount; i++){
             uint64_t item = rk64(itemBuffer + (i * sizeof(void *)));
-            NSLog(@"Item %d: 0x%llx", i, item);
+            printf("Item %d: 0x%llx\n", i, item);
             char *entitlementString = OSString_CopyString(item);
             if (strcmp(entitlementString, "/bootstrap/") == 0){
                 foundEntitlements = YES;
@@ -304,31 +304,31 @@ void set_amfi_entitlements(uint64_t proc) {
             rv = 1;
         }
     } else {
-      NSLog(@"Not going to merge array with itself :P");
+      printf("Not going to merge array with itself :P");
       rv = 1;
     }
 
     if (rv != 1) {
-      NSLog(@"Setting exc FAILED! amfi_entitlements: 0x%llx present: 0x%llx\n", amfi_entitlements, present);
+      printf("Setting exc FAILED! amfi_entitlements: 0x%llx present: 0x%llx\n", amfi_entitlements, present);
     }
 }
 
 int setcsflagsandplatformize(int pid){
   uint64_t proc = proc_find(pid, 3);
   if (proc != 0) {
-    NSLog(@"setcsflagsandplatformize start on PID %d", pid);
+    printf("setcsflagsandplatformize start on PID %d\n", pid);
     char name[40] = {0};
     kread(proc+0x268, name, 20);
-    NSLog(@"PID %d name is %s", pid, name);
+    printf("PID %d name is %s\n", pid, name);
       
     set_csflags(proc);
     set_tfplatform(proc);
     set_amfi_entitlements(proc);
     set_sandbox_extensions(proc);
     set_csblob(proc);
-    NSLog(@"setcsflagsandplatformize done on PID %d", pid);
+    printf("setcsflagsandplatformize done on PID %d\n", pid);
     return 0;
   }
-  NSLog(@"Unable to find PID %d to entitle!", pid);
+  printf("Unable to find PID %d to entitle!\n", pid);
   return 1;
 }

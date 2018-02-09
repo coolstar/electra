@@ -104,19 +104,19 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         
         uint32_t flags;
         csops(pid, CS_OPS_STATUS, &flags, 0);
-        NSLog(@"CSFlags for PID %d: 0x%x", pid, flags);
+        printf("CSFlags for PID %d: 0x%x\n", pid, flags);
         
         if ((flags & CS_DEBUGGED) == 0){
-            NSLog(@"%@",@"Trying again...");
+            printf("Trying again...\n");
             usleep(100 * 1000);
             
             setcsflagsandplatformize(pid);
             csops(pid, CS_OPS_STATUS, &flags, 0);
-            NSLog(@"CSFlags for PID %d: 0x%x", pid, flags);
+            printf("CSFlags for PID %d: 0x%x\n", pid, flags);
         }
-
+        
         if (stuff & FLAG_SIGCONT) {
-            NSLog(@"Sending SIGCONT to %d", pid);
+            printf("Sending SIGCONT to %d\n", pid);
             kill(pid, SIGCONT);
         }
 
@@ -148,13 +148,13 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         dispatch_group_async(waitgroup, dispatch_get_main_queue(), ^{
             char pathbuf[PROC_PIDPATHINFO_MAXSIZE] = {0};
 
-            NSLog(@"Waiting to ensure it's not xpcproxy anymore...");
+            printf("Waiting to ensure it's not xpcproxy anymore...\n");
             int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-            NSLog(@"proc_pidpath %d -> %d %s", pid, ret, pathbuf);
+            printf("proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
 
             while (ret > 0 && strcmp(pathbuf, "/usr/libexec/xpcproxy") == 0){
                 ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-                NSLog(@"proc_pidpath %d -> %d %s", pid, ret, pathbuf);
+                printf("proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
                 usleep(100);
             }
             // free(cmp_path);
@@ -189,20 +189,20 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
     xpc_connection_set_event_handler(who, ^(xpc_object_t msg) {
         xpc_type_t type = xpc_get_type(msg);
         if (type == XPC_TYPE_ERROR) {
-            NSLog(@"jailbreakd: connection error %s", xpc_dictionary_get_string(msg, XPC_ERROR_KEY_DESCRIPTION));
+            printf("jailbreakd: connection error %s\n", xpc_dictionary_get_string(msg, XPC_ERROR_KEY_DESCRIPTION));
             return;
         }
 
         xpc_connection_t peer = xpc_dictionary_get_remote_connection(msg);
 
         char *desc = xpc_copy_description(msg);
-        NSLog(@"jailbreakd: received object: %s", desc);
+        printf("jailbreakd: received object: %s\n", desc);
         free(desc);
 
         const char *action = xpc_dictionary_get_string(msg, "action");
         if (!action) {
             char *desc = xpc_copy_description(msg);
-            NSLog(@"jailbreakd: received message from pid %d with no action: %s",
+            printf("jailbreakd: received message from pid %d with no action: %s\n",
                 xpc_connection_get_pid(peer),
                 desc);
             free(desc);
@@ -222,11 +222,11 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
             do_entp_stuff_with_pid(flags, reqpid, ^(uint64_t stuff, pid_t pid) {
                 char flgstr[7] = {0};
                 flags_to_string(flags, flgstr);
-                NSLog(@"jailbreakd: entitle operations: %s complete for pid %d", flgstr, reqpid);
+                printf("jailbreakd: entitle operations: %s complete for pid %d\n", flgstr, reqpid);
 
                 xpc_object_t reply = xpc_dictionary_create_reply(msg);
                 if (!reply) {
-                    NSLog(@"jailbreakd: can't create reply. did the other end hang up too soon??");
+                    printf("jailbreakd: can't create reply. did the other end hang up too soon??\n");
                     xpc_release(msg);
                     return;
                 }
@@ -241,11 +241,11 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
             });
         } else if (!strcmp(action, JAILBREAKD_ACTION_FIX_SETUID)) {
             do_suid_with_pid(reqpid, ^(pid_t pid) {
-                NSLog(@"jailbreakd: suid complete for pid %d", reqpid);
+                printf("jailbreakd: suid complete for pid %d\n", reqpid);
 
                 xpc_object_t reply = xpc_dictionary_create_reply(msg);
                 if (!reply) {
-                    NSLog(@"jailbreakd: can't create reply. did the other end hang up too soon??");
+                    printf("jailbreakd: can't create reply. did the other end hang up too soon??\n");
                     xpc_release(msg);
                     return;
                 }
@@ -258,10 +258,10 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
                 xpc_release(msg);
             });
         } else if (!strcmp(action, JAILBREAKD_ACTION_PING)) {
-            NSLog(@"jailbreakd: ping complete for pid %d", reqpid);
+            printf("jailbreakd: ping complete for pid %d\n", reqpid);
             xpc_object_t reply = xpc_dictionary_create_reply(msg);
             if (!reply) {
-                NSLog(@"jailbreakd: can't create reply. did the other end hang up too soon??");
+                printf("jailbreakd: can't create reply. did the other end hang up too soon??\n");
                 xpc_release(msg);
                 return;
             }
@@ -275,12 +275,12 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
         } else if (!strcmp(action, JAILBREAKD_ACTION_EXIT)) {
             xpc_release(msg);
 
-            NSLog(@"jailbreakd: exiting for pid %d!", reqpid);
+            printf("jailbreakd: exiting for pid %d!\n", reqpid);
 
             term_kexecute();
             exit(0);
         } else {
-            NSLog(@"jailbreakd: invalid action! %s", action);
+            printf("jailbreakd: invalid action! %s\n", action);
             xpc_release(msg);
             xpc_connection_cancel(peer);
         }
@@ -309,17 +309,17 @@ void *initThread(struct InitThreadArg *args){
     char buf[1024];
     while (true){
         int bytesRead = recv(args->clientFd, buf, 1024, 0);
-        NSLog(@"Bytes Read: %d\n", bytesRead);
+        printf("Bytes Read: %d\n", bytesRead);
         if (bytesRead){
             int bytesProcessed = 0;
             while (bytesProcessed < bytesRead){
                 if (bytesRead - bytesProcessed >= sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
                     struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *clientMessage = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT*)(buf + bytesProcessed);
                     if (clientMessage->Command != JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
-                        NSLog(@"Invalid command\n");
+                        printf("Invalid command\n");
                     }
                     if (clientMessage->Command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
-                        NSLog(@"Got Request to Entitle PID %u\n", clientMessage->Pid);
+                        printf("Got Request to Entitle PID %u\n", clientMessage->Pid);
                         
                         setcsflagsandplatformize(clientMessage->Pid);
                         kill(clientMessage->Pid, SIGCONT);
@@ -328,7 +328,7 @@ void *initThread(struct InitThreadArg *args){
                 bytesProcessed += sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT);
             }
         } else {
-            NSLog(@"Client disconnected\n");
+            printf("Client disconnected\n");
             break;
         }
     }
@@ -337,14 +337,14 @@ void *initThread(struct InitThreadArg *args){
 }
 
 void* thd_func(void* arg){
-    NSLog(@"In a new thread!");
+    printf("In a new thread!\n");
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
     
-    NSLog(@"[jailbreakd] Running server...");
+    printf("[jailbreakd] Running server...\n");
     int listenFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listenFd < 0)
-        NSLog(@"[jailbreakd] Error opening socket");
+        printf("[jailbreakd] Error opening socket\n");
     int optval = 1;
     setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval, sizeof(int));
     
@@ -353,7 +353,7 @@ void* thd_func(void* arg){
     /* gethostbyname: get the server's DNS entry */
     server = gethostbyname(hostname);
     if (server == NULL) {
-        NSLog(@"[jailbreakd] ERROR, no such host as %s", hostname);
+        printf("[jailbreakd] ERROR, no such host as %s\n", hostname);
         exit(0);
     }
     
@@ -363,7 +363,7 @@ void* thd_func(void* arg){
     serveraddr.sin_port = htons((unsigned short)5);
     
     if (bind(listenFd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
-        NSLog(@"[jailbreakd] Error binding...");
+        printf("[jailbreakd] Error binding...\n");
         exit(-1);
     }
     
@@ -377,7 +377,7 @@ void* thd_func(void* arg){
         int clientFd = accept(listenFd, (struct sockaddr *)&clientaddr, &clientlen);
         
         if (clientFd < 0){
-            NSLog(@"Unable to accept\n");
+            printf("Unable to accept\n");
             return -1;
         }
         
@@ -389,7 +389,7 @@ void* thd_func(void* arg){
         
         int err = pthread_create(&thread, NULL, (void *(*)(void *))&initThread, &args);
         if (err != 0){
-            NSLog(@"Unable to create thread\n");
+            printf("Unable to create thread\n");
             pthread_detach(thread);
         }
         
@@ -398,7 +398,7 @@ void* thd_func(void* arg){
 }
 
 int main(int argc, char **argv, char **envp) {
-    NSLog(@"jailbreakd: start");
+    printf("jailbreakd: start\n");
 
     unlink("/tmp/jailbreakd.pid");
     int fd = open("/tmp/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
@@ -407,21 +407,21 @@ int main(int argc, char **argv, char **envp) {
     write(fd, mmmm, sz);
     close(fd);
 
-    NSLog(@"jailbreakd: dumped pid");
+    printf("jailbreakd: dumped pid\n");
 
     kernel_base = strtoull(getenv("KernelBase"), NULL, 16);
     remove_memory_limit();
 
     kern_return_t err = host_get_special_port(mach_host_self(), HOST_LOCAL_NODE, 4, &tfpzero);
     if (err != KERN_SUCCESS) {
-        NSLog(@"host_get_special_port 4: %s", mach_error_string(err));
+        printf("host_get_special_port 4: %s\n", mach_error_string(err));
         return 5;
     }
 
     init_kernel(kernel_base, NULL);
     // Get the slide
     kernel_slide = kernel_base - 0xFFFFFFF007004000;
-    NSLog(@"jailbreakd: slide: 0x%016llx", kernel_slide);
+    printf("jailbreakd: slide: 0x%016llx\n", kernel_slide);
 
     // prime offset caches
     find_allproc();
@@ -446,7 +446,7 @@ int main(int argc, char **argv, char **envp) {
             "com.apple.uikit.viewservice.xxx.dainsleif.xpc",
             NULL, XPC_CONNECTION_MACH_SERVICE_LISTENER);
         if (!connection) {
-            NSLog(@"jailbreakd: no XPC service");
+            printf("jailbreakd: no XPC service\n");
             return 0;
         }
 
@@ -454,17 +454,17 @@ int main(int argc, char **argv, char **envp) {
         xpc_connection_set_event_handler(connection, ^(xpc_object_t object) {
             xpc_type_t type = xpc_get_type(object);
             if (type == XPC_TYPE_CONNECTION) {
-                NSLog(@"jailbreakd: received XPC connection!");
+                printf("jailbreakd: received XPC connection!\n");
                 jailbreakd_handle_xpc_connection(object);
             } else if (type == XPC_TYPE_ERROR) {
-                NSLog(@"jailbreakd: XPC error in listener: %s", xpc_dictionary_get_string(object, XPC_ERROR_KEY_DESCRIPTION));
+                printf("jailbreakd: XPC error in listener: %s\n", xpc_dictionary_get_string(object, XPC_ERROR_KEY_DESCRIPTION));
             }
         });
 
         // Make connection live
         xpc_connection_resume(connection);
-        NSLog(@"it never fails to strike its target, and the wounds it causes do not heal");
-        NSLog(@"in other words, XPC is online");
+        printf("it never fails to strike its target, and the wounds it causes do not heal\n");
+        printf("in other words, XPC is online\n");
 
         dispatch_main();
     }
