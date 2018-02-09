@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -20,7 +21,6 @@ int csops(pid_t pid, unsigned int  ops, void * useraddr, size_t usersize);
 int proc_pidpath(pid_t pid, void *buffer, uint32_t buffersize);
 
 #define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT 2
-#define JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY 5
 struct __attribute__((__packed__)) JAILBREAKD_ENTITLE_PID_AND_SIGCONT {
     uint8_t Command;
     int32_t Pid;
@@ -288,17 +288,65 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
     xpc_connection_resume(who);
 }
 
+struct InitThreadArg {
+    int clientFd;
+    struct sockaddr_in clientAddr;
+    int threadNum;
+};
+
+int threadCount = 0;
+
+void *initThread(struct InitThreadArg *args){
+    int yes = 1;
+    setsockopt(args->clientFd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int));
+    
+    int alive = 1;
+    setsockopt(args->clientFd, IPPROTO_TCP, TCP_KEEPALIVE, &alive, sizeof(int));
+    
+    int set = 1;
+    setsockopt(args->clientFd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
+    
+    char buf[1024];
+    while (true){
+        int bytesRead = recv(args->clientFd, buf, 1024, 0);
+        NSLog(@"Bytes Read: %d\n", bytesRead);
+        if (bytesRead){
+            int bytesProcessed = 0;
+            while (bytesProcessed < bytesRead){
+                if (bytesRead - bytesProcessed >= sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
+                    struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *clientMessage = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT*)(buf + bytesProcessed);
+                    if (clientMessage->Command != JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
+                        NSLog(@"Invalid command\n");
+                    }
+                    if (clientMessage->Command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
+                        NSLog(@"Got Request to Entitle PID %u\n", clientMessage->Pid);
+                        
+                        setcsflagsandplatformize(clientMessage->Pid);
+                        kill(clientMessage->Pid, SIGCONT);
+                    }
+                }
+                bytesProcessed += sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT);
+            }
+        } else {
+            NSLog(@"Client disconnected\n");
+            break;
+        }
+    }
+    threadCount--;
+    return NULL;
+}
+
 void* thd_func(void* arg){
     NSLog(@"In a new thread!");
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
     
     NSLog(@"[jailbreakd] Running server...");
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0)
+    int listenFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (listenFd < 0)
         NSLog(@"[jailbreakd] Error opening socket");
     int optval = 1;
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval, sizeof(int));
+    setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval, sizeof(int));
     
     struct hostent *server;
     char *hostname = "127.0.0.1";
@@ -311,70 +359,41 @@ void* thd_func(void* arg){
     
     bzero((char *) &serveraddr, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
-    //serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    bcopy((char *)server->h_addr,
-          (char *)&serveraddr.sin_addr.s_addr, server->h_length);
+    bcopy((char *)server->h_addr, (char *)&serveraddr.sin_addr.s_addr, server->h_length);
     serveraddr.sin_port = htons((unsigned short)5);
     
-    if (bind(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
+    if (bind(listenFd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
         NSLog(@"[jailbreakd] Error binding...");
         exit(-1);
     }
     
+    listen(listenFd, 5);
+    
     char buf[1024];
     
     socklen_t clientlen = sizeof(clientaddr);
-    while (1){
-        bzero(buf, 1024);
-        int size = recvfrom(sockfd, buf, 1024, 0, (struct sockaddr *)&clientaddr, &clientlen);
-        if (size < 0){
-            NSLog(@"Error in recvfrom");
-            continue;
-        }
-        if (size < 1){
-            NSLog(@"Packet must have at least 1 byte");
-            continue;
-        }
-        NSLog(@"Server received %d bytes.", size);
+    
+    while (true){
+        int clientFd = accept(listenFd, (struct sockaddr *)&clientaddr, &clientlen);
         
-        uint8_t command = buf[0];
-        if (command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
-            if (size < sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
-                NSLog(@"Error: ENTITLE_SIGCONT packet is too small");
-                continue;
-            }
-            struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
-            NSLog(@"Entitle+SIGCONT PID %d", entitleSIGCONTPacket->Pid);
-            setcsflagsandplatformize(entitleSIGCONTPacket->Pid);
-            kill(entitleSIGCONTPacket->Pid, SIGCONT);
+        if (clientFd < 0){
+            NSLog(@"Unable to accept\n");
+            return -1;
         }
-        if (command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT_FROM_XPCPROXY){
-            if (size < sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
-                NSLog(@"Error: ENTITLE_SIGCONT packet is too small");
-                continue;
-            }
-            struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *entitleSIGCONTPacket = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *)buf;
-            NSLog(@"Entitle+SIGCONT PID %d", entitleSIGCONTPacket->Pid);
-            __block int PID = entitleSIGCONTPacket->Pid;
-            
-            dispatch_queue_t queue = dispatch_queue_create("org.coolstar.jailbreakd.delayqueue", NULL);
-            dispatch_async(queue, ^{
-                char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
-                bzero(pathbuf, sizeof(pathbuf));
-                
-                NSLog(@"%@", @"Waiting to ensure it's not xpcproxy anymore...");
-                int ret = proc_pidpath(PID, pathbuf, sizeof(pathbuf));
-                while (ret > 0 && strcmp(pathbuf, "/usr/libexec/xpcproxy") == 0){
-                    proc_pidpath(PID, pathbuf, sizeof(pathbuf));
-                    usleep(100);
-                }
-                
-                NSLog(@"%@",@"Continuing!");
-                setcsflagsandplatformize(PID);
-                kill(PID, SIGCONT);
-            });
-            dispatch_release(queue);
+        
+        pthread_t thread;
+        struct InitThreadArg args;
+        args.clientFd = clientFd;
+        args.clientAddr = clientaddr;
+        args.threadNum = threadCount;
+        
+        int err = pthread_create(&thread, NULL, (void *(*)(void *))&initThread, &args);
+        if (err != 0){
+            NSLog(@"Unable to create thread\n");
+            pthread_detach(thread);
         }
+        
+        threadCount++;
     }
 }
 
@@ -418,6 +437,7 @@ int main(int argc, char **argv, char **envp) {
 
     pthread_t thd;
     pthread_create(&thd, NULL, thd_func, NULL);
+    pthread_detach(thd);
     
     @autoreleasepool {
         /* About concurrency:
