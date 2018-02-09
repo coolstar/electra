@@ -28,10 +28,10 @@ We provide a substrate-shim compatability layer, that works for *most* tweaks. P
 
 ## jailbreakd
 
-Electra is a KPPLess jailbreak; this means that by nature, electra is not able to patch the kernel, therefore a jailbreak daemon is used in places where kernel paches would be. jailbreakd is a daemon that handles patching setuid for processes, platformising them, and handing certain entiltements out. 
+Electra is a KPPLess jailbreak; this means that by nature, electra is not able to patch the kernel, therefore a jailbreak daemon is used in places where kernel patches would be. jailbreakd is a daemon that handles patching setuid for processes, platformising them, and handing certain entiltements out. 
 
 We provide a libjailbreak.dylib for interfacing with jailbreakd, and this is in `/usr/lib/libjailbreak.dylib`.
-All patches here will require `dlopen()`ing the dylib, finding the appropiate symbol, and calling the respective function.
+All patches here will require `dlopen()`-ing the dylib, finding the appropiate symbol, and calling the respective function.
 
 ### Setting uid 0
 
