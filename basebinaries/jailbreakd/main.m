@@ -168,11 +168,10 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
 
             fprintf(stderr,"Waiting to ensure it's not xpcproxy anymore...\n");
             int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-            fprintf(stderr,"proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
-
             while (ret > 0 && strcmp(pathbuf, "/usr/libexec/xpcproxy") == 0){
                 ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-                fprintf(stderr,"proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
+                if (strcmp(pathbuf, "/usr/libexec/xpcproxy") != 0)
+                    fprintf(stderr,"proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
                 usleep(100);
             }
             // free(cmp_path);
