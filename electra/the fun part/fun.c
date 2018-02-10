@@ -289,11 +289,12 @@ do { \
         printf("[fun] copied the required binaries into the right places\n");
     }
     
-    inject_trusts(3, (const char **)&(const char*[]){
+    inject_trusts(4, (const char **)&(const char*[]){
         "/bootstrap/inject_criticald",
         "/bootstrap/amfid_payload.dylib",
         "/bootstrap/pspawn_payload.dylib",
-
+        
+        "/bootstrap/libjailbreak.dylib"
         // Don't forget to update number in beginning
     });
     
