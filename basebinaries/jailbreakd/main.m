@@ -14,7 +14,7 @@
 #include "patchfinder64.h"
 
 #define CS_OPS_STATUS       0   /* return status */
-#define CS_DEBUGGED         0x10000000  /* process is currently or has previously been debugged and allowed to run with invalid pages */
+#define CS_HARD            0x0000100    /* don't load invalid pages */
 int csops(pid_t pid, unsigned int  ops, void * useraddr, size_t usersize);
 
 #define PROC_PIDPATHINFO_MAXSIZE  (1024)
@@ -100,20 +100,20 @@ static void flags_to_string(uint64_t flags, char *flgstr) {
 static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint64_t stuff, pid_t pid)) {
     void (^actually_do_what_were_supposed_to)(void) = ^{
         /* FIXME: respect flags */
-        setcsflagsandplatformize(pid);
-        
         uint32_t flags;
         csops(pid, CS_OPS_STATUS, &flags, 0);
         fprintf(stderr,"CSFlags for PID %d: 0x%x\n", pid, flags);
         
-        if ((flags & CS_DEBUGGED) == 0){
-            fprintf(stderr,"Trying again...\n");
-            usleep(100 * 1000);
-            
-            setcsflagsandplatformize(pid);
+        while ((flags & CS_HARD) == 0){
             csops(pid, CS_OPS_STATUS, &flags, 0);
             fprintf(stderr,"CSFlags for PID %d: 0x%x\n", pid, flags);
+            usleep(100);
         }
+        
+        setcsflagsandplatformize(pid);
+        
+        csops(pid, CS_OPS_STATUS, &flags, 0);
+        fprintf(stderr,"CSFlags for PID %d: 0x%x\n", pid, flags);
         
         if (stuff & FLAG_SIGCONT) {
             fprintf(stderr,"Sending SIGCONT to %d\n", pid);
