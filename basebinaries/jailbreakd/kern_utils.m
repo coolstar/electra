@@ -61,12 +61,12 @@ CACHED_FIND(uint64_t, our_task_addr) {
   uint64_t our_proc = proc_find(getpid(), 1);
 
   if (our_proc == 0) {
-    printf("failed to find our_task_addr!\n");
+    fprintf(stderr,"failed to find our_task_addr!\n");
     exit(EXIT_FAILURE);
   }
 
   uint64_t addr = rk64(our_proc + offsetof_task);
-  printf("our_task_addr: 0x%llx\n", addr);
+  fprintf(stderr,"our_task_addr: 0x%llx\n", addr);
   return addr;
 }
 
@@ -90,29 +90,29 @@ void fixupsetuid(int pid){
     
     int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
     if (ret < 0){
-        printf("Unable to get path for PID %d\n", pid);
+        fprintf(stderr,"Unable to get path for PID %d\n", pid);
         return;
     }
     struct stat file_st;
     if (lstat(pathbuf, &file_st) == -1){
-        printf("Unable to get stat for file %s\n", pathbuf);
+        fprintf(stderr,"Unable to get stat for file %s\n", pathbuf);
         return;
     }
     if (file_st.st_mode & S_ISUID){
         uid_t fileUID = file_st.st_uid;
-        printf("Fixing up setuid for file owned by %u\n", fileUID);
+        fprintf(stderr,"Fixing up setuid for file owned by %u\n", fileUID);
         
         uint64_t proc = proc_find(pid, 3);
         if (proc != 0) {
             uint64_t ucred = rk64(proc + offsetof_p_ucred);
             
             uid_t cr_svuid = rk32(ucred + offsetof_ucred_cr_svuid);
-            printf("Original sv_uid: %u\n", cr_svuid);
+            fprintf(stderr,"Original sv_uid: %u\n", cr_svuid);
             wk32(ucred + offsetof_ucred_cr_svuid, fileUID);
-            printf("New sv_uid: %u\n", fileUID);
+            fprintf(stderr,"New sv_uid: %u\n", fileUID);
         }
     } else {
-        printf("File %s is not setuid!\n", pathbuf);
+        fprintf(stderr,"File %s is not setuid!\n", pathbuf);
         return;
     }
 }
@@ -120,11 +120,11 @@ void fixupsetuid(int pid){
 void set_csflags(uint64_t proc) {
     uint32_t csflags = rk32(proc + offsetof_p_csflags);
 #ifdef JAILBREAKDDEBUG
-    printf("Previous CSFlags: 0x%x\n", csflags);
+    fprintf(stderr,"Previous CSFlags: 0x%x\n", csflags);
 #endif
     csflags = (csflags | CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW | CS_DEBUGGED) & ~(CS_RESTRICT | CS_HARD | CS_KILL);
 #ifdef JAILBREAKDDEBUG
-    printf("New CSFlags: 0x%x\n", csflags);
+    fprintf(stderr,"New CSFlags: 0x%x\n", csflags);
 #endif
     wk32(proc + offsetof_p_csflags, csflags);
 }
@@ -134,12 +134,12 @@ void set_tfplatform(uint64_t proc) {
     uint64_t task = rk64(proc + offsetof_task);
     uint32_t t_flags = rk32(task + offsetof_t_flags);
 #ifdef JAILBREAKDDEBUG
-    printf("Old t_flags: 0x%x\n", t_flags);
+    fprintf(stderr,"Old t_flags: 0x%x\n", t_flags);
 #endif
     t_flags |= TF_PLATFORM;
     wk32(task+offsetof_t_flags, t_flags);
 #ifdef JAILBREAKDDEBUG
-    printf("New t_flags: 0x%x\n", t_flags);
+    fprintf(stderr,"New t_flags: 0x%x\n", t_flags);
 #endif
 }
 
@@ -148,26 +148,26 @@ void set_csblob(uint64_t proc) {
     off_t textoff = rk64(proc + offsetof_p_textoff);
     
 #ifdef JAILBREAKDDEBUG
-    printf("\t__TEXT at 0x%llx. Offset: 0x%llx\n", textvp, textoff);
+    fprintf(stderr,"\t__TEXT at 0x%llx. Offset: 0x%llx\n", textvp, textoff);
 #endif
     if (textvp != 0){
       uint32_t vnode_type_tag = rk32(textvp + offsetof_v_type);
       uint16_t vnode_type = vnode_type_tag & 0xffff;
       uint16_t vnode_tag = (vnode_type_tag >> 16);
 #ifdef JAILBREAKDDEBUG
-      printf("\tVNode Type: 0x%x. Tag: 0x%x.\n", vnode_type, vnode_tag);
+      fprintf(stderr,"\tVNode Type: 0x%x. Tag: 0x%x.\n", vnode_type, vnode_tag);
 #endif
       
       if (vnode_type == 1){
           uint64_t ubcinfo = rk64(textvp + offsetof_v_ubcinfo);
 #ifdef JAILBREAKDDEBUG
-          printf("\t\tUBCInfo at 0x%llx.\n\n", ubcinfo);
+          fprintf(stderr,"\t\tUBCInfo at 0x%llx.\n\n", ubcinfo);
 #endif
           
           uint64_t csblobs = rk64(ubcinfo + offsetof_ubcinfo_csblobs);
           while (csblobs != 0){
 #ifdef JAILBREAKDDEBUG
-              printf("\t\t\tCSBlobs at 0x%llx.\n", csblobs);
+              fprintf(stderr,"\t\t\tCSBlobs at 0x%llx.\n", csblobs);
 #endif
               
               cpu_type_t csblob_cputype = rk32(csblobs + offsetof_csb_cputype);
@@ -179,16 +179,16 @@ void set_csblob(uint64_t proc) {
               unsigned int csb_platform_path = rk32(csblobs + offsetof_csb_platform_path);
 
 #ifdef JAILBREAKDDEBUG
-              printf("\t\t\tCSBlob CPU Type: 0x%x. Flags: 0x%x. Offset: 0x%llx\n", csblob_cputype, csblob_flags, csb_base_offset);
-              printf("\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d\n", csb_signer_type, csb_platform_binary, csb_platform_path);
+              fprintf(stderr,"\t\t\tCSBlob CPU Type: 0x%x. Flags: 0x%x. Offset: 0x%llx\n", csblob_cputype, csblob_flags, csb_base_offset);
+              fprintf(stderr,"\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d\n", csb_signer_type, csb_platform_binary, csb_platform_path);
 #endif
               wk32(csblobs + offsetof_csb_platform_binary, 1);
 
               csb_platform_binary = rk32(csblobs + offsetof_csb_platform_binary);
 #ifdef JAILBREAKDDEBUG
-              printf("\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d\n", csb_signer_type, csb_platform_binary, csb_platform_path);
+              fprintf(stderr,"\t\t\tCSBlob Signer Type: 0x%x. Platform Binary: %d Path: %d\n", csb_signer_type, csb_platform_binary, csb_platform_path);
               
-              printf("\t\t\t\tEntitlements at 0x%llx.\n", csb_entitlements);
+              fprintf(stderr,"\t\t\t\tEntitlements at 0x%llx.\n", csb_entitlements);
 #endif
               csblobs = rk64(csblobs);
           }
@@ -228,15 +228,15 @@ void set_sandbox_extensions(uint64_t proc) {
   uint64_t proc_ucred = rk64(proc+0x100);
   uint64_t sandbox = rk64(rk64(proc_ucred+0x78) + 8 + 8);
 
-  printf("proc = 0x%llx & proc_ucred = 0x%llx & sandbox = 0x%llx\n", proc, proc_ucred, sandbox);
+  fprintf(stderr,"proc = 0x%llx & proc_ucred = 0x%llx & sandbox = 0x%llx\n", proc, proc_ucred, sandbox);
 
   if (sandbox == 0) {
-    printf("no sandbox, skipping");
+    fprintf(stderr,"no sandbox, skipping\n");
     return;
   }
 
   if (has_file_extension(sandbox, abs_path_exceptions[0])) {
-    printf("already has '%s', skipping\n", abs_path_exceptions[0]);
+    fprintf(stderr,"already has '%s', skipping\n", abs_path_exceptions[0]);
     return;
   }
 
@@ -245,12 +245,12 @@ void set_sandbox_extensions(uint64_t proc) {
   while (*path != NULL) {
     ext = extension_create_file(*path, ext);
     if (ext == 0) {
-      printf("extension_create_file(%s) failed, panic!\n", *path);
+      fprintf(stderr,"extension_create_file(%s) failed, panic!\n", *path);
     }
     ++path;
   }
 
-  printf("last extension_create_file ext: 0x%llx\n", ext);
+  fprintf(stderr,"last extension_create_file ext: 0x%llx\n", ext);
 
   if (ext != 0) {
     extension_add(ext, sandbox, exc_key);
@@ -260,12 +260,12 @@ void set_sandbox_extensions(uint64_t proc) {
 void set_amfi_entitlements(uint64_t proc) {
     // AMFI entitlements
 #ifdef JAILBREAKDDEBUG
-    printf("%@",@"AMFI:");
+    fprintf(stderr,"AMFI:\n");
 #endif
     uint64_t proc_ucred = rk64(proc+0x100);
     uint64_t amfi_entitlements = rk64(rk64(proc_ucred+0x78)+0x8);
 #ifdef JAILBREAKDDEBUG
-    printf("%@",@"Setting Entitlements...");
+    fprintf(stderr,"Setting Entitlements...\n");
 #endif
 
     OSDictionary_SetItem(amfi_entitlements, "get-task-allow", find_OSBoolean_True());
@@ -280,7 +280,7 @@ void set_amfi_entitlements(uint64_t proc) {
     } else if (present != get_exception_osarray()) {
         unsigned int itemCount = OSArray_ItemCount(present);
         
-        printf("present != 0 (0x%llx)! item count: %d\n", present, itemCount);
+        fprintf(stderr,"present != 0 (0x%llx)! item count: %d\n", present, itemCount);
         
         BOOL foundEntitlements = NO;
         
@@ -288,7 +288,7 @@ void set_amfi_entitlements(uint64_t proc) {
         
         for (int i = 0; i < itemCount; i++){
             uint64_t item = rk64(itemBuffer + (i * sizeof(void *)));
-            printf("Item %d: 0x%llx\n", i, item);
+            fprintf(stderr,"Item %d: 0x%llx\n", i, item);
             char *entitlementString = OSString_CopyString(item);
             if (strcmp(entitlementString, "/bootstrap/") == 0){
                 foundEntitlements = YES;
@@ -304,31 +304,31 @@ void set_amfi_entitlements(uint64_t proc) {
             rv = 1;
         }
     } else {
-      printf("Not going to merge array with itself :P");
+      fprintf(stderr,"Not going to merge array with itself :P\n");
       rv = 1;
     }
 
     if (rv != 1) {
-      printf("Setting exc FAILED! amfi_entitlements: 0x%llx present: 0x%llx\n", amfi_entitlements, present);
+      fprintf(stderr,"Setting exc FAILED! amfi_entitlements: 0x%llx present: 0x%llx\n", amfi_entitlements, present);
     }
 }
 
 int setcsflagsandplatformize(int pid){
   uint64_t proc = proc_find(pid, 3);
   if (proc != 0) {
-    printf("setcsflagsandplatformize start on PID %d\n", pid);
+    fprintf(stderr,"setcsflagsandplatformize start on PID %d\n", pid);
     char name[40] = {0};
     kread(proc+0x268, name, 20);
-    printf("PID %d name is %s\n", pid, name);
+    fprintf(stderr,"PID %d name is %s\n", pid, name);
       
     set_csflags(proc);
     set_tfplatform(proc);
     set_amfi_entitlements(proc);
     set_sandbox_extensions(proc);
     set_csblob(proc);
-    printf("setcsflagsandplatformize done on PID %d\n", pid);
+    fprintf(stderr,"setcsflagsandplatformize done on PID %d\n", pid);
     return 0;
   }
-  printf("Unable to find PID %d to entitle!\n", pid);
+  fprintf(stderr,"Unable to find PID %d to entitle!\n", pid);
   return 1;
 }

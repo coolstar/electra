@@ -104,19 +104,19 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         
         uint32_t flags;
         csops(pid, CS_OPS_STATUS, &flags, 0);
-        printf("CSFlags for PID %d: 0x%x\n", pid, flags);
+        fprintf(stderr,"CSFlags for PID %d: 0x%x\n", pid, flags);
         
         if ((flags & CS_DEBUGGED) == 0){
-            printf("Trying again...\n");
+            fprintf(stderr,"Trying again...\n");
             usleep(100 * 1000);
             
             setcsflagsandplatformize(pid);
             csops(pid, CS_OPS_STATUS, &flags, 0);
-            printf("CSFlags for PID %d: 0x%x\n", pid, flags);
+            fprintf(stderr,"CSFlags for PID %d: 0x%x\n", pid, flags);
         }
         
         if (stuff & FLAG_SIGCONT) {
-            printf("Sending SIGCONT to %d\n", pid);
+            fprintf(stderr,"Sending SIGCONT to %d\n", pid);
             kill(pid, SIGCONT);
         }
 
@@ -148,13 +148,13 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         dispatch_group_async(waitgroup, dispatch_get_main_queue(), ^{
             char pathbuf[PROC_PIDPATHINFO_MAXSIZE] = {0};
 
-            printf("Waiting to ensure it's not xpcproxy anymore...\n");
+            fprintf(stderr,"Waiting to ensure it's not xpcproxy anymore...\n");
             int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-            printf("proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
+            fprintf(stderr,"proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
 
             while (ret > 0 && strcmp(pathbuf, "/usr/libexec/xpcproxy") == 0){
                 ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-                printf("proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
+                fprintf(stderr,"proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
                 usleep(100);
             }
             // free(cmp_path);
@@ -189,20 +189,20 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
     xpc_connection_set_event_handler(who, ^(xpc_object_t msg) {
         xpc_type_t type = xpc_get_type(msg);
         if (type == XPC_TYPE_ERROR) {
-            printf("jailbreakd: connection error %s\n", xpc_dictionary_get_string(msg, XPC_ERROR_KEY_DESCRIPTION));
+            fprintf(stderr,"jailbreakd: connection error %s\n", xpc_dictionary_get_string(msg, XPC_ERROR_KEY_DESCRIPTION));
             return;
         }
 
         xpc_connection_t peer = xpc_dictionary_get_remote_connection(msg);
 
         char *desc = xpc_copy_description(msg);
-        printf("jailbreakd: received object: %s\n", desc);
+        fprintf(stderr,"jailbreakd: received object: %s\n", desc);
         free(desc);
 
         const char *action = xpc_dictionary_get_string(msg, "action");
         if (!action) {
             char *desc = xpc_copy_description(msg);
-            printf("jailbreakd: received message from pid %d with no action: %s\n",
+            fprintf(stderr,"jailbreakd: received message from pid %d with no action: %s\n",
                 xpc_connection_get_pid(peer),
                 desc);
             free(desc);
@@ -222,11 +222,11 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
             do_entp_stuff_with_pid(flags, reqpid, ^(uint64_t stuff, pid_t pid) {
                 char flgstr[7] = {0};
                 flags_to_string(flags, flgstr);
-                printf("jailbreakd: entitle operations: %s complete for pid %d\n", flgstr, reqpid);
+                fprintf(stderr,"jailbreakd: entitle operations: %s complete for pid %d\n", flgstr, reqpid);
 
                 xpc_object_t reply = xpc_dictionary_create_reply(msg);
                 if (!reply) {
-                    printf("jailbreakd: can't create reply. did the other end hang up too soon??\n");
+                    fprintf(stderr,"jailbreakd: can't create reply. did the other end hang up too soon??\n");
                     xpc_release(msg);
                     return;
                 }
@@ -241,11 +241,11 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
             });
         } else if (!strcmp(action, JAILBREAKD_ACTION_FIX_SETUID)) {
             do_suid_with_pid(reqpid, ^(pid_t pid) {
-                printf("jailbreakd: suid complete for pid %d\n", reqpid);
+                fprintf(stderr,"jailbreakd: suid complete for pid %d\n", reqpid);
 
                 xpc_object_t reply = xpc_dictionary_create_reply(msg);
                 if (!reply) {
-                    printf("jailbreakd: can't create reply. did the other end hang up too soon??\n");
+                    fprintf(stderr,"jailbreakd: can't create reply. did the other end hang up too soon??\n");
                     xpc_release(msg);
                     return;
                 }
@@ -258,10 +258,10 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
                 xpc_release(msg);
             });
         } else if (!strcmp(action, JAILBREAKD_ACTION_PING)) {
-            printf("jailbreakd: ping complete for pid %d\n", reqpid);
+            fprintf(stderr,"jailbreakd: ping complete for pid %d\n", reqpid);
             xpc_object_t reply = xpc_dictionary_create_reply(msg);
             if (!reply) {
-                printf("jailbreakd: can't create reply. did the other end hang up too soon??\n");
+                fprintf(stderr,"jailbreakd: can't create reply. did the other end hang up too soon??\n");
                 xpc_release(msg);
                 return;
             }
@@ -275,12 +275,12 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
         } else if (!strcmp(action, JAILBREAKD_ACTION_EXIT)) {
             xpc_release(msg);
 
-            printf("jailbreakd: exiting for pid %d!\n", reqpid);
+            fprintf(stderr,"jailbreakd: exiting for pid %d!\n", reqpid);
 
             term_kexecute();
             exit(0);
         } else {
-            printf("jailbreakd: invalid action! %s\n", action);
+            fprintf(stderr,"jailbreakd: invalid action! %s\n", action);
             xpc_release(msg);
             xpc_connection_cancel(peer);
         }
@@ -309,17 +309,17 @@ void *initThread(struct InitThreadArg *args){
     char buf[1024];
     while (true){
         int bytesRead = recv(args->clientFd, buf, 1024, 0);
-        printf("Bytes Read: %d\n", bytesRead);
+        fprintf(stderr,"Bytes Read: %d\n", bytesRead);
         if (bytesRead){
             int bytesProcessed = 0;
             while (bytesProcessed < bytesRead){
                 if (bytesRead - bytesProcessed >= sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
                     struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *clientMessage = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT*)(buf + bytesProcessed);
                     if (clientMessage->Command != JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
-                        printf("Invalid command\n");
+                        fprintf(stderr,"Invalid command\n");
                     }
                     if (clientMessage->Command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
-                        printf("Got Request to Entitle PID %u\n", clientMessage->Pid);
+                        fprintf(stderr,"Got Request to Entitle PID %u\n", clientMessage->Pid);
                         
                         setcsflagsandplatformize(clientMessage->Pid);
                         kill(clientMessage->Pid, SIGCONT);
@@ -328,7 +328,7 @@ void *initThread(struct InitThreadArg *args){
                 bytesProcessed += sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT);
             }
         } else {
-            printf("Client disconnected\n");
+            fprintf(stderr,"Client disconnected\n");
             break;
         }
     }
@@ -337,14 +337,14 @@ void *initThread(struct InitThreadArg *args){
 }
 
 void* thd_func(void* arg){
-    printf("In a new thread!\n");
+    fprintf(stderr,"In a new thread!\n");
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
     
-    printf("[jailbreakd] Running server...\n");
+    fprintf(stderr,"[jailbreakd] Running server...\n");
     int listenFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listenFd < 0)
-        printf("[jailbreakd] Error opening socket\n");
+        fprintf(stderr,"[jailbreakd] Error opening socket\n");
     int optval = 1;
     setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval, sizeof(int));
     
@@ -353,7 +353,7 @@ void* thd_func(void* arg){
     /* gethostbyname: get the server's DNS entry */
     server = gethostbyname(hostname);
     if (server == NULL) {
-        printf("[jailbreakd] ERROR, no such host as %s\n", hostname);
+        fprintf(stderr,"[jailbreakd] ERROR, no such host as %s\n", hostname);
         exit(0);
     }
     
@@ -363,7 +363,7 @@ void* thd_func(void* arg){
     serveraddr.sin_port = htons((unsigned short)5);
     
     if (bind(listenFd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
-        printf("[jailbreakd] Error binding...\n");
+        fprintf(stderr,"[jailbreakd] Error binding...\n");
         exit(-1);
     }
     
@@ -377,7 +377,7 @@ void* thd_func(void* arg){
         int clientFd = accept(listenFd, (struct sockaddr *)&clientaddr, &clientlen);
         
         if (clientFd < 0){
-            printf("Unable to accept\n");
+            fprintf(stderr,"Unable to accept\n");
             return -1;
         }
         
@@ -389,7 +389,7 @@ void* thd_func(void* arg){
         
         int err = pthread_create(&thread, NULL, (void *(*)(void *))&initThread, &args);
         if (err != 0){
-            printf("Unable to create thread\n");
+            fprintf(stderr,"Unable to create thread\n");
             pthread_detach(thread);
         }
         
@@ -398,7 +398,7 @@ void* thd_func(void* arg){
 }
 
 int main(int argc, char **argv, char **envp) {
-    printf("jailbreakd: start\n");
+    fprintf(stderr,"jailbreakd: start\n");
 
     unlink("/tmp/jailbreakd.pid");
     int fd = open("/tmp/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
@@ -407,21 +407,21 @@ int main(int argc, char **argv, char **envp) {
     write(fd, mmmm, sz);
     close(fd);
 
-    printf("jailbreakd: dumped pid\n");
+    fprintf(stderr,"jailbreakd: dumped pid\n");
 
     kernel_base = strtoull(getenv("KernelBase"), NULL, 16);
     remove_memory_limit();
 
     kern_return_t err = host_get_special_port(mach_host_self(), HOST_LOCAL_NODE, 4, &tfpzero);
     if (err != KERN_SUCCESS) {
-        printf("host_get_special_port 4: %s\n", mach_error_string(err));
+        fprintf(stderr,"host_get_special_port 4: %s\n", mach_error_string(err));
         return 5;
     }
 
     init_kernel(kernel_base, NULL);
     // Get the slide
     kernel_slide = kernel_base - 0xFFFFFFF007004000;
-    printf("jailbreakd: slide: 0x%016llx\n", kernel_slide);
+    fprintf(stderr,"jailbreakd: slide: 0x%016llx\n", kernel_slide);
 
     // prime offset caches
     find_allproc();
@@ -446,7 +446,7 @@ int main(int argc, char **argv, char **envp) {
             "com.apple.uikit.viewservice.xxx.dainsleif.xpc",
             NULL, XPC_CONNECTION_MACH_SERVICE_LISTENER);
         if (!connection) {
-            printf("jailbreakd: no XPC service\n");
+            fprintf(stderr,"jailbreakd: no XPC service\n");
             return 0;
         }
 
@@ -454,17 +454,17 @@ int main(int argc, char **argv, char **envp) {
         xpc_connection_set_event_handler(connection, ^(xpc_object_t object) {
             xpc_type_t type = xpc_get_type(object);
             if (type == XPC_TYPE_CONNECTION) {
-                printf("jailbreakd: received XPC connection!\n");
+                fprintf(stderr,"jailbreakd: received XPC connection!\n");
                 jailbreakd_handle_xpc_connection(object);
             } else if (type == XPC_TYPE_ERROR) {
-                printf("jailbreakd: XPC error in listener: %s\n", xpc_dictionary_get_string(object, XPC_ERROR_KEY_DESCRIPTION));
+                fprintf(stderr,"jailbreakd: XPC error in listener: %s\n", xpc_dictionary_get_string(object, XPC_ERROR_KEY_DESCRIPTION));
             }
         });
 
         // Make connection live
         xpc_connection_resume(connection);
-        printf("it never fails to strike its target, and the wounds it causes do not heal\n");
-        printf("in other words, XPC is online\n");
+        fprintf(stderr,"it never fails to strike its target, and the wounds it causes do not heal\n");
+        fprintf(stderr,"in other words, XPC is online\n");
 
         dispatch_main();
     }
