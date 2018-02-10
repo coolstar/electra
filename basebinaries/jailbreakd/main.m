@@ -14,7 +14,18 @@
 #include "patchfinder64.h"
 
 #define CS_OPS_STATUS       0   /* return status */
-#define CS_HARD            0x0000100    /* don't load invalid pages */
+
+#define CS_GET_TASK_ALLOW    0x0000004    /* has get-task-allow entitlement */
+#define CS_INSTALLER        0x0000008    /* has installer entitlement */
+
+#define    CS_HARD            0x0000100    /* don't load invalid pages */
+#define    CS_KILL            0x0000200    /* kill process if it becomes invalid */
+#define CS_RESTRICT        0x0000800    /* tell dyld to treat restricted */
+
+#define CS_PLATFORM_BINARY    0x4000000    /* this is a platform binary */
+
+#define CS_DEBUGGED         0x10000000  /* process is currently or has previously been debugged and allowed to run with invalid pages */
+
 int csops(pid_t pid, unsigned int  ops, void * useraddr, size_t usersize);
 
 #define PROC_PIDPATHINFO_MAXSIZE  (1024)
@@ -102,12 +113,19 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         /* FIXME: respect flags */
         uint32_t flags;
         csops(pid, CS_OPS_STATUS, &flags, 0);
-        fprintf(stderr,"CSFlags for PID %d: 0x%x\n", pid, flags);
+        fprintf(stderr, "Waiting for CSFlags to reset for PID %d...\n", pid);
         
-        while ((flags & CS_HARD) == 0){
+        int tries = 0;
+        while ((flags & (CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW | CS_DEBUGGED)) != 0 &&
+               (flags & (CS_RESTRICT | CS_HARD | CS_KILL)) == 0 &&
+               tries < 5000){
             csops(pid, CS_OPS_STATUS, &flags, 0);
-            fprintf(stderr,"CSFlags for PID %d: 0x%x\n", pid, flags);
             usleep(100);
+            tries++;
+        }
+        
+        if (tries >= 5000){
+            fprintf(stderr, "Warning: CSFlag timer timed out for PID %d\n");
         }
         
         setcsflagsandplatformize(pid);
