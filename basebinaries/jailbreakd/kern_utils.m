@@ -197,7 +197,6 @@ void set_csblob(uint64_t proc) {
 }
 
 const char* abs_path_exceptions[] = {
-  "/bootstrap",
   "/Library",
   // XXX there's some weird stuff about linking and special
   // handling for /private/var/mobile/* in sandbox
@@ -212,7 +211,6 @@ uint64_t get_exception_osarray(void) {
   if (cached == 0) {
     // XXX use abs_path_exceptions
     cached = OSUnserializeXML("<array>"
-    "<string>/bootstrap/</string>"
     "<string>/Library/</string>"
     "<string>/private/var/mobile/Library/</string>"
     "<string>/private/var/mnt/</string>"

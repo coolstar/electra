@@ -42,7 +42,7 @@ const char* realPath() {
 void extractTarBinary(){
     NSData *tarGz = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"tar" ofType:@"gz"]];
     NSData *tar = [tarGz gunzippedData];
-    [tar writeToFile:@"/bootstrap/tar" atomically:YES];
+    [tar writeToFile:@"/electra/tar" atomically:YES];
 }
 
 void update_springboard_plist(){

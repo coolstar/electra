@@ -12,5 +12,6 @@
 #include <stdio.h>
 
 int run(const char *cmd);
+char* itoa(long n);
 
 #endif /* utils_h */

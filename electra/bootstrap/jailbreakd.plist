@@ -5,11 +5,11 @@
 	<key>Label</key>
 	<string>jailbreakd</string>
 	<key>Program</key>
-	<string>/bootstrap/jailbreakd</string>
-	<!-- Do not remove EnvironmentVariables! It's needed by start_jailbreakd
-         The value of KernelBase will be adjusted accordingly.-->
+	<string>/electra/jailbreakd</string>
 	<key>EnvironmentVariables</key>
 	<dict>
+		<!-- Do not remove EnvironmentVariables! It's needed by start_jailbreakd
+         The value of KernelBase will be adjusted accordingly.-->
 		<key>KernelBase</key>
 		<string>0x746f6d6f68696d61</string>
 	</dict>
