@@ -84,10 +84,6 @@ void extract_bootstrap() {
     open("/.bootstrapped_electra", O_RDWR|O_CREAT);
     open("/.cydia_no_stash",O_RDWR|O_CREAT);
     
-    unlink(tar);
-    
-    inject_trusts(1, (const char **)&(const char*[]){"/bin/launchctl"});
-    
     unlink("/usr/lib/libjailbreak.dylib");
     cp("/usr/lib/libjailbreak.dylib","/electra/libjailbreak.dylib");
     
@@ -100,7 +96,11 @@ void extract_bootstrap() {
 void post_bootstrapped(const bool runUICache) {
     if (runUICache)
         run("uicache");
-
+    
+    unlink(tar);
+    
+    inject_trusts(1, (const char **)&(const char*[]){"/bin/launchctl"});
+    
     run("launchctl load /Library/LaunchDaemons/dropbear.plist");
     cleanup_old();
     
