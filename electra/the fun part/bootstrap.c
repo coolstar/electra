@@ -78,15 +78,11 @@ void extract_bootstrap() {
     if (bootstrapped != -1)
         return post_bootstrap(runUICache);
     
-    posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "--preserve-permissions", "--no-overwrite-dir", "-xvzf", progname("bootstrap.tar.gz"), NULL }, NULL);
+    posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "--preserve-permissions", "--no-overwrite-dir", "-xvzkf", progname("bootstrap.tar.gz"), NULL }, NULL);
     waitpid(pd, NULL, 0);
     
     open("/.bootstrapped_electra", O_RDWR|O_CREAT);
     open("/.cydia_no_stash",O_RDWR|O_CREAT);
-    
-    inject_trusts(1, (const char **)&(const char*[]){"/bin/launchctl"});
-    
-    symlink("/Library/dpkg/", "/var/lib/dpkg");
     
     printf("[bootstrapper] extracted bootstrap to / \n");
     post_bootstrap(runUICache);
@@ -103,7 +99,7 @@ void post_bootstrap(const bool runUICache) {
     
     inject_trusts(1, (const char **)&(const char*[]){"/bin/launchctl"});
     
-    run("launchctl load /Library/LaunchDaemons/dropbear.plist");
+    run("launchctl load /Library/LaunchDaemons/com.openssh.opensshd.plist");
     cleanup_old();
     
     printf("[bootstrapper] device has been bootstrapped!\n");
