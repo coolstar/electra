@@ -353,6 +353,9 @@ void *initThread(struct InitThreadArg *args){
     return NULL;
 }
 
+bool isXPCInit = false;
+bool isTCPInit = false;
+
 void* thd_func(void* arg){
     fprintf(stderr,"In a new thread!\n");
     struct sockaddr_in serveraddr; /* server's addr */
@@ -390,6 +393,19 @@ void* thd_func(void* arg){
     
     socklen_t clientlen = sizeof(clientaddr);
     
+    isTCPInit = true;
+    
+    if (isXPCInit && isTCPInit){
+        int fd = open("/tmp/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
+        char mmmm[8] = {0};
+        int sz = snprintf(mmmm, 8, "%d", getpid());
+        write(fd, mmmm, sz);
+        close(fd);
+        
+        fprintf(stderr,"jailbreakd: dumped pid\n");
+    }
+    
+    
     while (true){
         int clientFd = accept(listenFd, (struct sockaddr *)&clientaddr, &clientlen);
         
@@ -418,13 +434,6 @@ int main(int argc, char **argv, char **envp) {
     fprintf(stderr,"jailbreakd: start\n");
 
     unlink("/tmp/jailbreakd.pid");
-    int fd = open("/tmp/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
-    char mmmm[8] = {0};
-    int sz = snprintf(mmmm, 8, "%d", getpid());
-    write(fd, mmmm, sz);
-    close(fd);
-
-    fprintf(stderr,"jailbreakd: dumped pid\n");
 
     kernel_base = strtoull(getenv("KernelBase"), NULL, 16);
     remove_memory_limit();
@@ -483,6 +492,18 @@ int main(int argc, char **argv, char **envp) {
         fprintf(stderr,"it never fails to strike its target, and the wounds it causes do not heal\n");
         fprintf(stderr,"in other words, XPC is online\n");
 
+        isXPCInit = true;
+        
+        if (isXPCInit && isTCPInit){
+            int fd = open("/tmp/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
+            char mmmm[8] = {0};
+            int sz = snprintf(mmmm, 8, "%d", getpid());
+            write(fd, mmmm, sz);
+            close(fd);
+            
+            fprintf(stderr,"jailbreakd: dumped pid\n");
+        }
+        
         dispatch_main();
     }
 
