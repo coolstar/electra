@@ -14,6 +14,6 @@
 
 void copy_basebinaries(void);
 void extract_bootstrap(void);
-void post_bootstrapped(const bool runUICache);
+void post_bootstrap(const bool runUICache);
 
 #endif /* bootstrap_h */

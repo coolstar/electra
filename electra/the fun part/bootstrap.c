@@ -55,7 +55,7 @@ void copy_basebinaries() {
     unlink("/electra/launchjailbreak");
     unlink("/electra/jailbreakd");
     
-    posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("basebinaries.tar"), "-C", "/electra", NULL }, NULL);
+    posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpzf", progname("basebinaries.tar.gz"), "-C", "/electra", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
     printf("[bootstrapper] copied the required binaries into the right places\n");
@@ -76,7 +76,7 @@ void extract_bootstrap() {
     
     int bootstrapped = open("/.bootstrapped_electra", O_RDONLY);
     if (bootstrapped != -1)
-        return post_bootstrapped(runUICache);
+        return post_bootstrap(runUICache);
     
     posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "--preserve-permissions", "--no-overwrite-dir", "-xvzf", progname("bootstrap.tar.gz"), NULL }, NULL);
     waitpid(pd, NULL, 0);
@@ -88,19 +88,19 @@ void extract_bootstrap() {
     
     inject_trusts(1, (const char **)&(const char*[]){"/bin/launchctl"});
     
-    unlink("/usr/lib/libjailbreak.dylib");
-    cp("/usr/lib/libjailbreak.dylib","/electra/libjailbreak.dylib");
-    
     symlink("/Library/dpkg/", "/var/lib/dpkg");
     
     printf("[bootstrapper] extracted bootstrap to / \n");
-    post_bootstrapped(runUICache);
+    post_bootstrap(runUICache);
 }
 
-void post_bootstrapped(const bool runUICache) {
+void post_bootstrap(const bool runUICache) {
     if (runUICache)
         run("uicache");
-
+    
+    unlink("/usr/lib/libjailbreak.dylib");
+    cp("/usr/lib/libjailbreak.dylib","/electra/libjailbreak.dylib");
+    
     run("launchctl load /Library/LaunchDaemons/dropbear.plist");
     cleanup_old();
     
