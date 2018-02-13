@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		175043CB203230350064B7CE /* launchctl.gz in Resources */ = {isa = PBXBuildFile; fileRef = 175043CA203230350064B7CE /* launchctl.gz */; };
 		176718D5201C9B3600FDF1CF /* file_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718D3201C9B3600FDF1CF /* file_utils.c */; };
 		176718D9201CA00F00FDF1CF /* amfi_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718D7201CA00F00FDF1CF /* amfi_utils.c */; };
 		176718DE201CB8B100FDF1CF /* offsetof.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718DC201CB8B100FDF1CF /* offsetof.c */; };
 		176718E1201CC80B00FDF1CF /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718DF201CC80A00FDF1CF /* utils.c */; };
 		17909C752030BBC60078B16A /* bootstrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 17909C732030BBC60078B16A /* bootstrap.c */; };
+		17D60E912032280600902E73 /* bootstrap.tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = 17D60E902032280600902E73 /* bootstrap.tar.gz */; };
 		4A7B89692010255800CB6439 /* jailbreakd.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4A7B89682010255800CB6439 /* jailbreakd.plist */; };
 		6545304C200E8F600017BA60 /* remap_tfp_set_hsp.c in Sources */ = {isa = PBXBuildFile; fileRef = 6545304B200E8F600017BA60 /* remap_tfp_set_hsp.c */; };
 		B003EB351FC583CB00C58441 /* kmem.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB331FC583CA00C58441 /* kmem.c */; };
@@ -51,6 +53,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		175043CA203230350064B7CE /* launchctl.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = launchctl.gz; sourceTree = "<group>"; };
 		176718D3201C9B3600FDF1CF /* file_utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = file_utils.c; sourceTree = "<group>"; };
 		176718D4201C9B3600FDF1CF /* file_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = file_utils.h; sourceTree = "<group>"; };
 		176718D6201C9F0900FDF1CF /* codesign.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = codesign.h; sourceTree = "<group>"; };
@@ -63,6 +66,7 @@
 		176718E0201CC80B00FDF1CF /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		17909C732030BBC60078B16A /* bootstrap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bootstrap.c; sourceTree = "<group>"; };
 		17909C742030BBC60078B16A /* bootstrap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bootstrap.h; sourceTree = "<group>"; };
+		17D60E902032280600902E73 /* bootstrap.tar.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = bootstrap.tar.gz; sourceTree = "<group>"; };
 		4A7B89682010255800CB6439 /* jailbreakd.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = jailbreakd.plist; sourceTree = "<group>"; };
 		4A9599892020080100A36B90 /* xpc_minimal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = xpc_minimal.h; sourceTree = "<group>"; };
 		6545304A200E8F600017BA60 /* remap_tfp_set_hsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = remap_tfp_set_hsp.h; sourceTree = "<group>"; };
@@ -138,6 +142,8 @@
 			isa = PBXGroup;
 			children = (
 				F1531E102009709700DD5051 /* tar.gz */,
+				175043CA203230350064B7CE /* launchctl.gz */,
+				17D60E902032280600902E73 /* bootstrap.tar.gz */,
 				4A7B89682010255800CB6439 /* jailbreakd.plist */,
 			);
 			path = bootstrap;
@@ -370,10 +376,12 @@
 				F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */,
 				B07A02461FB09B6F0018ACE5 /* Assets.xcassets in Resources */,
 				F1954022200BFE86000D094F /* AppIcon20x20@2x.png in Resources */,
+				17D60E912032280600902E73 /* bootstrap.tar.gz in Resources */,
 				F195401E200BFE86000D094F /* AppIcon83.5x83.5@2x.png in Resources */,
 				F1954023200BFE86000D094F /* AppIcon76x76@2x.png in Resources */,
 				F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */,
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
+				175043CB203230350064B7CE /* launchctl.gz in Resources */,
 				4A7B89692010255800CB6439 /* jailbreakd.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -392,7 +400,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:$HOME/bin\"\n\nMACOSX_SDK=$(xcrun --show-sdk-path --sdk macosx)\n# suppress warning\nrm -f $SRCROOT/basebinaries/apple_include/xpc $SRCROOT/basebinaries/apple_include/launch.h\nln -s $MACOSX_SDK/usr/include/xpc $SRCROOT/basebinaries/apple_include/xpc\nln -s $MACOSX_SDK/usr/include/launch.h $SRCROOT/basebinaries/apple_include/launch.h\n\nmake -C $SRCROOT/basebinaries clean all \"OUTDIR=$DERIVED_FILE_DIR\"\ncp \"$DERIVED_FILE_DIR/basebinaries.tar.gz\" \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/basebinaries.tar.gz\"";
+			shellScript = "export PATH=\"$PATH:$HOME/bin\"\n\nMACOSX_SDK=$(xcrun --show-sdk-path --sdk macosx)\n# suppress warning\nrm -f $SRCROOT/basebinaries/apple_include/xpc $SRCROOT/basebinaries/apple_include/launch.h\nln -s $MACOSX_SDK/usr/include/xpc $SRCROOT/basebinaries/apple_include/xpc\nln -s $MACOSX_SDK/usr/include/launch.h $SRCROOT/basebinaries/apple_include/launch.h\n\nmake -C $SRCROOT/basebinaries clean all \"OUTDIR=$DERIVED_FILE_DIR\"\ncp \"$DERIVED_FILE_DIR/basebinaries.tar\" \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/basebinaries.tar\"";
 		};
 		F1F5BD75201C6EA400C42113 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;

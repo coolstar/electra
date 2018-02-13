@@ -9,8 +9,8 @@
 #ifndef fun_objc_h
 #define fun_objc_h
 
-const char* progname(const char*);
-void extractTarBinary(void);
+const char* progname(const char*);;
+void extractGzTo(const char *from, const char *to);
 void update_springboard_plist(void);
 
 #endif /* fun_objc_h */

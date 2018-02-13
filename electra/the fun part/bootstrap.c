@@ -30,15 +30,13 @@ void cleanup_old() {
 }
 
 void copy_tar() {
-    extractTarBinary();
+    extractGzTo("tar", "/electra/tar");
     chmod(tar, 0755);
     inject_trusts(1, (const char **)&(const char*[]){tar});
 }
 
 void copy_basebinaries() {
-    if (!file_exists("/electra")) {
-        mkdir("/electra", 0755);
-    }
+    mkdir("/electra", 0755);
     
     copy_tar();
     
@@ -55,7 +53,7 @@ void copy_basebinaries() {
     unlink("/electra/launchjailbreak");
     unlink("/electra/jailbreakd");
     
-    posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpzf", progname("basebinaries.tar.gz"), "-C", "/electra", NULL }, NULL);
+    posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("basebinaries.tar"), "-C", "/electra", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
     printf("[bootstrapper] copied the required binaries into the right places\n");
@@ -78,8 +76,16 @@ void extract_bootstrap() {
     if (bootstrapped != -1)
         return post_bootstrap(runUICache);
     
-    posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "--preserve-permissions", "--no-overwrite-dir", "-xvzkf", progname("bootstrap.tar.gz"), NULL }, NULL);
+    extractGzTo("bootstrap.tar", "/electra/bootstrap.tar");
+    
+    extractGzTo("launchctl", "/electra/launchctl");
+    cp("/bin/launchctl", "/electra/launchctl");
+    unlink("/electra/launchctl");
+    
+    posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "--preserve-permissions", "-xvkf", "/electra/bootstrap.tar", "-C", "/", NULL }, NULL);
     waitpid(pd, NULL, 0);
+    
+    unlink("/electra/bootstrap.tar");
     
     open("/.bootstrapped_electra", O_RDWR|O_CREAT);
     open("/.cydia_no_stash",O_RDWR|O_CREAT);

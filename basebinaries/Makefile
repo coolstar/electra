@@ -1,4 +1,4 @@
-TARGET  = basebinaries.tar.gz
+TARGET  = basebinaries.tar
 OUTDIR ?= bin
 
 .PHONY: all clean
@@ -19,7 +19,7 @@ $(OUTDIR):
 $(OUTDIR)/$(TARGET): $(addprefix $(OUTDIR)/, $(SUBPRJ)) | $(OUTDIR)
 	#tar -cvf $@ $^
 	rm -f $@
-	cd $(OUTDIR); gtar -zpcvf $(abspath $@) $(notdir bin/*)
+	cd $(OUTDIR); gtar -pcvf $(abspath $@) $(notdir bin/*)
 
 $(OUTDIR)/%: | $(OUTDIR)
 	$(MAKE) -C $(notdir $@) $(MFLAGS)
