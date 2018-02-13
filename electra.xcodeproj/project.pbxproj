@@ -426,7 +426,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:$HOME/bin\"\n\nMACOSX_SDK=$(xcrun --show-sdk-path --sdk macosx)\n# suppress warning\nrm $SRCROOT/basebinaries/apple_include/xpc $SRCROOT/basebinaries/apple_include/launch.h || true\nln -s $MACOSX_SDK/usr/include/xpc $SRCROOT/basebinaries/apple_include/xpc\nln -s $MACOSX_SDK/usr/include/launch.h $SRCROOT/basebinaries/apple_include/launch.h\n\nmake -C $SRCROOT/basebinaries clean all \"OUTDIR=$DERIVED_FILE_DIR\"\ncp \"$DERIVED_FILE_DIR/basebinaries.tar\" \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/basebinaries.tar\"";
+			shellScript = "export PATH=\"$PATH:$HOME/bin\"\n\nMACOSX_SDK=$(xcrun --show-sdk-path --sdk macosx)\n# suppress warning\nrm -f $SRCROOT/basebinaries/apple_include/xpc $SRCROOT/basebinaries/apple_include/launch.h\nln -s $MACOSX_SDK/usr/include/xpc $SRCROOT/basebinaries/apple_include/xpc\nln -s $MACOSX_SDK/usr/include/launch.h $SRCROOT/basebinaries/apple_include/launch.h\n\nmake -C $SRCROOT/basebinaries clean all \"OUTDIR=$DERIVED_FILE_DIR\"\ncp \"$DERIVED_FILE_DIR/basebinaries.tar\" \"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/basebinaries.tar\"";
 		};
 		F1F5BD75201C6EA400C42113 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
