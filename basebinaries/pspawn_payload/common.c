@@ -101,7 +101,6 @@ void calljailbreakd(pid_t PID, uint8_t command) {
     
 #define BUFSIZE 1024
     
-    int n;
     char buf[BUFSIZE];
     
     /* get a message from the user */
