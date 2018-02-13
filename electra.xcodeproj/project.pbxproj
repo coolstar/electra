@@ -34,12 +34,14 @@
 		BC8EE46C1FE272CF00402F32 /* fun.c in Sources */ = {isa = PBXBuildFile; fileRef = BC8EE46A1FE272CF00402F32 /* fun.c */; };
 		BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */ = {isa = PBXBuildFile; fileRef = BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */; };
 		BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC9969031FE66CE200A4EDB9 /* ent.plist */; };
+		F11625EB2032CD3500515402 /* rm.gz in Resources */ = {isa = PBXBuildFile; fileRef = F11625EA2032CD3500515402 /* rm.gz */; };
 		F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */ = {isa = PBXBuildFile; fileRef = F14B5F951FF2265900E62599 /* start_jailbreakd.m */; };
 		F1531E0E2009702B00DD5051 /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = F1531E0D2009702B00DD5051 /* NSData+GZip.m */; };
 		F1531E112009709800DD5051 /* tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = F1531E102009709700DD5051 /* tar.gz */; };
 		F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026D2008C679002CF5EE /* CSGradientView.m */; };
 		F18428AD20327D6900C1CC3F /* unliberios.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AC20327D6900C1CC3F /* unliberios.c */; };
 		F18428B02032838700C1CC3F /* topangadetect.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AF2032838700C1CC3F /* topangadetect.c */; };
+		F18428B72032AFD100C1CC3F /* removeElectraBeta.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428B62032AFD100C1CC3F /* removeElectraBeta.c */; };
 		F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400E200BFE85000D094F /* AppIcon76x76.png */; };
 		F195401A200BFE86000D094F /* AppIcon40x40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400F200BFE85000D094F /* AppIcon40x40@3x.png */; };
 		F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954010200BFE85000D094F /* AppIcon40x40.png */; };
@@ -108,6 +110,7 @@
 		BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = patchfinder64.c; sourceTree = "<group>"; };
 		BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = patchfinder64.h; sourceTree = "<group>"; };
 		BC9969031FE66CE200A4EDB9 /* ent.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
+		F11625EA2032CD3500515402 /* rm.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = rm.gz; sourceTree = "<group>"; };
 		F14B5F951FF2265900E62599 /* start_jailbreakd.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = start_jailbreakd.m; sourceTree = "<group>"; };
 		F1531E0D2009702B00DD5051 /* NSData+GZip.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSData+GZip.m"; sourceTree = "<group>"; };
 		F1531E0F2009703900DD5051 /* NSData+GZip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+GZip.h"; sourceTree = "<group>"; };
@@ -118,6 +121,8 @@
 		F18428AC20327D6900C1CC3F /* unliberios.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unliberios.c; sourceTree = "<group>"; };
 		F18428AE2032838700C1CC3F /* topangadetect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = topangadetect.h; sourceTree = "<group>"; };
 		F18428AF2032838700C1CC3F /* topangadetect.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = topangadetect.c; sourceTree = "<group>"; };
+		F18428B52032AFD100C1CC3F /* removeElectraBeta.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = removeElectraBeta.h; sourceTree = "<group>"; };
+		F18428B62032AFD100C1CC3F /* removeElectraBeta.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = removeElectraBeta.c; sourceTree = "<group>"; };
 		F195400E200BFE85000D094F /* AppIcon76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon76x76.png; sourceTree = "<group>"; };
 		F195400F200BFE85000D094F /* AppIcon40x40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon40x40@3x.png"; sourceTree = "<group>"; };
 		F1954010200BFE85000D094F /* AppIcon40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon40x40.png; sourceTree = "<group>"; };
@@ -150,6 +155,7 @@
 				F1531E102009709700DD5051 /* tar.gz */,
 				175043CA203230350064B7CE /* launchctl.gz */,
 				17D60E902032280600902E73 /* bootstrap.tar.gz */,
+				F11625EA2032CD3500515402 /* rm.gz */,
 				4A7B89682010255800CB6439 /* jailbreakd.plist */,
 			);
 			path = bootstrap;
@@ -226,6 +232,8 @@
 				F18428AC20327D6900C1CC3F /* unliberios.c */,
 				F18428AE2032838700C1CC3F /* topangadetect.h */,
 				F18428AF2032838700C1CC3F /* topangadetect.c */,
+				F18428B52032AFD100C1CC3F /* removeElectraBeta.h */,
+				F18428B62032AFD100C1CC3F /* removeElectraBeta.c */,
 			);
 			path = utilities;
 			sourceTree = "<group>";
@@ -393,6 +401,7 @@
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
 				175043CB203230350064B7CE /* launchctl.gz in Resources */,
 				4A7B89692010255800CB6439 /* jailbreakd.plist in Resources */,
+				F11625EB2032CD3500515402 /* rm.gz in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,6 +459,7 @@
 				F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */,
 				B07A023E1FB09B6F0018ACE5 /* AppDelegate.m in Sources */,
 				F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */,
+				F18428B72032AFD100C1CC3F /* removeElectraBeta.c in Sources */,
 				F18428AD20327D6900C1CC3F /* unliberios.c in Sources */,
 				BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */,
 				17909C752030BBC60078B16A /* bootstrap.c in Sources */,
@@ -591,7 +601,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = AHEHG4CE9W;
+				DEVELOPMENT_TEAM = N78R6QBX22;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -611,7 +621,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = AHEHG4CE9W;
+				DEVELOPMENT_TEAM = N78R6QBX22;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;

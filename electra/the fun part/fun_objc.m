@@ -18,6 +18,7 @@
 #include <sys/utsname.h>
 #import <Foundation/Foundation.h>
 #import "NSData+GZip.h"
+#import "ViewController.h"
 
 const char* progname(const char* prog) {
     char path[4096];
@@ -54,4 +55,16 @@ void update_springboard_plist(){
     
     NSError *error = nil;
     [[NSFileManager defaultManager] setAttributes:attr ofItemAtPath:@"/var/mobile/Library/Preferences/com.apple.springboard.plist" error:&error];
+}
+
+void removingLiberiOS(){
+    [[ViewController currentViewController] removingLiberiOS];
+}
+
+void removingElectraBeta(){
+    [[ViewController currentViewController] removingElectraBeta];
+}
+
+void installingCydia(){
+    [[ViewController currentViewController] installingCydia];
 }

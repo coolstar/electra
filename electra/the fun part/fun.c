@@ -21,6 +21,9 @@
 #include <dlfcn.h>
 #include <CommonCrypto/CommonDigest.h>
 #include "xpc_minimal.h"
+#include "topangadetect.h"
+#include "unliberios.h"
+#include "removeElectrabeta.h"
 
 mach_port_t tfpzero;
 
@@ -255,6 +258,24 @@ do { \
     waitpid(pd, NULL, 0);
     
     //unlocknvram();
+    
+    int bootstrapped = open("/.bootstrapped_electra", O_RDONLY);
+    if (bootstrapped == -1) {
+        if (checkLiberiOS()){
+            removingLiberiOS();
+            removeLiberiOS();
+        }
+        if (topangaInstalled()){
+            close(bootstrapped);
+            wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
+            unlink("/electra/rm");
+            return -2;
+        }
+        removingElectraBeta();
+        removeElectraBeta();
+    }
+    close(bootstrapped);
+    unlink("/electra/rm");
     
     extract_bootstrap();
 

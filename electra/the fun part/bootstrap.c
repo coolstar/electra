@@ -21,14 +21,6 @@
 
 pid_t pd;
 
-void cleanup_old() {
-    if (file_exists("/bootstrap/")) {
-        printf("/bootstrap exists: deleting\n");
-        run("rm -rf /bootstrap");
-        // whew that felt good
-    }
-}
-
 void copy_tar() {
     extractGz("tar", "/electra/tar");
     chmod(tar, 0755);
@@ -53,6 +45,9 @@ void copy_basebinaries() {
     unlink("/electra/launchjailbreak");
     unlink("/electra/jailbreakd");
     
+    extractGz("rm","/electra/rm");
+    chmod("/electra/rm", 0755);
+    
     posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("basebinaries.tar"), "-C", "/electra", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
@@ -62,7 +57,6 @@ void copy_basebinaries() {
         "/electra/inject_criticald",
         "/electra/amfid_payload.dylib",
         "/electra/pspawn_payload.dylib",
-        
         "/electra/libjailbreak.dylib"
     });
 }
@@ -79,6 +73,7 @@ void extract_bootstrap() {
     
     extractGz("launchctl", "/electra/launchctl");
     cp("/bin/launchctl", "/electra/launchctl");
+    chmod("/bin/launchctl", 0755);
     unlink("/electra/launchctl");
     
     posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "--preserve-permissions", "-xvkf", "/electra/bootstrap.tar", "-C", "/", NULL }, NULL);
@@ -106,8 +101,7 @@ void post_bootstrap(const bool runUICache) {
     
     inject_trusts(1, (const char **)&(const char*[]){"/bin/launchctl"});
     
-    run("launchctl load /Library/LaunchDaemons/com.openssh.opensshd.plist");
-    cleanup_old();
+    run("launchctl load /Library/LaunchDaemons/com.openssh.sshd.plist");
     
     printf("[bootstrapper] device has been bootstrapped!\n");
 }
