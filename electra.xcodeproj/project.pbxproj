@@ -41,6 +41,7 @@
 		F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0263200888A6002CF5EE /* anemoneapp.tar */; };
 		F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0265200888AA002CF5EE /* tweaksupport.tar */; };
 		F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026D2008C679002CF5EE /* CSGradientView.m */; };
+		F18428AD20327D6900C1CC3F /* unliberios.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AC20327D6900C1CC3F /* unliberios.c */; };
 		F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400E200BFE85000D094F /* AppIcon76x76.png */; };
 		F195401A200BFE86000D094F /* AppIcon40x40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400F200BFE85000D094F /* AppIcon40x40@3x.png */; };
 		F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954010200BFE85000D094F /* AppIcon40x40.png */; };
@@ -117,6 +118,8 @@
 		F15B0265200888AA002CF5EE /* tweaksupport.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = tweaksupport.tar; sourceTree = "<group>"; };
 		F15B026C2008C679002CF5EE /* CSGradientView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CSGradientView.h; sourceTree = "<group>"; };
 		F15B026D2008C679002CF5EE /* CSGradientView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientView.m; sourceTree = "<group>"; };
+		F18428AB20327D6900C1CC3F /* unliberios.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unliberios.h; sourceTree = "<group>"; };
+		F18428AC20327D6900C1CC3F /* unliberios.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unliberios.c; sourceTree = "<group>"; };
 		F195400E200BFE85000D094F /* AppIcon76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon76x76.png; sourceTree = "<group>"; };
 		F195400F200BFE85000D094F /* AppIcon40x40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon40x40@3x.png"; sourceTree = "<group>"; };
 		F1954010200BFE85000D094F /* AppIcon40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon40x40.png; sourceTree = "<group>"; };
@@ -226,6 +229,8 @@
 				176718DD201CB8B100FDF1CF /* offsetof.h */,
 				176718DF201CC80A00FDF1CF /* utils.c */,
 				176718E0201CC80B00FDF1CF /* utils.h */,
+				F18428AB20327D6900C1CC3F /* unliberios.h */,
+				F18428AC20327D6900C1CC3F /* unliberios.c */,
 			);
 			path = utilities;
 			sourceTree = "<group>";
@@ -460,6 +465,7 @@
 				F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */,
 				B07A023E1FB09B6F0018ACE5 /* AppDelegate.m in Sources */,
 				F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */,
+				F18428AD20327D6900C1CC3F /* unliberios.c in Sources */,
 				BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */,
 				176718E1201CC80B00FDF1CF /* utils.c in Sources */,
 				176718D9201CA00F00FDF1CF /* amfi_utils.c in Sources */,
