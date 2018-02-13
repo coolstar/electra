@@ -36,7 +36,7 @@ int start_jailbreakd(uint64_t kernel_base) {
 
     pid_t pid = 0;
     
-    int rv = run("launchctl load -w /Library/LaunchDaemons/jailbreakd.plist");
+    int rv = run("/bin/launchctl load /Library/LaunchDaemons/jailbreakd.plist");
     if (rv == -1) {
         return -1;
     }

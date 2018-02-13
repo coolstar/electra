@@ -62,6 +62,11 @@ void copy_basebinaries() {
 }
 
 void extract_bootstrap() {
+    extractGz("launchctl", "/electra/launchctl");
+    cp("/bin/launchctl", "/electra/launchctl");
+    chmod("/bin/launchctl", 0755);
+    unlink("/electra/launchctl");
+    
     int bootstrapped = open("/.bootstrapped_electra", O_RDONLY);
     if (bootstrapped != -1) {
         close(bootstrapped);
@@ -69,12 +74,9 @@ void extract_bootstrap() {
     }
     close(bootstrapped);
     
-    extractGz("bootstrap.tar", "/electra/bootstrap.tar");
+    installingCydia();
     
-    extractGz("launchctl", "/electra/launchctl");
-    cp("/bin/launchctl", "/electra/launchctl");
-    chmod("/bin/launchctl", 0755);
-    unlink("/electra/launchctl");
+    extractGz("bootstrap.tar", "/electra/bootstrap.tar");
     
     posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "--preserve-permissions", "-xvkf", "/electra/bootstrap.tar", "-C", "/", NULL }, NULL);
     waitpid(pd, NULL, 0);
@@ -101,7 +103,9 @@ void post_bootstrap(const bool runUICache) {
     
     inject_trusts(1, (const char **)&(const char*[]){"/bin/launchctl"});
     
-    run("launchctl load /Library/LaunchDaemons/com.openssh.sshd.plist");
+    run("/Library/dpkg/info/openssh.postinst");
+    
+    run("/bin/launchctl load /Library/LaunchDaemons/com.openssh.sshd.plist");
     
     printf("[bootstrapper] device has been bootstrapped!\n");
 }

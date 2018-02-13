@@ -168,7 +168,6 @@ int run(const char *cmd) {
     }
     free(rawCmd);
     return status;
-    return 0;
 }
 
 char *itoa(long n) {
