@@ -9,8 +9,11 @@
 #ifndef fun_objc_h
 #define fun_objc_h
 
-const char* progname(const char*);
-void extractTarBinary(void);
+const char* progname(const char*);;
+void extractGz(const char *from, const char *to);
 void update_springboard_plist(void);
 
+void removingLiberiOS(void);
+void removingElectraBeta(void);
+void installingCydia(void);
 #endif /* fun_objc_h */

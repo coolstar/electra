@@ -12,7 +12,13 @@
 
 @end
 
+static ViewController *currentViewController;
+
 @implementation ViewController
+
++ (instancetype)currentViewController {
+    return currentViewController;
+}
 
 - (void)checkVersion {
     NSString *rawgitHistory = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"githistory" ofType:@"txt"] encoding:NSUTF8StringEncoding error:nil];
@@ -77,6 +83,8 @@
     [jailbreak setEnabled:NO];
     [enableTweaks setEnabled:NO];
     
+    currentViewController = self;
+    
     [jailbreak setTitle:@"Please Wait (1/3)" forState:UIControlStateNormal];
     
     BOOL shouldEnableTweaks = [enableTweaks isOn];
@@ -89,7 +97,8 @@
             [jailbreak setTitle:@"Please Wait (2/3)" forState:UIControlStateNormal];
         });
         
-        if (begin_fun(tfp0, user_client, shouldEnableTweaks) == 0){
+        int jailbreakstatus = begin_fun(tfp0, user_client, shouldEnableTweaks);
+        if (jailbreakstatus == 0){
             dispatch_async(dispatch_get_main_queue(), ^{
                 [jailbreak setTitle:@"Jailbroken" forState:UIControlStateNormal];
                 
@@ -100,6 +109,14 @@
                 }]];
                 [self presentViewController:dropbearRunning animated:YES completion:nil];
             });
+        } else if (jailbreakstatus == -1) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [jailbreak setTitle:@"Already Jailbroken" forState:UIControlStateNormal];
+            });
+        } else if (jailbreakstatus == -2) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [jailbreak setTitle:@"Error: topanga" forState:UIControlStateNormal];
+            });
         } else {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [jailbreak setTitle:@"Error Jailbreaking" forState:UIControlStateNormal];
@@ -107,6 +124,24 @@
         }
         
         NSLog(@" ♫ KPP never bothered me anyway... ♫ ");
+    });
+}
+
+- (void)removingLiberiOS {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [jailbreak setTitle:@"Removing liberiOS" forState:UIControlStateNormal];
+    });
+}
+
+- (void)removingElectraBeta {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [jailbreak setTitle:@"Removing beta" forState:UIControlStateNormal];
+    });
+}
+
+- (void)installingCydia {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [jailbreak setTitle:@"Installing Cydia" forState:UIControlStateNormal];
     });
 }
 

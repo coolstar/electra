@@ -7,7 +7,7 @@
 #import <sys/stat.h>
 #import <sys/types.h>
 
-#define dylibDir @"/bootstrap/Library/SBInject"
+#define dylibDir @"/Library/MobileSubstrate/DynamicLibraries"
 
 NSArray *sbinjectGenerateDylibList() {
     NSString *processName = [[NSProcessInfo processInfo] processName];

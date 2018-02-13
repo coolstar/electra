@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		175043CB203230350064B7CE /* launchctl.gz in Resources */ = {isa = PBXBuildFile; fileRef = 175043CA203230350064B7CE /* launchctl.gz */; };
 		176718D5201C9B3600FDF1CF /* file_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718D3201C9B3600FDF1CF /* file_utils.c */; };
 		176718D9201CA00F00FDF1CF /* amfi_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718D7201CA00F00FDF1CF /* amfi_utils.c */; };
 		176718DE201CB8B100FDF1CF /* offsetof.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718DC201CB8B100FDF1CF /* offsetof.c */; };
 		176718E1201CC80B00FDF1CF /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 176718DF201CC80A00FDF1CF /* utils.c */; };
-		17C74A00200E7298008B0276 /* dropbear.plist in Resources */ = {isa = PBXBuildFile; fileRef = 17C749FF200E7297008B0276 /* dropbear.plist */; };
+		17909C752030BBC60078B16A /* bootstrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 17909C732030BBC60078B16A /* bootstrap.c */; };
+		17D60E912032280600902E73 /* bootstrap.tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = 17D60E902032280600902E73 /* bootstrap.tar.gz */; };
 		4A7B89692010255800CB6439 /* jailbreakd.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4A7B89682010255800CB6439 /* jailbreakd.plist */; };
 		6545304C200E8F600017BA60 /* remap_tfp_set_hsp.c in Sources */ = {isa = PBXBuildFile; fileRef = 6545304B200E8F600017BA60 /* remap_tfp_set_hsp.c */; };
 		B003EB351FC583CB00C58441 /* kmem.c in Sources */ = {isa = PBXBuildFile; fileRef = B003EB331FC583CA00C58441 /* kmem.c */; };
@@ -32,17 +34,14 @@
 		BC8EE46C1FE272CF00402F32 /* fun.c in Sources */ = {isa = PBXBuildFile; fileRef = BC8EE46A1FE272CF00402F32 /* fun.c */; };
 		BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */ = {isa = PBXBuildFile; fileRef = BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */; };
 		BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC9969031FE66CE200A4EDB9 /* ent.plist */; };
+		F11625EB2032CD3500515402 /* rm.gz in Resources */ = {isa = PBXBuildFile; fileRef = F11625EA2032CD3500515402 /* rm.gz */; };
 		F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */ = {isa = PBXBuildFile; fileRef = F14B5F951FF2265900E62599 /* start_jailbreakd.m */; };
-		F1531E0C20096FC000DD5051 /* unjailbreak.sh in Resources */ = {isa = PBXBuildFile; fileRef = F1531E0B20096FC000DD5051 /* unjailbreak.sh */; };
 		F1531E0E2009702B00DD5051 /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = F1531E0D2009702B00DD5051 /* NSData+GZip.m */; };
 		F1531E112009709800DD5051 /* tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = F1531E102009709700DD5051 /* tar.gz */; };
-		F1531E51200983DD00DD5051 /* safemode.tar in Resources */ = {isa = PBXBuildFile; fileRef = F1531E50200983DD00DD5051 /* safemode.tar */; };
-		F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */ = {isa = PBXBuildFile; fileRef = F158610D1FEA002000795B90 /* gnubinpack.tar */; };
-		F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0263200888A6002CF5EE /* anemoneapp.tar */; };
-		F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0265200888AA002CF5EE /* tweaksupport.tar */; };
 		F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026D2008C679002CF5EE /* CSGradientView.m */; };
 		F18428AD20327D6900C1CC3F /* unliberios.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AC20327D6900C1CC3F /* unliberios.c */; };
 		F18428B02032838700C1CC3F /* topangadetect.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AF2032838700C1CC3F /* topangadetect.c */; };
+		F18428B72032AFD100C1CC3F /* removeElectraBeta.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428B62032AFD100C1CC3F /* removeElectraBeta.c */; };
 		F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400E200BFE85000D094F /* AppIcon76x76.png */; };
 		F195401A200BFE86000D094F /* AppIcon40x40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400F200BFE85000D094F /* AppIcon40x40@3x.png */; };
 		F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954010200BFE85000D094F /* AppIcon40x40.png */; };
@@ -58,6 +57,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		175043CA203230350064B7CE /* launchctl.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = launchctl.gz; sourceTree = "<group>"; };
 		176718D3201C9B3600FDF1CF /* file_utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = file_utils.c; sourceTree = "<group>"; };
 		176718D4201C9B3600FDF1CF /* file_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = file_utils.h; sourceTree = "<group>"; };
 		176718D6201C9F0900FDF1CF /* codesign.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = codesign.h; sourceTree = "<group>"; };
@@ -68,7 +68,9 @@
 		176718DD201CB8B100FDF1CF /* offsetof.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = offsetof.h; sourceTree = "<group>"; };
 		176718DF201CC80A00FDF1CF /* utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
 		176718E0201CC80B00FDF1CF /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
-		17C749FF200E7297008B0276 /* dropbear.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = dropbear.plist; sourceTree = "<group>"; };
+		17909C732030BBC60078B16A /* bootstrap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bootstrap.c; sourceTree = "<group>"; };
+		17909C742030BBC60078B16A /* bootstrap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bootstrap.h; sourceTree = "<group>"; };
+		17D60E902032280600902E73 /* bootstrap.tar.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = bootstrap.tar.gz; sourceTree = "<group>"; };
 		4A7B89682010255800CB6439 /* jailbreakd.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = jailbreakd.plist; sourceTree = "<group>"; };
 		4A9599892020080100A36B90 /* xpc_minimal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = xpc_minimal.h; sourceTree = "<group>"; };
 		6545304A200E8F600017BA60 /* remap_tfp_set_hsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = remap_tfp_set_hsp.h; sourceTree = "<group>"; };
@@ -108,21 +110,19 @@
 		BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = patchfinder64.c; sourceTree = "<group>"; };
 		BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = patchfinder64.h; sourceTree = "<group>"; };
 		BC9969031FE66CE200A4EDB9 /* ent.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
+		F11625EA2032CD3500515402 /* rm.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = rm.gz; sourceTree = "<group>"; };
 		F14B5F951FF2265900E62599 /* start_jailbreakd.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = start_jailbreakd.m; sourceTree = "<group>"; };
-		F1531E0B20096FC000DD5051 /* unjailbreak.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = unjailbreak.sh; sourceTree = "<group>"; };
 		F1531E0D2009702B00DD5051 /* NSData+GZip.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSData+GZip.m"; sourceTree = "<group>"; };
 		F1531E0F2009703900DD5051 /* NSData+GZip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+GZip.h"; sourceTree = "<group>"; };
 		F1531E102009709700DD5051 /* tar.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = tar.gz; sourceTree = "<group>"; };
-		F1531E50200983DD00DD5051 /* safemode.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = safemode.tar; sourceTree = "<group>"; };
-		F158610D1FEA002000795B90 /* gnubinpack.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = gnubinpack.tar; sourceTree = "<group>"; };
-		F15B0263200888A6002CF5EE /* anemoneapp.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = anemoneapp.tar; sourceTree = "<group>"; };
-		F15B0265200888AA002CF5EE /* tweaksupport.tar */ = {isa = PBXFileReference; lastKnownFileType = archive.tar; path = tweaksupport.tar; sourceTree = "<group>"; };
 		F15B026C2008C679002CF5EE /* CSGradientView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CSGradientView.h; sourceTree = "<group>"; };
 		F15B026D2008C679002CF5EE /* CSGradientView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientView.m; sourceTree = "<group>"; };
 		F18428AB20327D6900C1CC3F /* unliberios.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unliberios.h; sourceTree = "<group>"; };
 		F18428AC20327D6900C1CC3F /* unliberios.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unliberios.c; sourceTree = "<group>"; };
 		F18428AE2032838700C1CC3F /* topangadetect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = topangadetect.h; sourceTree = "<group>"; };
 		F18428AF2032838700C1CC3F /* topangadetect.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = topangadetect.c; sourceTree = "<group>"; };
+		F18428B52032AFD100C1CC3F /* removeElectraBeta.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = removeElectraBeta.h; sourceTree = "<group>"; };
+		F18428B62032AFD100C1CC3F /* removeElectraBeta.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = removeElectraBeta.c; sourceTree = "<group>"; };
 		F195400E200BFE85000D094F /* AppIcon76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon76x76.png; sourceTree = "<group>"; };
 		F195400F200BFE85000D094F /* AppIcon40x40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon40x40@3x.png"; sourceTree = "<group>"; };
 		F1954010200BFE85000D094F /* AppIcon40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon40x40.png; sourceTree = "<group>"; };
@@ -136,7 +136,6 @@
 		F1954018200BFE86000D094F /* AppIcon76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon76x76@2x.png"; sourceTree = "<group>"; };
 		F1987659200A8A0F00D4BB56 /* unlocknvram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unlocknvram.h; sourceTree = "<group>"; };
 		F198765A200A8A0F00D4BB56 /* unlocknvram.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unlocknvram.c; sourceTree = "<group>"; };
-		F1F28F4F1FF052870074AA75 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = test.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,13 +152,10 @@
 		176718CC201C98EB00FDF1CF /* bootstrap */ = {
 			isa = PBXGroup;
 			children = (
-				F1F28F4A1FF052870074AA75 /* binaries */,
 				F1531E102009709700DD5051 /* tar.gz */,
-				F158610D1FEA002000795B90 /* gnubinpack.tar */,
-				F15B0265200888AA002CF5EE /* tweaksupport.tar */,
-				F15B0263200888A6002CF5EE /* anemoneapp.tar */,
-				F1531E50200983DD00DD5051 /* safemode.tar */,
-				17C749FF200E7297008B0276 /* dropbear.plist */,
+				175043CA203230350064B7CE /* launchctl.gz */,
+				17D60E902032280600902E73 /* bootstrap.tar.gz */,
+				F11625EA2032CD3500515402 /* rm.gz */,
 				4A7B89682010255800CB6439 /* jailbreakd.plist */,
 			);
 			path = bootstrap;
@@ -236,6 +232,8 @@
 				F18428AC20327D6900C1CC3F /* unliberios.c */,
 				F18428AE2032838700C1CC3F /* topangadetect.h */,
 				F18428AF2032838700C1CC3F /* topangadetect.c */,
+				F18428B52032AFD100C1CC3F /* removeElectraBeta.h */,
+				F18428B62032AFD100C1CC3F /* removeElectraBeta.c */,
 			);
 			path = utilities;
 			sourceTree = "<group>";
@@ -291,6 +289,8 @@
 				176718D2201C9B0B00FDF1CF /* utilities */,
 				BC8EE46A1FE272CF00402F32 /* fun.c */,
 				BC8EE46B1FE272CF00402F32 /* fun.h */,
+				17909C732030BBC60078B16A /* bootstrap.c */,
+				17909C742030BBC60078B16A /* bootstrap.h */,
 				BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */,
 				BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */,
 				BC8B64C31FE5252F00EDF749 /* fun_objc.m */,
@@ -320,15 +320,6 @@
 				F1954013200BFE86000D094F /* AppIcon83.5x83.5@2x.png */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		F1F28F4A1FF052870074AA75 /* binaries */ = {
-			isa = PBXGroup;
-			children = (
-				F1531E0B20096FC000DD5051 /* unjailbreak.sh */,
-				F1F28F4F1FF052870074AA75 /* test.m */,
-			);
-			path = binaries;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -392,28 +383,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				F1531E112009709800DD5051 /* tar.gz in Resources */,
-				F158610E1FEA002000795B90 /* gnubinpack.tar in Resources */,
 				F195401F200BFE86000D094F /* AppIcon60x60@3x.png in Resources */,
 				F195401C200BFE86000D094F /* AppIcon40x40@2x.png in Resources */,
-				F15B0264200888A6002CF5EE /* anemoneapp.tar in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
-				F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */,
-				17C74A00200E7298008B0276 /* dropbear.plist in Resources */,
-				F1531E51200983DD00DD5051 /* safemode.tar in Resources */,
 				F1954020200BFE86000D094F /* AppIcon60x60@2x.png in Resources */,
 				F1954021200BFE86000D094F /* AppIcon20x20@3x.png in Resources */,
 				F195401D200BFE86000D094F /* AppIcon20x20.png in Resources */,
 				F195401A200BFE86000D094F /* AppIcon40x40@3x.png in Resources */,
 				B07A02491FB09B6F0018ACE5 /* LaunchScreen.storyboard in Resources */,
 				F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */,
-				F1531E0C20096FC000DD5051 /* unjailbreak.sh in Resources */,
 				B07A02461FB09B6F0018ACE5 /* Assets.xcassets in Resources */,
 				F1954022200BFE86000D094F /* AppIcon20x20@2x.png in Resources */,
+				17D60E912032280600902E73 /* bootstrap.tar.gz in Resources */,
 				F195401E200BFE86000D094F /* AppIcon83.5x83.5@2x.png in Resources */,
 				F1954023200BFE86000D094F /* AppIcon76x76@2x.png in Resources */,
 				F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */,
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
+				175043CB203230350064B7CE /* launchctl.gz in Resources */,
 				4A7B89692010255800CB6439 /* jailbreakd.plist in Resources */,
+				F11625EB2032CD3500515402 /* rm.gz in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -471,8 +459,10 @@
 				F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */,
 				B07A023E1FB09B6F0018ACE5 /* AppDelegate.m in Sources */,
 				F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */,
+				F18428B72032AFD100C1CC3F /* removeElectraBeta.c in Sources */,
 				F18428AD20327D6900C1CC3F /* unliberios.c in Sources */,
 				BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */,
+				17909C752030BBC60078B16A /* bootstrap.c in Sources */,
 				176718E1201CC80B00FDF1CF /* utils.c in Sources */,
 				176718D9201CA00F00FDF1CF /* amfi_utils.c in Sources */,
 				B003EB3B1FC58F4900C58441 /* kdbg.c in Sources */,

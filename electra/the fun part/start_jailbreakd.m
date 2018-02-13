@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #import <Foundation/Foundation.h>
-#include <spawn.h>
+#include "utils.h"
 
 int start_jailbreakd(uint64_t kernel_base) {
     unlink("/var/tmp/jailbreakd.pid");
@@ -30,13 +30,13 @@ int start_jailbreakd(uint64_t kernel_base) {
     NSMutableDictionary *job = [NSPropertyListSerialization propertyListWithData:blob options:NSPropertyListMutableContainers format:nil error:nil];
 
     job[@"EnvironmentVariables"][@"KernelBase"] = [NSString stringWithFormat:@"0x%16llx", kernel_base];
-    [job writeToFile:@"/bootstrap/Library/LaunchDaemons/jailbreakd.plist" atomically:YES];
-    chmod("/bootstrap/Library/LaunchDaemons/jailbreakd.plist", 0600);
-    chown("/bootstrap/Library/LaunchDaemons/jailbreakd.plist", 0, 0);
+    [job writeToFile:@"/Library/LaunchDaemons/jailbreakd.plist" atomically:YES];
+    chmod("/Library/LaunchDaemons/jailbreakd.plist", 0644);
+    chown("/Library/LaunchDaemons/jailbreakd.plist", 0, 0);
 
     pid_t pid = 0;
-
-    int rv = posix_spawn(&pid, "/bootstrap/bin/launchctl", NULL, NULL, (char **)&(const char*[]){ "launchctl", "load", "-w", "/bootstrap/Library/LaunchDaemons/jailbreakd.plist", NULL }, NULL);
+    
+    int rv = run("launchctl load -w /Library/LaunchDaemons/jailbreakd.plist");
     if (rv == -1) {
         return -1;
     }

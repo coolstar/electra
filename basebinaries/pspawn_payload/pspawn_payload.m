@@ -39,8 +39,8 @@ fflush(log_file); \
 #define DEBUGLOG(fmt, args...)
 #endif
 
-#define PSPAWN_PAYLOAD_DYLIB "/bootstrap/pspawn_payload.dylib"
-#define AMFID_PAYLOAD_DYLIB "/bootstrap/amfid_payload.dylib"
+#define PSPAWN_PAYLOAD_DYLIB "/electra/pspawn_payload.dylib"
+#define AMFID_PAYLOAD_DYLIB "/electra/amfid_payload.dylib"
 #define SBINJECT_PAYLOAD_DYLIB "/usr/lib/SBInject.dylib"
 
 // since this dylib should only be loaded into launchd and xpcproxy

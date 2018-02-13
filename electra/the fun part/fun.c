@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "file_utils.h"
 #include "amfi_utils.h"
+#include "bootstrap.h"
 #include "codesign.h"
 #include "offsetof.h"
 #include "unlocknvram.h"
@@ -20,19 +21,9 @@
 #include <dlfcn.h>
 #include <CommonCrypto/CommonDigest.h>
 #include "xpc_minimal.h"
-
-#define BOOTSTRAP_PREFIX "bootstrap"
-
-// MARK: - Functions
-
-char *itoa(long n) {
-    int len = n==0 ? 1 : floor(log10l(labs(n)))+1;
-    if (n<0) len++; // room for negative sign '-'
-    
-    char    *buf = calloc(sizeof(char), len+1); // +1 for null
-    snprintf(buf, len+1, "%ld", n);
-    return   buf;
-}
+#include "topangadetect.h"
+#include "unliberios.h"
+#include "removeElectrabeta.h"
 
 mach_port_t tfpzero;
 
@@ -256,178 +247,37 @@ do { \
     pid_t pd;
     int rv = 0;
     
-    const char *tar = "/" BOOTSTRAP_PREFIX "/tar";
+    // MARK: Bootstrap
     
-    // Prepare our binaries
-    {
-        if (!file_exists("/bootstrap")) {
-            printf("making /bootstrap\n");
-            mkdir("/bootstrap", 0755);
-        }
-        
-        mkdir("/" BOOTSTRAP_PREFIX, 0755);
-        extractTarBinary();
-        chmod(tar, 0755);
-        inject_trusts(1, (const char **)&(const char*[]){tar});
-
-        // old
-        unlink("/bootstrap/inject_amfid");
-        unlink("/bootstrap/inject_launchd");
-        unlink("/bootstrap/launchd_payload.dylib");
-        unlink("/bootstrap/xpcproxy_payload.dylib");
-
-        unlink("/bootstrap/inject_ctriticald");
-        unlink("/bootstrap/pspawn_payload.dylib");
-
-        unlink("/bootstrap/amfid_payload.dylib");
-        unlink("/bootstrap/launchjailbreak");
-        unlink("/bootstrap/jailbreakd");
-        
-        rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("basebinaries.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
-        waitpid(pd, NULL, 0);
-        
-        printf("[fun] copied the required binaries into the right places\n");
-    }
+    copy_basebinaries();
     
-    inject_trusts(3, (const char **)&(const char*[]){
-        "/bootstrap/inject_criticald",
-        "/bootstrap/amfid_payload.dylib",
-        "/bootstrap/pspawn_payload.dylib",
-
-        // Don't forget to update number in beginning
-    });
+#define BinaryLocation "/electra/inject_criticald"
     
-#define BinaryLocation "/bootstrap/inject_criticald"
-    
-    const char* args_amfid[] = {BinaryLocation, itoa(amfid_pid), "/bootstrap/amfid_payload.dylib", NULL};
+    const char* args_amfid[] = {BinaryLocation, itoa(amfid_pid), "/electra/amfid_payload.dylib", NULL};
     rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&args_amfid, NULL);
     waitpid(pd, NULL, 0);
     
     //unlocknvram();
     
-    rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("gnubinpack.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
-    waitpid(pd, NULL, 0);
-
-    inject_trusts(1, (const char **)&(const char*[]){"/"BOOTSTRAP_PREFIX"/bin/launchctl"});
-
-    // TODO: Clean this up, like, a lot
-    mkdir("/bootstrap/Library", 0755);
-    mkdir("/bootstrap/Library/LaunchDaemons", 0755);
-    unlink("/bootstrap/Library/LaunchDaemons/dropbear.plist");
-    cp("/bootstrap/Library/LaunchDaemons/dropbear.plist", progname("dropbear.plist"));
-    chmod("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0600);
-    chown("/bootstrap/Library/LaunchDaemons/dropbear.plist", 0, 0);
-    
-    if (file_exists("/bootstrap/._amfid_payload.dylib")){
-        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/bootstrap", "-name", "._*", "-delete", NULL }, NULL);
-        waitpid(pd, NULL, 0);
-    }
-    if (file_exists("/Applications/Anemone.app/._Info.plist")){
-        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/Applications/Anemone.app", "-name", "._*", "-delete", NULL }, NULL);
-        waitpid(pd, NULL, 0);
-    }
-    if (file_exists("/Applications/SafeMode.app/._Info.plist")){
-        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/Applications/SafeMode.app", "-name", "._*", "-delete", NULL }, NULL);
-        waitpid(pd, NULL, 0);
-    }
-    if (file_exists("/usr/lib/SBInject/._AnemoneCore.dylib")){
-        rv = posix_spawn(&pd, "/bootstrap/usr/bin/find", NULL, NULL, (char **)&(const char*[]){ "find", "/usr/lib/SBInject", "-name", "._*", "-delete", NULL }, NULL);
-        waitpid(pd, NULL, 0);
-    }
-    
-    bool runUICache = true;
-    if (file_exists("/Applications/Anemone.app"))
-        runUICache = false;
-    
-    if (enable_tweaks) {
-        // Cleanup old symlinks
-        if (file_exists("/System/Library/Themes")) {
-            printf("removing /System/Library/Themes\n");
-            
-            rv = posix_spawn(&pd, "/"BOOTSTRAP_PREFIX"/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/System/Library/Themes", NULL }, NULL);
-            waitpid(pd, NULL, 0);
-            unlink("/"BOOTSTRAP_PREFIX"/Library/Themes");
-            
-            if (file_exists("/usr/lib/SBInject")) {
-                printf("removing /usr/lib/SBInject\n");
-                
-                rv = posix_spawn(&pd, "/bootstrap/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/usr/lib/SBInject", NULL }, NULL);
-                unlink("/"BOOTSTRAP_PREFIX"/Library/SBInject");
-            }
+    int bootstrapped = open("/.bootstrapped_electra", O_RDONLY);
+    if (bootstrapped == -1) {
+        if (checkLiberiOS()){
+            removingLiberiOS();
+            removeLiberiOS();
         }
-        
-        
-        rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("tweaksupport.tar"), "-C", "/" BOOTSTRAP_PREFIX, NULL }, NULL);
-        waitpid(pd, NULL, 0);
-        
-        rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("anemoneapp.tar"), "-C", "/Applications", NULL }, NULL);
-        waitpid(pd, NULL, 0);
-        
-        rv = posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "-xpf", progname("safemode.tar"), "-C", "/Applications", NULL }, NULL);
-        waitpid(pd, NULL, 0);
-    }
-    unlink(tar);
-
-    if (enable_tweaks && runUICache){
-        const char *uicache = "/"BOOTSTRAP_PREFIX"/usr/bin/uicache";
-        rv = posix_spawn(&pd, uicache, NULL, NULL, (char **)&(const char*[]){ uicache, NULL }, NULL);
-        waitpid(pd, NULL, 0);
-    }
-    
-    unlink("/usr/libexec/sftp-server");
-    symlink("/"BOOTSTRAP_PREFIX"/usr/libexec/sftp-server","/usr/libexec/sftp-server");
-    
-    unlink("/usr/share/terminfo");
-    symlink("/"BOOTSTRAP_PREFIX"/usr/share/terminfo","/usr/share/terminfo");
-    
-    if (enable_tweaks){
-        unlink("/usr/lib/SBInject.dylib");
-        cp("/usr/lib/SBInject.dylib","/bootstrap/usr/lib/SBInject.dylib");
-        
-        unlink("/usr/lib/libsubstitute.dylib");
-        cp("/usr/lib/libsubstitute.dylib","/bootstrap/usr/lib/libsubstitute.dylib");
-        
-        unlink("/usr/lib/libsubstitute.0.dylib");
-        cp("/usr/lib/libsubstitute.0.dylib","/bootstrap/usr/lib/libsubstitute.0.dylib");
-        
-        unlink("/usr/lib/libsubstrate.dylib");
-        cp("/usr/lib/libsubstrate.dylib","/bootstrap/usr/lib/libsubstrate.dylib");
-        
-        rv = posix_spawn(&pd, "/"BOOTSTRAP_PREFIX"/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/Library/Frameworks/CydiaSubstrate.framework", NULL }, NULL);
-        waitpid(pd, NULL, 0);
-        
-        mkdir("/Library/Frameworks/CydiaSubstrate.framework", 0755);
-        symlink("/usr/lib/libsubstrate.dylib", "/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate");
-        
-        unlink("/usr/bin/recache");
-        cp("/usr/bin/recache","/"BOOTSTRAP_PREFIX"/usr/bin/recache");
-        chmod("/usr/bin/recache", 0755);
-        
-        unlink("/usr/bin/killall");
-        cp("/usr/bin/killall","/"BOOTSTRAP_PREFIX"/usr/bin/killall");
-        chmod("/usr/bin/killall", 0755);
-        
-        if (!file_exists("/usr/lib/SBInject")) {
-            rename("/"BOOTSTRAP_PREFIX"/Library/SBInject", "/usr/lib/SBInject");
-            symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
-        } else {
-            rv = posix_spawn(&pd, "/bootstrap/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/"BOOTSTRAP_PREFIX"/Library/SBInject", NULL }, NULL);
-            waitpid(pd, NULL, 0);
-            symlink("/usr/lib/SBInject","/"BOOTSTRAP_PREFIX"/Library/SBInject");
+        if (topangaInstalled()){
+            close(bootstrapped);
+            wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
+            unlink("/electra/rm");
+            return -2;
         }
-        
-        unlink("/Library/Themes");
-        symlink("/"BOOTSTRAP_PREFIX"/Library/Themes", "/Library/Themes");
+        removingElectraBeta();
+        removeElectraBeta();
     }
+    close(bootstrapped);
+    unlink("/electra/rm");
     
-    unlink("/usr/lib/libjailbreak.dylib");
-    cp("/usr/lib/libjailbreak.dylib","/bootstrap/libjailbreak.dylib");
-    
-    unlink("/bootstrap/unjailbreak.sh");
-    cp("/bootstrap/unjailbreak.sh",progname("unjailbreak.sh"));
-	
-    rv = posix_spawn(&pd, "/bootstrap/bin/launchctl", NULL, NULL, (char **)&(const char*[]){ "launchctl", "load", "/"BOOTSTRAP_PREFIX"/Library/LaunchDaemons/dropbear.plist", NULL }, NULL);
-    waitpid(pd, NULL, 0);
+    extract_bootstrap();
 
     // MARK: - Cleanup
     
@@ -445,14 +295,12 @@ do { \
     
     kill(cfprefsd_pid, SIGKILL);
     
-    if (enable_tweaks){
-        const char* args_launchd[] = {BinaryLocation, itoa(1), "/bootstrap/pspawn_payload.dylib", NULL};
+    if (enable_tweaks) {
+        const char* args_launchd[] = {BinaryLocation, itoa(1), "/electra/pspawn_payload.dylib", NULL};
         rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&args_launchd, NULL);
         waitpid(pd, NULL, 0);
         
-        const char* args_recache[] = {"/bootstrap/usr/bin/recache", "--no-respring", NULL};
-        rv = posix_spawn(&pd, "/bootstrap/usr/bin/recache", NULL, NULL, (char **)&args_recache, NULL);
-        waitpid(pd, NULL, 0);
+        run("recache --no-respring");
     }
     
     wk64(rk64(kern_ucred+0x78)+0x8, 0);

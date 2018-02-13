@@ -18,6 +18,7 @@
 #include <sys/utsname.h>
 #import <Foundation/Foundation.h>
 #import "NSData+GZip.h"
+#import "ViewController.h"
 
 const char* progname(const char* prog) {
     char path[4096];
@@ -39,10 +40,10 @@ const char* realPath() {
 	return pt;
 }
 
-void extractTarBinary(){
-    NSData *tarGz = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"tar" ofType:@"gz"]];
-    NSData *tar = [tarGz gunzippedData];
-    [tar writeToFile:@"/bootstrap/tar" atomically:YES];
+void extractGz(const char *from, const char *to) {
+    NSData *gz = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@(from) ofType:@"gz"]];
+    NSData *extracted = [gz gunzippedData];
+    [extracted writeToFile:@(to) atomically:YES];
 }
 
 void update_springboard_plist(){
@@ -54,4 +55,16 @@ void update_springboard_plist(){
     
     NSError *error = nil;
     [[NSFileManager defaultManager] setAttributes:attr ofItemAtPath:@"/var/mobile/Library/Preferences/com.apple.springboard.plist" error:&error];
+}
+
+void removingLiberiOS(){
+    [[ViewController currentViewController] removingLiberiOS];
+}
+
+void removingElectraBeta(){
+    [[ViewController currentViewController] removingElectraBeta];
+}
+
+void installingCydia(){
+    [[ViewController currentViewController] installingCydia];
 }
