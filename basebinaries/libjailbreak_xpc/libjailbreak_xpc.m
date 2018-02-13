@@ -15,7 +15,6 @@ jb_connection_t jb_connect(void) {
 
     xpc_connection_set_event_handler(connection, ^(xpc_object_t object) {
         char *desc = xpc_copy_description(object);
-        printf("event: %s\n",  desc);
         free(desc);
     });
     xpc_connection_resume(connection);

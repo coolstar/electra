@@ -103,6 +103,11 @@ void post_bootstrap(const bool runUICache) {
     
     inject_trusts(1, (const char **)&(const char*[]){"/bin/launchctl"});
     
+    int rv = open("/var/lib/dpkg/available", O_RDWR|O_CREAT);
+    close(rv);
+    
+    run("/bin/bash /usr/libexec/cydia/firmware.sh");
+    
     run("/Library/dpkg/info/openssh.postinst");
     
     run("/bin/launchctl load /Library/LaunchDaemons/com.openssh.sshd.plist");

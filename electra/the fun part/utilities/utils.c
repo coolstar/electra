@@ -154,11 +154,17 @@ static char *fixedCmd(const char *cmdStr){
 }
 
 int run(const char *cmd) {
+    char *myenviron[] = {
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games",
+        "PS1=\\h:\\w \\u\\$ ",
+        NULL
+    };
+    
     pid_t pid;
     char *rawCmd = fixedCmd(cmd);
     char *argv[] = {"sh", "-c", (char*)rawCmd, NULL};
     int status;
-    status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, environ);
+    status = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv, (char **)&myenviron);
     if (status == 0) {
         if (waitpid(pid, &status, 0) == -1) {
             perror("waitpid");
