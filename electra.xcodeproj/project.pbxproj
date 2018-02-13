@@ -42,6 +42,7 @@
 		F15B0266200888AA002CF5EE /* tweaksupport.tar in Resources */ = {isa = PBXBuildFile; fileRef = F15B0265200888AA002CF5EE /* tweaksupport.tar */; };
 		F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026D2008C679002CF5EE /* CSGradientView.m */; };
 		F18428AD20327D6900C1CC3F /* unliberios.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AC20327D6900C1CC3F /* unliberios.c */; };
+		F18428B02032838700C1CC3F /* topangadetect.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AF2032838700C1CC3F /* topangadetect.c */; };
 		F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400E200BFE85000D094F /* AppIcon76x76.png */; };
 		F195401A200BFE86000D094F /* AppIcon40x40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400F200BFE85000D094F /* AppIcon40x40@3x.png */; };
 		F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954010200BFE85000D094F /* AppIcon40x40.png */; };
@@ -120,6 +121,8 @@
 		F15B026D2008C679002CF5EE /* CSGradientView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientView.m; sourceTree = "<group>"; };
 		F18428AB20327D6900C1CC3F /* unliberios.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unliberios.h; sourceTree = "<group>"; };
 		F18428AC20327D6900C1CC3F /* unliberios.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unliberios.c; sourceTree = "<group>"; };
+		F18428AE2032838700C1CC3F /* topangadetect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = topangadetect.h; sourceTree = "<group>"; };
+		F18428AF2032838700C1CC3F /* topangadetect.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = topangadetect.c; sourceTree = "<group>"; };
 		F195400E200BFE85000D094F /* AppIcon76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon76x76.png; sourceTree = "<group>"; };
 		F195400F200BFE85000D094F /* AppIcon40x40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon40x40@3x.png"; sourceTree = "<group>"; };
 		F1954010200BFE85000D094F /* AppIcon40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon40x40.png; sourceTree = "<group>"; };
@@ -231,6 +234,8 @@
 				176718E0201CC80B00FDF1CF /* utils.h */,
 				F18428AB20327D6900C1CC3F /* unliberios.h */,
 				F18428AC20327D6900C1CC3F /* unliberios.c */,
+				F18428AE2032838700C1CC3F /* topangadetect.h */,
+				F18428AF2032838700C1CC3F /* topangadetect.c */,
 			);
 			path = utilities;
 			sourceTree = "<group>";
@@ -451,6 +456,7 @@
 				B003EB351FC583CB00C58441 /* kmem.c in Sources */,
 				B0EF11171FCC784B00C1D14E /* symbols.c in Sources */,
 				F198765B200A8A0F00D4BB56 /* unlocknvram.c in Sources */,
+				F18428B02032838700C1CC3F /* topangadetect.c in Sources */,
 				6545304C200E8F600017BA60 /* remap_tfp_set_hsp.c in Sources */,
 				B07A02411FB09B6F0018ACE5 /* ViewController.m in Sources */,
 				176718D5201C9B3600FDF1CF /* file_utils.c in Sources */,

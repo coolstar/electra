@@ -41,6 +41,7 @@ void removeLiberiOS(){
     waitpid(pd, NULL, 0);
     
     unlink("/bin/zsh");
+    unlink("/etc/profile");
     unlink("/etc/zshrc");
     
     unlink("/usr/bin/scp"); //missing from removeMe.sh oddly
