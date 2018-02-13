@@ -125,7 +125,7 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         }
         
         if (tries >= 5000){
-            fprintf(stderr, "Warning: CSFlag timer timed out for PID %d\n");
+            fprintf(stderr, "Warning: CSFlag timer timed out for PID %d\n", pid);
         }
         
         setcsflagsandplatformize(pid);
@@ -411,7 +411,7 @@ void* thd_func(void* arg){
         
         if (clientFd < 0){
             fprintf(stderr,"Unable to accept\n");
-            return -1;
+            return NULL;
         }
         
         pthread_t thread;
