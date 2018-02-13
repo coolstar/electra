@@ -39,7 +39,10 @@ void removeLiberiOS(){
     rv = posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/usr/share/terminfo", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
-    rv = posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/usr/local", NULL }, NULL);
+    rv = posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/usr/local/bin", NULL }, NULL);
+    waitpid(pd, NULL, 0);
+    
+    rv = posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/usr/local/lib", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
     unlink("/bin/zsh");
