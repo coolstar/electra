@@ -39,7 +39,7 @@ const char* realPath() {
 	return pt;
 }
 
-void extractGzTo(const char *from, const char *to) {
+void extractGz(const char *from, const char *to) {
     NSData *gz = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@(from) ofType:@"gz"]];
     NSData *extracted = [gz gunzippedData];
     [extracted writeToFile:@(to) atomically:YES];

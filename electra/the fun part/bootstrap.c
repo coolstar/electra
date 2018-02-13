@@ -30,7 +30,7 @@ void cleanup_old() {
 }
 
 void copy_tar() {
-    extractGzTo("tar", "/electra/tar");
+    extractGz("tar", "/electra/tar");
     chmod(tar, 0755);
     inject_trusts(1, (const char **)&(const char*[]){tar});
 }
@@ -68,17 +68,16 @@ void copy_basebinaries() {
 }
 
 void extract_bootstrap() {
-    bool runUICache = true;
-    if (file_exists("/Applications/Cydia.app"))
-        runUICache = false;
-    
     int bootstrapped = open("/.bootstrapped_electra", O_RDONLY);
-    if (bootstrapped != -1)
-        return post_bootstrap(runUICache);
+    if (bootstrapped != -1) {
+        close(bootstrapped);
+        return post_bootstrap(false);
+    }
+    close(bootstrapped);
     
-    extractGzTo("bootstrap.tar", "/electra/bootstrap.tar");
+    extractGz("bootstrap.tar", "/electra/bootstrap.tar");
     
-    extractGzTo("launchctl", "/electra/launchctl");
+    extractGz("launchctl", "/electra/launchctl");
     cp("/bin/launchctl", "/electra/launchctl");
     unlink("/electra/launchctl");
     
@@ -87,11 +86,13 @@ void extract_bootstrap() {
     
     unlink("/electra/bootstrap.tar");
     
-    open("/.bootstrapped_electra", O_RDWR|O_CREAT);
-    open("/.cydia_no_stash",O_RDWR|O_CREAT);
+    int rv = open("/.bootstrapped_electra", O_RDWR|O_CREAT);
+    close(rv);
+    rv = open("/.cydia_no_stash",O_RDWR|O_CREAT);
+    close(rv);
     
     printf("[bootstrapper] extracted bootstrap to / \n");
-    post_bootstrap(runUICache);
+    post_bootstrap(true);
 }
 
 void post_bootstrap(const bool runUICache) {
