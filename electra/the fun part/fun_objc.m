@@ -68,3 +68,7 @@ void removingElectraBeta(){
 void installingCydia(){
     [[ViewController currentViewController] installingCydia];
 }
+
+void cydiaDone(){
+    [[ViewController currentViewController] cydiaDone];
+}

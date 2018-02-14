@@ -16,4 +16,5 @@ void update_springboard_plist(void);
 void removingLiberiOS(void);
 void removingElectraBeta(void);
 void installingCydia(void);
+void cydiaDone(void);
 #endif /* fun_objc_h */

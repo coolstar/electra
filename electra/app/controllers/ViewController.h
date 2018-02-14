@@ -8,5 +8,6 @@
 - (void)removingLiberiOS;
 - (void)removingElectraBeta;
 - (void)installingCydia;
+- (void)cydiaDone;
 @end
 

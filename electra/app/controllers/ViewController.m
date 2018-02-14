@@ -145,6 +145,12 @@ static ViewController *currentViewController;
     });
 }
 
+- (void)cydiaDone {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [jailbreak setTitle:@"Please Wait (2/3)" forState:UIControlStateNormal];
+    });
+}
+
 - (UIStatusBarStyle)preferredStatusBarStyle {
     return UIStatusBarStyleLightContent;
 }

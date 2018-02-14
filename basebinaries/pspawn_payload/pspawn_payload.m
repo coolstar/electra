@@ -41,7 +41,7 @@ fflush(log_file); \
 
 #define PSPAWN_PAYLOAD_DYLIB "/electra/pspawn_payload.dylib"
 #define AMFID_PAYLOAD_DYLIB "/electra/amfid_payload.dylib"
-#define SBINJECT_PAYLOAD_DYLIB "/usr/lib/SBInject.dylib"
+#define SBINJECT_PAYLOAD_DYLIB "/usr/lib/TweakInject.dylib"
 
 // since this dylib should only be loaded into launchd and xpcproxy
 // it's safe to assume that we're in xpcproxy if getpid() != 1
