@@ -122,12 +122,12 @@ void post_bootstrap(const bool runUICache) {
     fclose(file); /*done!*/
     
     file = fopen("/etc/apt/sources.list.d/electra.list","w"); /* write file (create a file if it does not exist and if it does treat as empty.*/
-    fprintf(file,"%s","deb https://electrajailbreak.github.io/electratools/ ./\n"); //writes
+    fprintf(file,"%s","deb https://electrarepo64.coolstar.org/ ./\n"); //writes
     fprintf(file,"%s","\n"); //writes
     fclose(file);
     
     file = fopen("/etc/apt/sources.list.d/electra-shim.list","w"); /* write file (create a file if it does not exist and if it does treat as empty.*/
-    fprintf(file,"%s","deb https://electrajailbreak.github.io/electratools/substrate-shim/ ./\n"); //writes
+    fprintf(file,"%s","deb https://electrarepo64.coolstar.org/substrate-shim/ ./\n"); //writes
     fprintf(file,"%s","\n"); //writes
     fclose(file);
     
