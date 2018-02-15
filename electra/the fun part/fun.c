@@ -316,8 +316,15 @@ do { \
     
     wk64(rk64(kern_ucred+0x78)+0x8, 0);
     
+    startDaemons();
+    
     if (enable_tweaks){
-        kill(backboardd_pid, SIGTERM);
+        sleep(2);
+        
+        const char* args_ldrestart[] = {"ldrestart", itoa(1), "/usr/bin/ldrestart", NULL};
+        rv = posix_spawn(&pd, "/usr/bin/ldrestart", NULL, NULL, (char **)&args_ldrestart, NULL);
+        waitpid(pd, NULL, 0);
+        //kill(backboardd_pid, SIGTERM);
     }
     return 0;
 }

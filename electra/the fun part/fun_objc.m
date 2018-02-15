@@ -57,6 +57,23 @@ void update_springboard_plist(){
     [[NSFileManager defaultManager] setAttributes:attr ofItemAtPath:@"/var/mobile/Library/Preferences/com.apple.springboard.plist" error:&error];
 }
 
+void startDaemons(){
+    pid_t pd;
+    
+    NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Library/LaunchDaemons/" error:nil];
+    for (NSString *fileName in files){
+        if ([fileName isEqualToString:@"jailbreakd.plist"])
+            continue;
+        if ([fileName isEqualToString:@"com.openssh.sshd.plist"])
+            continue;
+        
+        NSString *fullPath = [@"/Library/LaunchDaemons" stringByAppendingPathComponent:fileName];
+        
+        posix_spawn(&pd, "/bin/launchctl", NULL, NULL, (char **)&(const char*[]){ "launchctl", "load", [fullPath UTF8String], NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
+}
+
 void removingLiberiOS(){
     [[ViewController currentViewController] removingLiberiOS];
 }
