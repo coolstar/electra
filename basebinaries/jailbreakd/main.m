@@ -113,7 +113,9 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         /* FIXME: respect flags */
         uint32_t flags;
         csops(pid, CS_OPS_STATUS, &flags, 0);
+#ifdef JAILBREAKDDEBUG
         fprintf(stderr, "Waiting for CSFlags to reset for PID %d...\n", pid);
+#endif
         
         int tries = 0;
         while ((flags & (CS_PLATFORM_BINARY | CS_INSTALLER | CS_GET_TASK_ALLOW | CS_DEBUGGED)) != 0 &&
@@ -131,10 +133,14 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         setcsflagsandplatformize(pid);
         
         csops(pid, CS_OPS_STATUS, &flags, 0);
+#ifdef JAILBREAKDDEBUG
         fprintf(stderr,"CSFlags for PID %d: 0x%x\n", pid, flags);
+#endif
         
         if (stuff & FLAG_SIGCONT) {
+#ifdef JAILBREAKDDEBUG
             fprintf(stderr,"Sending SIGCONT to %d\n", pid);
+#endif
             kill(pid, SIGCONT);
         }
 
@@ -166,12 +172,16 @@ static void do_entp_stuff_with_pid(uint64_t stuff, pid_t pid, void(^finish)(uint
         dispatch_group_async(waitgroup, dispatch_get_main_queue(), ^{
             char pathbuf[PROC_PIDPATHINFO_MAXSIZE] = {0};
 
+#ifdef JAILBREAKDDEBUG
             fprintf(stderr,"Waiting to ensure it's not xpcproxy anymore...\n");
+#endif
             int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
             while (ret > 0 && strcmp(pathbuf, "/usr/libexec/xpcproxy") == 0){
                 ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
+#ifdef JAILBREAKDDEBUG
                 if (strcmp(pathbuf, "/usr/libexec/xpcproxy") != 0)
                     fprintf(stderr,"proc_pidpath %d -> %d %s\n", pid, ret, pathbuf);
+#endif
                 usleep(100);
             }
             // free(cmp_path);
@@ -206,14 +216,18 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
     xpc_connection_set_event_handler(who, ^(xpc_object_t msg) {
         xpc_type_t type = xpc_get_type(msg);
         if (type == XPC_TYPE_ERROR) {
-            fprintf(stderr,"jailbreakd: connection error %s\n", xpc_dictionary_get_string(msg, XPC_ERROR_KEY_DESCRIPTION));
+#ifdef JAILBREAKDDEBUG
+            fprintf(stderr,"jailbreakd: connection error %s\n", xpc_dictionary_get_string(msg, XPC_ERROR_KEY_DESCRIPTION));  
+#endif
             return;
         }
 
         xpc_connection_t peer = xpc_dictionary_get_remote_connection(msg);
 
         char *desc = xpc_copy_description(msg);
+#ifdef JAILBREAKDDEBUG
         fprintf(stderr,"jailbreakd: received object: %s\n", desc);
+#endif
         free(desc);
 
         const char *action = xpc_dictionary_get_string(msg, "action");
@@ -239,7 +253,9 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
             do_entp_stuff_with_pid(flags, reqpid, ^(uint64_t stuff, pid_t pid) {
                 char flgstr[7] = {0};
                 flags_to_string(flags, flgstr);
+#ifdef JAILBREAKDDEBUG
                 fprintf(stderr,"jailbreakd: entitle operations: %s complete for pid %d\n", flgstr, reqpid);
+#endif
 
                 xpc_object_t reply = xpc_dictionary_create_reply(msg);
                 if (!reply) {
@@ -258,7 +274,9 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
             });
         } else if (!strcmp(action, JAILBREAKD_ACTION_FIX_SETUID)) {
             do_suid_with_pid(reqpid, ^(pid_t pid) {
+#ifdef JAILBREAKDDEBUG
                 fprintf(stderr,"jailbreakd: suid complete for pid %d\n", reqpid);
+#endif
 
                 xpc_object_t reply = xpc_dictionary_create_reply(msg);
                 if (!reply) {
@@ -275,7 +293,9 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
                 xpc_release(msg);
             });
         } else if (!strcmp(action, JAILBREAKD_ACTION_PING)) {
+#ifdef JAILBREAKDDEBUG
             fprintf(stderr,"jailbreakd: ping complete for pid %d\n", reqpid);
+#endif
             xpc_object_t reply = xpc_dictionary_create_reply(msg);
             if (!reply) {
                 fprintf(stderr,"jailbreakd: can't create reply. did the other end hang up too soon??\n");
@@ -290,12 +310,16 @@ static void jailbreakd_handle_xpc_connection(xpc_connection_t who) {
             xpc_release(reply);
             xpc_release(msg);
         } else if (!strcmp(action, JAILBREAKD_ACTION_EXIT)) {
+#ifdef JAILBREAKDDEBUG
             xpc_release(msg);
 
             fprintf(stderr,"jailbreakd: exiting for pid %d!\n", reqpid);
 
             term_kexecute();
             exit(0);
+#else
+            fprintf(stderr,"jailbreakd: exit command not supported on release builds!\n");
+#endif
         } else {
             fprintf(stderr,"jailbreakd: invalid action! %s\n", action);
             xpc_release(msg);
@@ -326,17 +350,23 @@ void *initThread(struct InitThreadArg *args){
     char buf[1024];
     while (true){
         int bytesRead = recv(args->clientFd, buf, 1024, 0);
+#ifdef JAILBREAKDDEBUG
         fprintf(stderr,"Bytes Read: %d\n", bytesRead);
+#endif
         if (bytesRead){
             int bytesProcessed = 0;
             while (bytesProcessed < bytesRead){
                 if (bytesRead - bytesProcessed >= sizeof(struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT)){
                     struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT *clientMessage = (struct JAILBREAKD_ENTITLE_PID_AND_SIGCONT*)(buf + bytesProcessed);
                     if (clientMessage->Command != JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
+#ifdef JAILBREAKDDEBUG
                         fprintf(stderr,"Invalid command\n");
+#endif
                     }
                     if (clientMessage->Command == JAILBREAKD_COMMAND_ENTITLE_AND_SIGCONT){
+#ifdef JAILBREAKDDEBUG
                         fprintf(stderr,"Got Request to Entitle PID %u\n", clientMessage->Pid);
+#endif
                         
                         setcsflagsandplatformize(clientMessage->Pid);
                         kill(clientMessage->Pid, SIGCONT);
@@ -480,7 +510,9 @@ int main(int argc, char **argv, char **envp) {
         xpc_connection_set_event_handler(connection, ^(xpc_object_t object) {
             xpc_type_t type = xpc_get_type(object);
             if (type == XPC_TYPE_CONNECTION) {
+#ifdef JAILBREAKDDEBUG
                 fprintf(stderr,"jailbreakd: received XPC connection!\n");
+#endif
                 jailbreakd_handle_xpc_connection(object);
             } else if (type == XPC_TYPE_ERROR) {
                 fprintf(stderr,"jailbreakd: XPC error in listener: %s\n", xpc_dictionary_get_string(object, XPC_ERROR_KEY_DESCRIPTION));
