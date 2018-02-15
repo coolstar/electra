@@ -212,6 +212,8 @@ const char* abs_path_exceptions[] = {
   // handling for /private/var/mobile/* in sandbox
   "/private/var/mobile/Library",
   "/private/var/mnt",
+  "/private/var/db",
+  "/private/var/stash",
   NULL
 };
 
@@ -224,6 +226,8 @@ uint64_t get_exception_osarray(void) {
     "<string>/Library/</string>"
     "<string>/private/var/mobile/Library/</string>"
     "<string>/private/var/mnt/</string>"
+    "<string>/private/var/db/</string>"
+    "<string>/private/var/stash/</string>"
     "</array>");
   }
 
