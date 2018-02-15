@@ -62,6 +62,7 @@ void copy_basebinaries() {
 }
 
 void extract_bootstrap() {
+    unlink("/bin/launchctl");
     extractGz("launchctl", "/electra/launchctl");
     cp("/bin/launchctl", "/electra/launchctl");
     chmod("/bin/launchctl", 0755);
@@ -104,8 +105,11 @@ void extract_bootstrap() {
 }
 
 void post_bootstrap(const bool runUICache) {
-    if (runUICache)
-        run("uicache");
+    pid_t pd;
+    if (runUICache){
+        posix_spawn(&pd, "/usr/bin/uicache", NULL, NULL, (char **)&(const char*[]){ "uicache", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+    }
     
     unlink(tar);
     
@@ -139,13 +143,18 @@ void post_bootstrap(const bool runUICache) {
     int rv = open("/var/lib/dpkg/available", O_RDWR|O_CREAT);
     close(rv);
     
-    run("/bin/bash /usr/libexec/cydia/firmware.sh");
+    posix_spawn(&pd, "/bin/bash", NULL, NULL, (char **)&(const char*[]){ "bash", "/usr/libexec/cydia/firmware.sh", NULL }, NULL);
+    waitpid(pd, NULL, 0);
     
-    run("/Library/dpkg/info/openssh.postinst");
+    posix_spawn(&pd, "/bin/bash", NULL, NULL, (char **)&(const char*[]){ "bash", "/Library/dpkg/info/openssh.postinst", NULL }, NULL);
+    waitpid(pd, NULL, 0);
     
-    run("/bin/launchctl load /Library/LaunchDaemons/com.openssh.sshd.plist");
+    posix_spawn(&pd, "/bin/launchctl", NULL, NULL, (char **)&(const char*[]){ "launchctl", "load", "/Library/LaunchDaemons/com.openssh.sshd.plist", NULL }, NULL);
+    waitpid(pd, NULL, 0);
     
     printf("[bootstrapper] device has been bootstrapped!\n");
     
-    cydiaDone();
+    if (runUICache){
+        cydiaDone();
+    }
 }
