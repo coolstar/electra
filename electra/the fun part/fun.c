@@ -257,6 +257,17 @@ do { \
     rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&args_amfid, NULL);
     waitpid(pd, NULL, 0);
     
+    unlink("/.amfid_success");
+    const char *args_helloworld[] = {"helloworld", NULL};
+    rv = posix_spawn(&pd, "/electra/helloworld", NULL, NULL, (char **)&args_helloworld, NULL);
+    waitpid(pd, NULL, 0);
+    
+    if (!file_exists("/.amfid_success")){
+        wk64(IOSurfaceRootUserClient_port + koffset(KSTRUCT_OFFSET_IPC_PORT_IP_KOBJECT), IOSurfaceRootUserClient_addr);
+        return -3;
+    }
+    unlink("/.amfid_success");
+    
     //unlocknvram();
     
     int bootstrapped = open("/.bootstrapped_electra", O_RDONLY);

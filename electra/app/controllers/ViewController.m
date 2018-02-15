@@ -117,6 +117,10 @@ static ViewController *currentViewController;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [jailbreak setTitle:@"Error: topanga" forState:UIControlStateNormal];
             });
+        } else if (jailbreakstatus == -3) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [jailbreak setTitle:@"Error: amfid patch" forState:UIControlStateNormal];
+            });
         } else {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [jailbreak setTitle:@"Error Jailbreaking" forState:UIControlStateNormal];
