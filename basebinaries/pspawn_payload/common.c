@@ -64,7 +64,7 @@ void openjailbreakdsocket(){
     }
     jailbreakd_sockfd = sock;
     
-    int fd = open("/tmp/jailbreakd.pid", O_RDONLY, 0600);
+    int fd = open("/var/run/jailbreakd.pid", O_RDONLY, 0600);
     if (fd < 0) {
         fprintf(stderr, "WHAT!\n");
         return;
@@ -79,7 +79,7 @@ void calljailbreakd(pid_t PID, uint8_t command) {
     if (jailbreakd_sockfd == -1) {
         openjailbreakdsocket();
     }
-    int fd = open("/tmp/jailbreakd.pid", O_RDONLY, 0600);
+    int fd = open("/var/run/jailbreakd.pid", O_RDONLY, 0600);
     if (fd < 0) {
         fprintf(stderr, "WHAT!\n");
         return;

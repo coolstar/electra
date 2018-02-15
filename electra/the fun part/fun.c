@@ -297,7 +297,7 @@ do { \
     printf("Starting server...\n");
     start_jailbreakd(kernel_base);
 
-    while (!file_exists("/var/tmp/jailbreakd.pid")){
+    while (!file_exists("/var/run/jailbreakd.pid")){
         printf("Waiting for jailbreakd...\n");
         usleep(100000); //100 ms
     }

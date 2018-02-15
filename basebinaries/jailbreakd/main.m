@@ -396,7 +396,7 @@ void* thd_func(void* arg){
     isTCPInit = true;
     
     if (isXPCInit && isTCPInit){
-        int fd = open("/tmp/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
+        int fd = open("/var/run/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
         char mmmm[8] = {0};
         int sz = snprintf(mmmm, 8, "%d", getpid());
         write(fd, mmmm, sz);
@@ -433,7 +433,7 @@ void* thd_func(void* arg){
 int main(int argc, char **argv, char **envp) {
     fprintf(stderr,"jailbreakd: start\n");
 
-    unlink("/tmp/jailbreakd.pid");
+    unlink("/var/run/jailbreakd.pid");
 
     kernel_base = strtoull(getenv("KernelBase"), NULL, 16);
     remove_memory_limit();
@@ -495,7 +495,7 @@ int main(int argc, char **argv, char **envp) {
         isXPCInit = true;
         
         if (isXPCInit && isTCPInit){
-            int fd = open("/tmp/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
+            int fd = open("/var/run/jailbreakd.pid", O_WRONLY | O_CREAT, 0600);
             char mmmm[8] = {0};
             int sz = snprintf(mmmm, 8, "%d", getpid());
             write(fd, mmmm, sz);

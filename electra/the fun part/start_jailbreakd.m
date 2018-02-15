@@ -23,6 +23,7 @@
 
 int start_jailbreakd(uint64_t kernel_base) {
     unlink("/var/tmp/jailbreakd.pid");
+    unlink("/var/run/jailbreakd.pid");
     unlink("/var/log/jailbreakd-stderr.log");
     unlink("/var/log/jailbreakd-stdout.log");
     
