@@ -95,6 +95,10 @@ void extract_bootstrap() {
     
     unlink("/electra/bootstrap.tar");
     
+    unlink("/usr/libexec/cydia/move.sh");
+    
+    cp("/usr/libexec/cydia/move.sh", progname("move.sh"));
+    
     int rv = open("/.bootstrapped_electra", O_RDWR|O_CREAT);
     close(rv);
     rv = open("/.cydia_no_stash",O_RDWR|O_CREAT);

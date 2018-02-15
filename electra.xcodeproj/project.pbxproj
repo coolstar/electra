@@ -54,6 +54,7 @@
 		F1954022200BFE86000D094F /* AppIcon20x20@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954017200BFE86000D094F /* AppIcon20x20@2x.png */; };
 		F1954023200BFE86000D094F /* AppIcon76x76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954018200BFE86000D094F /* AppIcon76x76@2x.png */; };
 		F198765B200A8A0F00D4BB56 /* unlocknvram.c in Sources */ = {isa = PBXBuildFile; fileRef = F198765A200A8A0F00D4BB56 /* unlocknvram.c */; };
+		F1A6290D20357C45007B52B4 /* move.sh in Resources */ = {isa = PBXBuildFile; fileRef = F1A6290C20357C45007B52B4 /* move.sh */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -136,6 +137,7 @@
 		F1954018200BFE86000D094F /* AppIcon76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon76x76@2x.png"; sourceTree = "<group>"; };
 		F1987659200A8A0F00D4BB56 /* unlocknvram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unlocknvram.h; sourceTree = "<group>"; };
 		F198765A200A8A0F00D4BB56 /* unlocknvram.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unlocknvram.c; sourceTree = "<group>"; };
+		F1A6290C20357C45007B52B4 /* move.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = move.sh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +154,7 @@
 		176718CC201C98EB00FDF1CF /* bootstrap */ = {
 			isa = PBXGroup;
 			children = (
+				F1A6290C20357C45007B52B4 /* move.sh */,
 				F1531E102009709700DD5051 /* tar.gz */,
 				175043CA203230350064B7CE /* launchctl.gz */,
 				17D60E902032280600902E73 /* bootstrap.tar.gz */,
@@ -397,6 +400,7 @@
 				17D60E912032280600902E73 /* bootstrap.tar.gz in Resources */,
 				F195401E200BFE86000D094F /* AppIcon83.5x83.5@2x.png in Resources */,
 				F1954023200BFE86000D094F /* AppIcon76x76@2x.png in Resources */,
+				F1A6290D20357C45007B52B4 /* move.sh in Resources */,
 				F195401B200BFE86000D094F /* AppIcon40x40.png in Resources */,
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
 				175043CB203230350064B7CE /* launchctl.gz in Resources */,
