@@ -9,6 +9,11 @@
 #include "topangadetect.h"
 #include "file_utils.h"
 
+//THIS DETECTION IS NOT COMPREHENSIVE
+//DO NOT TRY MANUALLY REMOVING FILES TO PASS THIS CHECK
+//IF NOT ALL OF TOPANGA'S FILES ARE REMOVED, ELECTRA WILL FAIL TO EXTRACT THE BOOTSTRAP
+//YOU HAVE BEEN WARNED
+
 bool topangaInstalled(){
     if (file_exists("/bin/bash"))
         return true;
