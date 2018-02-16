@@ -286,9 +286,9 @@ do { \
         removeElectraBeta();
     }
     close(bootstrapped);
-    unlink("/electra/rm");
     
     extract_bootstrap();
+    unlink("/electra/rm");
 
     // MARK: - Cleanup
     
