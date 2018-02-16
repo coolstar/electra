@@ -85,7 +85,11 @@ void extract_bootstrap() {
     waitpid(pd, NULL, 0);
     posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/var/lib/apt", NULL }, NULL);
     waitpid(pd, NULL, 0);
+    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/var/cache/apt", NULL }, NULL);
+    waitpid(pd, NULL, 0);
     posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/var/lib/dpkg", NULL }, NULL);
+    waitpid(pd, NULL, 0);
+    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/Library/MobileSubstrate", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
     extractGz("bootstrap.tar", "/electra/bootstrap.tar");
