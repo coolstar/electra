@@ -39,14 +39,12 @@ void removeElectraBeta(void){
     rv = posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/Library/Frameworks", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
-    unlink("/usr/lib/SBInject.dylib");
     rv = posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/System/Library/Themes", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
     rv = posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/bootstrap", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
-    unlink("/usr/lib/SBInject.dylib");
     rv = posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/Library/Themes", NULL }, NULL);
     waitpid(pd, NULL, 0);
 }
