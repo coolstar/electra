@@ -54,7 +54,6 @@ int current_process = PROCESS_XPCPROXY;
 
 const char* xpcproxy_blacklist[] = {
     "com.apple.diagnosticd",  // syslog
-    "com.apple.ReportCrash",  // crash reporting
     "MTLCompilerService",     // ?_?
     "OTAPKIAssetTool",        // h_h
     "cfprefsd",               // o_o
