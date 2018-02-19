@@ -93,7 +93,9 @@ int parse_superblob(uint8_t *code_dir, uint8_t dst[CS_CDHASH_LEN]) {
 }
 
 uint8_t *get_code_directory(const char* name, uint64_t file_off) {
+    // XXX use mmap
     FILE* fd = fopen(name, "r");
+    uint8_t *rv = NULL;
 
     if (fd == NULL) {
         NSLog(@"Couldn't open file");
@@ -106,7 +108,7 @@ uint8_t *get_code_directory(const char* name, uint64_t file_off) {
 
     if (file_off > file_len){
         NSLog(@"Error: File offset greater than length.");
-        return NULL;
+        goto out;
     }
 
     uint64_t off = file_off;
@@ -117,18 +119,18 @@ uint8_t *get_code_directory(const char* name, uint64_t file_off) {
 
     if (mh.magic != MH_MAGIC_64){
         NSLog(@"Error: Invalid magic");
-        return NULL;
+        goto out;
     }
 
     off += sizeof(struct mach_header_64);
     if (off > file_len){
         NSLog(@"Error: Unexpected end of file");
-        return NULL;
+        goto out;
     }
     for (int i = 0; i < mh.ncmds; i++) {
         if (off + sizeof(struct load_command) > file_len){
             NSLog(@"Error: Unexpected end of file");
-            return NULL;
+            goto out;
         }
 
         const struct load_command cmd;
@@ -142,23 +144,28 @@ uint8_t *get_code_directory(const char* name, uint64_t file_off) {
 
             if (off_cs+file_off+size_cs > file_len){
                 NSLog(@"Error: Unexpected end of file");
-                return NULL;
+                goto out;
             }
 
-            uint8_t *cd = malloc(size_cs);
-            fseek(fd, off_cs+file_off, SEEK_SET);
-            fread(cd, size_cs, 1, fd);
-            return cd;
+            rv = malloc(size_cs);
+            if (rv != NULL) {
+                fseek(fd, off_cs+file_off, SEEK_SET);
+                fread(rv, size_cs, 1, fd);
+            }
+            goto out;
         } else {
             off += cmd.cmdsize;
             if (off > file_len){
                 NSLog(@"Error: Unexpected end of file");
-                return NULL;
+                goto out;
             }
         }
     }
     NSLog(@"Didnt find the code signature");
-    return NULL;
+
+out:;
+    fclose(fd);
+    return rv;
 }
 
 int (*old_MISValidateSignatureAndCopyInfo)(NSString* file, NSDictionary* options, NSMutableDictionary** info);
