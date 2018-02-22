@@ -86,4 +86,4 @@ void platformize_me() {
 
 * Join the /r/jailbreak [discord](https://discord.gg/jb), and ask for help in #development
 * Create a post on /r/jailbreakdevelopers
-* If neither of these solve your issues, open an issue on the [the electra issues page](https://github.com/coolstar/electra/issues)
+* If neither of these solve your issues, open an issue on the [electra issues page](https://github.com/coolstar/electra/issues)
