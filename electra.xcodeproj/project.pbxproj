@@ -35,6 +35,9 @@
 		BC8EE46F1FE2B4E800402F32 /* patchfinder64.c in Sources */ = {isa = PBXBuildFile; fileRef = BC8EE46D1FE2B4E800402F32 /* patchfinder64.c */; };
 		BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC9969031FE66CE200A4EDB9 /* ent.plist */; };
 		F11625EB2032CD3500515402 /* rm.gz in Resources */ = {isa = PBXBuildFile; fileRef = F11625EA2032CD3500515402 /* rm.gz */; };
+		F14151A4203F87BC00CAEBDB /* AppIcon29x29@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F14151A1203F87BC00CAEBDB /* AppIcon29x29@2x.png */; };
+		F14151A5203F87BC00CAEBDB /* AppIcon29x29.png in Resources */ = {isa = PBXBuildFile; fileRef = F14151A2203F87BC00CAEBDB /* AppIcon29x29.png */; };
+		F14151A6203F87BC00CAEBDB /* AppIcon29x29@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F14151A3203F87BC00CAEBDB /* AppIcon29x29@3x.png */; };
 		F14B5F961FF2265900E62599 /* start_jailbreakd.m in Sources */ = {isa = PBXBuildFile; fileRef = F14B5F951FF2265900E62599 /* start_jailbreakd.m */; };
 		F1531E0E2009702B00DD5051 /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = F1531E0D2009702B00DD5051 /* NSData+GZip.m */; };
 		F1531E112009709800DD5051 /* tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = F1531E102009709700DD5051 /* tar.gz */; };
@@ -112,6 +115,9 @@
 		BC8EE46E1FE2B4E800402F32 /* patchfinder64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = patchfinder64.h; sourceTree = "<group>"; };
 		BC9969031FE66CE200A4EDB9 /* ent.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ent.plist; sourceTree = "<group>"; };
 		F11625EA2032CD3500515402 /* rm.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = rm.gz; sourceTree = "<group>"; };
+		F14151A1203F87BC00CAEBDB /* AppIcon29x29@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon29x29@2x.png"; sourceTree = "<group>"; };
+		F14151A2203F87BC00CAEBDB /* AppIcon29x29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon29x29.png; sourceTree = "<group>"; };
+		F14151A3203F87BC00CAEBDB /* AppIcon29x29@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon29x29@3x.png"; sourceTree = "<group>"; };
 		F14B5F951FF2265900E62599 /* start_jailbreakd.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = start_jailbreakd.m; sourceTree = "<group>"; };
 		F1531E0D2009702B00DD5051 /* NSData+GZip.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSData+GZip.m"; sourceTree = "<group>"; };
 		F1531E0F2009703900DD5051 /* NSData+GZip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+GZip.h"; sourceTree = "<group>"; };
@@ -313,6 +319,9 @@
 				F1954012200BFE86000D094F /* AppIcon20x20.png */,
 				F1954017200BFE86000D094F /* AppIcon20x20@2x.png */,
 				F1954016200BFE86000D094F /* AppIcon20x20@3x.png */,
+				F14151A2203F87BC00CAEBDB /* AppIcon29x29.png */,
+				F14151A1203F87BC00CAEBDB /* AppIcon29x29@2x.png */,
+				F14151A3203F87BC00CAEBDB /* AppIcon29x29@3x.png */,
 				F1954010200BFE85000D094F /* AppIcon40x40.png */,
 				F1954011200BFE86000D094F /* AppIcon40x40@2x.png */,
 				F195400F200BFE85000D094F /* AppIcon40x40@3x.png */,
@@ -386,6 +395,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F1531E112009709800DD5051 /* tar.gz in Resources */,
+				F14151A6203F87BC00CAEBDB /* AppIcon29x29@3x.png in Resources */,
 				F195401F200BFE86000D094F /* AppIcon60x60@3x.png in Resources */,
 				F195401C200BFE86000D094F /* AppIcon40x40@2x.png in Resources */,
 				BC9969041FE66CE200A4EDB9 /* ent.plist in Resources */,
@@ -395,6 +405,7 @@
 				F195401A200BFE86000D094F /* AppIcon40x40@3x.png in Resources */,
 				B07A02491FB09B6F0018ACE5 /* LaunchScreen.storyboard in Resources */,
 				F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */,
+				F14151A5203F87BC00CAEBDB /* AppIcon29x29.png in Resources */,
 				B07A02461FB09B6F0018ACE5 /* Assets.xcassets in Resources */,
 				F1954022200BFE86000D094F /* AppIcon20x20@2x.png in Resources */,
 				17D60E912032280600902E73 /* bootstrap.tar.gz in Resources */,
@@ -405,6 +416,7 @@
 				B07A02441FB09B6F0018ACE5 /* Main.storyboard in Resources */,
 				175043CB203230350064B7CE /* launchctl.gz in Resources */,
 				4A7B89692010255800CB6439 /* jailbreakd.plist in Resources */,
+				F14151A4203F87BC00CAEBDB /* AppIcon29x29@2x.png in Resources */,
 				F11625EB2032CD3500515402 /* rm.gz in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
