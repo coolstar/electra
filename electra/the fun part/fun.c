@@ -310,8 +310,6 @@ do { \
         const char* args_launchd[] = {BinaryLocation, itoa(1), "/electra/pspawn_payload.dylib", NULL};
         rv = posix_spawn(&pd, BinaryLocation, NULL, NULL, (char **)&args_launchd, NULL);
         waitpid(pd, NULL, 0);
-        
-        run("/usr/bin/recache --no-respring");
     }
     
     wk64(rk64(kern_ucred+0x78)+0x8, 0);
