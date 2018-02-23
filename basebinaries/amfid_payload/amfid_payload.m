@@ -69,12 +69,13 @@ int hash_code_directory(const CodeDirectory* directory, uint8_t dst[CS_CDHASH_LE
     return 0;
 }
 
-#define BLOB_FITS(blob, size) ((size >= sizeof(*blob)) && (size <= ntohl(blob->length)))
+#define BLOB_FITS(blob, size) ((size >= sizeof(*blob)) && (size >= ntohl(blob->length)))
 
 // see cs_validate_csblob in xnu bsd/kern/ubc_subr.c
 // 0 on success
 int hash_code_signature(const void *csblob, uint32_t csblob_size, uint8_t dst[CS_CDHASH_LEN]) {
     const CS_GenericBlob *gb = (const CS_GenericBlob *) csblob;
+
     if (!BLOB_FITS(gb, csblob_size)) {
         ERROR("csblob too small even for generic blob");
         return 1;
