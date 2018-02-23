@@ -51,6 +51,12 @@ typedef struct __attribute__((packed)) {
     /* followed by Blobs in no particular order as indicated by offsets in index */
 } CS_SuperBlob;
 
+typedef struct __attribute__((packed)) {
+    uint32_t magic;                 /* magic number */
+    uint32_t length;                /* total length of blob */
+    char data[];
+} CS_GenericBlob;
+
 /*
  * Magic numbers used by Code Signing
  */
