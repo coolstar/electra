@@ -211,6 +211,7 @@ int open_img(img_info_t* info) {
     }
 
     info->addr = (const void*) ((uintptr_t) map + info->file_off);
+    ret = 0;
 
 out:;
     if (ret) {
