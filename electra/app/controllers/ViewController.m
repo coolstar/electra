@@ -168,7 +168,7 @@ static ViewController *currentViewController;
 - (void)displaySnapshotNotice {
     dispatch_async(dispatch_get_main_queue(), ^{
         [jailbreak setTitle:@"user prompt" forState:UIControlStateNormal];
-        UIAlertController *apfsNoticeController = [UIAlertController alertControllerWithTitle:@"APFS Snapshot Created" message:@"An APFS Snapshot has been successfully created! You may be able to use SemiRestore to restore to your phone to this snapshot in the future." preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController *apfsNoticeController = [UIAlertController alertControllerWithTitle:@"APFS Snapshot Created" message:@"An APFS Snapshot has been successfully created! You may be able to use SemiRestore to restore your phone to this snapshot in the future." preferredStyle:UIAlertControllerStyleAlert];
         [apfsNoticeController addAction:[UIAlertAction actionWithTitle:@"Continue Jailbreak" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [jailbreak setTitle:@"Please Wait (2/3)" forState:UIControlStateNormal];
             snapshotWarningRead();
