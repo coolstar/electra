@@ -270,9 +270,7 @@ bool topangaInstalled(){
                                             @"/bin/chmod",
                                             @"/bin/rm",
                                             @"/bin/bzip2",
-                                            @"/etc/zshrc",
                                             @"/etc/dropbear",
-                                            @"/etc/profile",
                                             @"/Library/test_inject_springboard.cy",
                                             @"/usr/local/lib/libluajit.a",
                                             nil];
