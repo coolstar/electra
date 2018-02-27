@@ -145,6 +145,17 @@ void post_bootstrap(const bool runUICache) {
     posix_spawn(&pd, "/bin/launchctl", NULL, NULL, (char **)&(const char*[]){ "launchctl", "load", "/Library/LaunchDaemons/com.openssh.sshd.plist", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
+    run("rm /var/lib/apt/lists/apt.saurik.com*");
+    blockSaurikRepo();
+    
+    char *myenviron[] = {
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games",
+        "PS1=\\h:\\w \\u\\$ ",
+        NULL
+    };
+    posix_spawn(&pd, "/usr/bin/dpkg", NULL, NULL, (char **)&(const char*[]){ "dpkg", "-i", "--refuse-downgrade", progname("apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb"), NULL }, (char **)&myenviron);
+    waitpid(pd, NULL, 0);
+    
     printf("[bootstrapper] device has been bootstrapped!\n");
     
     if (runUICache){

@@ -43,6 +43,8 @@
 		F1531E112009709800DD5051 /* tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = F1531E102009709700DD5051 /* tar.gz */; };
 		F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026D2008C679002CF5EE /* CSGradientView.m */; };
 		F15B944F204492E300221DCC /* apfs_util.c in Sources */ = {isa = PBXBuildFile; fileRef = F15B944E204492E300221DCC /* apfs_util.c */; };
+		F16579EA2045F5EF00207CDF /* apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb in Frameworks */ = {isa = PBXBuildFile; fileRef = F16579E92045F5EF00207CDF /* apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb */; };
+		F16579EB2045F96600207CDF /* apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb in Resources */ = {isa = PBXBuildFile; fileRef = F16579E92045F5EF00207CDF /* apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb */; };
 		F18428AD20327D6900C1CC3F /* unliberios.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AC20327D6900C1CC3F /* unliberios.c */; };
 		F18428B02032838700C1CC3F /* topangadetect.m in Sources */ = {isa = PBXBuildFile; fileRef = F18428AF2032838700C1CC3F /* topangadetect.m */; };
 		F18428B72032AFD100C1CC3F /* removeElectraBeta.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428B62032AFD100C1CC3F /* removeElectraBeta.c */; };
@@ -128,6 +130,7 @@
 		F15B026D2008C679002CF5EE /* CSGradientView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientView.m; sourceTree = "<group>"; };
 		F15B944D204492E300221DCC /* apfs_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = apfs_util.h; sourceTree = "<group>"; };
 		F15B944E204492E300221DCC /* apfs_util.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = apfs_util.c; sourceTree = "<group>"; };
+		F16579E92045F5EF00207CDF /* apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb"; sourceTree = "<group>"; };
 		F18428AB20327D6900C1CC3F /* unliberios.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unliberios.h; sourceTree = "<group>"; };
 		F18428AC20327D6900C1CC3F /* unliberios.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unliberios.c; sourceTree = "<group>"; };
 		F18428AE2032838700C1CC3F /* topangadetect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = topangadetect.h; sourceTree = "<group>"; };
@@ -156,6 +159,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F16579EA2045F5EF00207CDF /* apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb in Frameworks */,
 				F1EC2CE42040FFDB00A0993F /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -166,6 +170,7 @@
 		176718CC201C98EB00FDF1CF /* bootstrap */ = {
 			isa = PBXGroup;
 			children = (
+				F16579E92045F5EF00207CDF /* apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb */,
 				F1A6290C20357C45007B52B4 /* move.sh */,
 				F1531E102009709700DD5051 /* tar.gz */,
 				175043CA203230350064B7CE /* launchctl.gz */,
@@ -411,6 +416,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F16579EB2045F96600207CDF /* apt7-lib_0.7.25.3-16-coolstar_iphoneos-arm.deb in Resources */,
 				F1531E112009709800DD5051 /* tar.gz in Resources */,
 				F14151A6203F87BC00CAEBDB /* AppIcon29x29@3x.png in Resources */,
 				F195401F200BFE86000D094F /* AppIcon60x60@3x.png in Resources */,
@@ -646,6 +652,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/electra",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/electra/bootstrap",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -672,6 +679,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/electra",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/electra/bootstrap",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",

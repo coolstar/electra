@@ -104,3 +104,19 @@ void installingCydia(){
 void cydiaDone(){
     [[ViewController currentViewController] cydiaDone];
 }
+
+void blockSaurikRepo(){
+    NSString *hostsFile = [NSString stringWithContentsOfFile:@"/etc/hosts" encoding:NSUTF8StringEncoding error:nil];
+    if ([hostsFile rangeOfString:@"\n0.0.0.0    apt.saurik.com\n"].location == NSNotFound){
+        FILE *file = fopen("/etc/hosts","a");
+        fprintf(file, "0.0.0.0    apt.saurik.com\n");
+        fclose(file);
+        
+        pid_t pd;
+        
+        posix_spawn(&pd, "/bin/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/var/mobile/Library/Caches/com.saurik.Cydia", NULL }, NULL);
+        waitpid(pd, NULL, 0);
+        
+        NSLog(@"Telesphoreo repo blocked successfully");
+    }
+}

@@ -52,6 +52,9 @@ void cleanupPotentialManualFiles(){
     posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/etc/dpkg", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
+    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/etc/dropbear", NULL }, NULL);
+    waitpid(pd, NULL, 0);
+    
     posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/etc/pam.d", NULL }, NULL);
     waitpid(pd, NULL, 0);
     
