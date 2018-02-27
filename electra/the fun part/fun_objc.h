@@ -13,6 +13,8 @@ const char* progname(const char*);;
 void extractGz(const char *from, const char *to);
 void update_springboard_plist(void);
 void startDaemons(void);
+void displaySnapshotWarning(void);
+void displaySnapshotNotice(void);
 
 void removingLiberiOS(void);
 void removingElectraBeta(void);

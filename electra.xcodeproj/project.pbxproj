@@ -42,8 +42,9 @@
 		F1531E0E2009702B00DD5051 /* NSData+GZip.m in Sources */ = {isa = PBXBuildFile; fileRef = F1531E0D2009702B00DD5051 /* NSData+GZip.m */; };
 		F1531E112009709800DD5051 /* tar.gz in Resources */ = {isa = PBXBuildFile; fileRef = F1531E102009709700DD5051 /* tar.gz */; };
 		F15B026E2008C679002CF5EE /* CSGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F15B026D2008C679002CF5EE /* CSGradientView.m */; };
+		F15B944F204492E300221DCC /* apfs_util.c in Sources */ = {isa = PBXBuildFile; fileRef = F15B944E204492E300221DCC /* apfs_util.c */; };
 		F18428AD20327D6900C1CC3F /* unliberios.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AC20327D6900C1CC3F /* unliberios.c */; };
-		F18428B02032838700C1CC3F /* topangadetect.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428AF2032838700C1CC3F /* topangadetect.c */; };
+		F18428B02032838700C1CC3F /* topangadetect.m in Sources */ = {isa = PBXBuildFile; fileRef = F18428AF2032838700C1CC3F /* topangadetect.m */; };
 		F18428B72032AFD100C1CC3F /* removeElectraBeta.c in Sources */ = {isa = PBXBuildFile; fileRef = F18428B62032AFD100C1CC3F /* removeElectraBeta.c */; };
 		F1954019200BFE86000D094F /* AppIcon76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400E200BFE85000D094F /* AppIcon76x76.png */; };
 		F195401A200BFE86000D094F /* AppIcon40x40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F195400F200BFE85000D094F /* AppIcon40x40@3x.png */; };
@@ -58,6 +59,7 @@
 		F1954023200BFE86000D094F /* AppIcon76x76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F1954018200BFE86000D094F /* AppIcon76x76@2x.png */; };
 		F198765B200A8A0F00D4BB56 /* unlocknvram.c in Sources */ = {isa = PBXBuildFile; fileRef = F198765A200A8A0F00D4BB56 /* unlocknvram.c */; };
 		F1A6290D20357C45007B52B4 /* move.sh in Resources */ = {isa = PBXBuildFile; fileRef = F1A6290C20357C45007B52B4 /* move.sh */; };
+		F1EC2CE42040FFDB00A0993F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1EC2CE32040FFDB00A0993F /* Security.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -124,10 +126,12 @@
 		F1531E102009709700DD5051 /* tar.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = tar.gz; sourceTree = "<group>"; };
 		F15B026C2008C679002CF5EE /* CSGradientView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CSGradientView.h; sourceTree = "<group>"; };
 		F15B026D2008C679002CF5EE /* CSGradientView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CSGradientView.m; sourceTree = "<group>"; };
+		F15B944D204492E300221DCC /* apfs_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = apfs_util.h; sourceTree = "<group>"; };
+		F15B944E204492E300221DCC /* apfs_util.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = apfs_util.c; sourceTree = "<group>"; };
 		F18428AB20327D6900C1CC3F /* unliberios.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unliberios.h; sourceTree = "<group>"; };
 		F18428AC20327D6900C1CC3F /* unliberios.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unliberios.c; sourceTree = "<group>"; };
 		F18428AE2032838700C1CC3F /* topangadetect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = topangadetect.h; sourceTree = "<group>"; };
-		F18428AF2032838700C1CC3F /* topangadetect.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = topangadetect.c; sourceTree = "<group>"; };
+		F18428AF2032838700C1CC3F /* topangadetect.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = topangadetect.m; sourceTree = "<group>"; };
 		F18428B52032AFD100C1CC3F /* removeElectraBeta.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = removeElectraBeta.h; sourceTree = "<group>"; };
 		F18428B62032AFD100C1CC3F /* removeElectraBeta.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = removeElectraBeta.c; sourceTree = "<group>"; };
 		F195400E200BFE85000D094F /* AppIcon76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon76x76.png; sourceTree = "<group>"; };
@@ -144,6 +148,7 @@
 		F1987659200A8A0F00D4BB56 /* unlocknvram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unlocknvram.h; sourceTree = "<group>"; };
 		F198765A200A8A0F00D4BB56 /* unlocknvram.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unlocknvram.c; sourceTree = "<group>"; };
 		F1A6290C20357C45007B52B4 /* move.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = move.sh; sourceTree = "<group>"; };
+		F1EC2CE32040FFDB00A0993F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +156,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1EC2CE42040FFDB00A0993F /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,9 +246,11 @@
 				F18428AB20327D6900C1CC3F /* unliberios.h */,
 				F18428AC20327D6900C1CC3F /* unliberios.c */,
 				F18428AE2032838700C1CC3F /* topangadetect.h */,
-				F18428AF2032838700C1CC3F /* topangadetect.c */,
+				F18428AF2032838700C1CC3F /* topangadetect.m */,
 				F18428B52032AFD100C1CC3F /* removeElectraBeta.h */,
 				F18428B62032AFD100C1CC3F /* removeElectraBeta.c */,
+				F15B944D204492E300221DCC /* apfs_util.h */,
+				F15B944E204492E300221DCC /* apfs_util.c */,
 			);
 			path = utilities;
 			sourceTree = "<group>";
@@ -262,6 +270,7 @@
 			children = (
 				B07A023B1FB09B6F0018ACE5 /* electra */,
 				B07A023A1FB09B6F0018ACE5 /* Products */,
+				F1EC2CE22040FFDB00A0993F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -334,6 +343,14 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		F1EC2CE22040FFDB00A0993F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F1EC2CE32040FFDB00A0993F /* Security.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -342,9 +359,9 @@
 			buildConfigurationList = B07A024F1FB09B6F0018ACE5 /* Build configuration list for PBXNativeTarget "electra" */;
 			buildPhases = (
 				B07A02351FB09B6F0018ACE5 /* Sources */,
+				B07A02361FB09B6F0018ACE5 /* Frameworks */,
 				6545305220137D250017BA60 /* ShellScript */,
 				F1F5BD75201C6EA400C42113 /* ShellScript */,
-				B07A02361FB09B6F0018ACE5 /* Frameworks */,
 				B07A02371FB09B6F0018ACE5 /* Resources */,
 			);
 			buildRules = (
@@ -460,7 +477,7 @@
 				B003EB351FC583CB00C58441 /* kmem.c in Sources */,
 				B0EF11171FCC784B00C1D14E /* symbols.c in Sources */,
 				F198765B200A8A0F00D4BB56 /* unlocknvram.c in Sources */,
-				F18428B02032838700C1CC3F /* topangadetect.c in Sources */,
+				F18428B02032838700C1CC3F /* topangadetect.m in Sources */,
 				6545304C200E8F600017BA60 /* remap_tfp_set_hsp.c in Sources */,
 				B07A02411FB09B6F0018ACE5 /* ViewController.m in Sources */,
 				176718D5201C9B3600FDF1CF /* file_utils.c in Sources */,
@@ -469,6 +486,7 @@
 				BC8B64C41FE5252F00EDF749 /* fun_objc.m in Sources */,
 				176718DE201CB8B100FDF1CF /* offsetof.c in Sources */,
 				F1531E0E2009702B00DD5051 /* NSData+GZip.m in Sources */,
+				F15B944F204492E300221DCC /* apfs_util.c in Sources */,
 				B07A024C1FB09B6F0018ACE5 /* main.m in Sources */,
 				B003EB381FC5863800C58441 /* find_port.c in Sources */,
 				B07A02541FB09C3D0018ACE5 /* async_wake.c in Sources */,
@@ -617,12 +635,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = N78R6QBX22;
 				ENABLE_BITCODE = NO;
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/electra/headers/\"";
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/electra",
+					"$(PROJECT_DIR)",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,
@@ -637,12 +661,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = N78R6QBX22;
 				ENABLE_BITCODE = NO;
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/electra/headers/\"";
 				INFOPLIST_FILE = "$(SRCROOT)/electra/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/electra",
+					"$(PROJECT_DIR)",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,

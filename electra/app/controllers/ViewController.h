@@ -9,5 +9,7 @@
 - (void)removingElectraBeta;
 - (void)installingCydia;
 - (void)cydiaDone;
+- (void)displaySnapshotNotice;
+- (void)displaySnapshotWarning;
 @end
 

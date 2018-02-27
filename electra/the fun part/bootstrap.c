@@ -77,21 +77,6 @@ void extract_bootstrap() {
     
     installingCydia();
     
-    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/etc/apt", NULL }, NULL);
-    waitpid(pd, NULL, 0);
-    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/etc/dpkg", NULL }, NULL);
-    waitpid(pd, NULL, 0);
-    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/etc/ssh", NULL }, NULL);
-    waitpid(pd, NULL, 0);
-    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/var/lib/apt", NULL }, NULL);
-    waitpid(pd, NULL, 0);
-    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/var/cache/apt", NULL }, NULL);
-    waitpid(pd, NULL, 0);
-    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/var/lib/dpkg", NULL }, NULL);
-    waitpid(pd, NULL, 0);
-    posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/Library/MobileSubstrate", NULL }, NULL);
-    waitpid(pd, NULL, 0);
-    
     extractGz("bootstrap.tar", "/electra/bootstrap.tar");
     
     posix_spawn(&pd, tar, NULL, NULL, (char **)&(const char*[]){ tar, "--preserve-permissions", "-xvkf", "/electra/bootstrap.tar", "-C", "/", NULL }, NULL);
@@ -100,6 +85,22 @@ void extract_bootstrap() {
     unlink("/electra/bootstrap.tar");
     
     unlink("/usr/libexec/cydia/move.sh");
+    
+    FILE *file = fopen("/etc/hosts","w"); /* write file (create a file if it does not exist and if it does treat as empty.*/
+    fprintf(file,"%s","##\n"); //writes
+    fprintf(file,"%s","# Host Database\n"); //writes
+    fprintf(file,"%s","# localhost is used to configure the loopback interface\n"); //writes
+    fprintf(file,"%s","# when the system is booting.  Do not change this entry.\n"); //writes
+    fprintf(file,"%s","##\n"); //writes
+    fprintf(file,"%s","127.0.0.1    localhost\n"); //writes
+    fprintf(file,"%s","255.255.255.255 broadcasthost\n"); //writes
+    fprintf(file,"%s","::1      localhost\n"); //writes
+    fclose(file); /*done!*/
+    
+    file = fopen("/etc/apt/sources.list.d/electra-shim.list","w"); /* write file (create a file if it does not exist and if it does treat as empty.*/
+    fprintf(file,"%s","deb https://electrarepo64.coolstar.org/substrate-shim/ ./\n"); //writes
+    fprintf(file,"%s","\n"); //writes
+    fclose(file);
     
     cp("/usr/libexec/cydia/move.sh", progname("move.sh"));
     
@@ -122,24 +123,8 @@ void post_bootstrap(const bool runUICache) {
     unlink(tar);
     
     FILE *file;
-    file = fopen("/etc/hosts","w"); /* write file (create a file if it does not exist and if it does treat as empty.*/
-    fprintf(file,"%s","##\n"); //writes
-    fprintf(file,"%s","# Host Database\n"); //writes
-    fprintf(file,"%s","# localhost is used to configure the loopback interface\n"); //writes
-    fprintf(file,"%s","# when the system is booting.  Do not change this entry.\n"); //writes
-    fprintf(file,"%s","##\n"); //writes
-    fprintf(file,"%s","127.0.0.1    localhost\n"); //writes
-    fprintf(file,"%s","255.255.255.255 broadcasthost\n"); //writes
-    fprintf(file,"%s","::1      localhost\n"); //writes
-    fclose(file); /*done!*/
-    
     file = fopen("/etc/apt/sources.list.d/electra.list","w"); /* write file (create a file if it does not exist and if it does treat as empty.*/
     fprintf(file,"%s","deb https://electrarepo64.coolstar.org/ ./\n"); //writes
-    fprintf(file,"%s","\n"); //writes
-    fclose(file);
-    
-    file = fopen("/etc/apt/sources.list.d/electra-shim.list","w"); /* write file (create a file if it does not exist and if it does treat as empty.*/
-    fprintf(file,"%s","deb https://electrarepo64.coolstar.org/substrate-shim/ ./\n"); //writes
     fprintf(file,"%s","\n"); //writes
     fclose(file);
     

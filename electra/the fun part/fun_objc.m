@@ -19,6 +19,7 @@
 #import <Foundation/Foundation.h>
 #import "NSData+GZip.h"
 #import "ViewController.h"
+#import "utils.h"
 
 const char* progname(const char* prog) {
     char path[4096];
@@ -57,10 +58,16 @@ void update_springboard_plist(){
     [[NSFileManager defaultManager] setAttributes:attr ofItemAtPath:@"/var/mobile/Library/Preferences/com.apple.springboard.plist" error:&error];
 }
 
-void startDaemons(){
+void startDaemons(){    
     pid_t pd;
     
-    NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Library/LaunchDaemons/" error:nil];
+    NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/etc/rc.d" error:nil];
+    for (NSString *fileName in files){
+        NSString *fullPath = [@"/etc/rc.d" stringByAppendingPathComponent:fileName];
+        run([fullPath UTF8String]);
+    }
+    
+    files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Library/LaunchDaemons/" error:nil];
     for (NSString *fileName in files){
         if ([fileName isEqualToString:@"jailbreakd.plist"])
             continue;
@@ -72,6 +79,14 @@ void startDaemons(){
         posix_spawn(&pd, "/bin/launchctl", NULL, NULL, (char **)&(const char*[]){ "launchctl", "load", [fullPath UTF8String], NULL }, NULL);
         waitpid(pd, NULL, 0);
     }
+}
+
+void displaySnapshotNotice(){
+    [[ViewController currentViewController] displaySnapshotNotice];
+}
+
+void displaySnapshotWarning(){
+    [[ViewController currentViewController] displaySnapshotWarning];
 }
 
 void removingLiberiOS(){

@@ -11,6 +11,7 @@
 #include "IOKit.h"
 #include "kutils.h"
 #include "utils.h"
+#include "apfs_util.h"
 #include "file_utils.h"
 #include "amfi_utils.h"
 #include "bootstrap.h"
@@ -39,6 +40,12 @@ kexecute(rk64(rk(dict)+SetObjectWithCharP), dict, s, val, 0, 0, 0, 0); \
 #define OSString_CStringPtr(str) rk64(str+0x10)
 
 // MARK: - Post exploit patching
+
+bool acknowledgeSnapshotWarning = false;
+
+void snapshotWarningRead(void){
+    acknowledgeSnapshotWarning = true;
+}
 
 int begin_fun(mach_port_t tfp0, mach_port_t user_client, bool enable_tweaks) {
 	
@@ -235,15 +242,6 @@ do { \
     
     unlink("/.bit_of_fun");
     
-    FILE *fp = popen("/sbin/mount", "r");
-    
-    char *ln = NULL;
-    size_t len = 0;
-    
-    while (getline(&ln, &len, fp) != -1)
-        fputs(ln, stdout);
-    fclose(fp);
-    
     pid_t pd;
     int rv = 0;
     
@@ -268,8 +266,6 @@ do { \
     }
     unlink("/.amfid_success");
     
-    //unlocknvram();
-    
     int bootstrapped = open("/.bootstrapped_electra", O_RDONLY);
     if (bootstrapped == -1) {
         if (checkLiberiOS()){
@@ -284,10 +280,60 @@ do { \
         }
         removingElectraBeta();
         removeElectraBeta();
+        
+        printf("APFS Snapshots: \n");
+        printf("=========\n");
+        list_snapshots("/");
+        printf("=========\n");
+        
+        int snapshot = check_snapshot("/", "electra-prejailbreak");
+        if (snapshot == 1){
+            printf("Snapshot exists!\n");
+        } else if (snapshot == 0){
+            rename("/electra/createSnapshot", "/createSnapshot");
+            rv = posix_spawn(&pd, "/electra/rm", NULL, NULL, (char **)&(const char*[]){ "rm", "-rf", "/electra", NULL }, NULL);
+            waitpid(pd, NULL, 0);
+            
+            rv = posix_spawn(&pd, "/createSnapshot", NULL, NULL, (char **)&(const char*[]){ "createSnapshot", NULL }, NULL);
+            waitpid(pd, NULL, 0);
+            
+            printf("APFS Snapshots: \n");
+            
+            printf("=========\n");
+            list_snapshots("/");
+            printf("=========\n");
+            
+            snapshot = check_snapshot("/", "electra-prejailbreak");
+            if (snapshot != 1){
+                return -5;
+            }
+            
+            acknowledgeSnapshotWarning = false;
+            displaySnapshotNotice();
+            while (!acknowledgeSnapshotWarning){
+                usleep(100);
+            }
+            
+            copy_basebinaries();
+        }
+    } else {
+        int snapshot = check_snapshot("/", "electra-prejailbreak");
+        if (snapshot != 1){
+            if (!file_exists("/.electra_no_snapshot")){
+                acknowledgeSnapshotWarning = false;
+                displaySnapshotWarning();
+                while (!acknowledgeSnapshotWarning){
+                    usleep(100);
+                }
+                int rv = open("/.electra_no_snapshot", O_RDWR|O_CREAT);
+                close(rv);
+            }
+        }
     }
     close(bootstrapped);
     
     extract_bootstrap();
+    unlink("/electra/createSnapshot");
     unlink("/electra/rm");
 
     // MARK: - Cleanup
@@ -314,15 +360,14 @@ do { \
     
     wk64(rk64(kern_ucred+0x78)+0x8, 0);
     
-    startDaemons();
-    
     if (enable_tweaks){
+        startDaemons();
+        
         sleep(2);
         
         const char* args_ldrestart[] = {"ldrestart", itoa(1), "/usr/bin/ldrestart", NULL};
         rv = posix_spawn(&pd, "/usr/bin/ldrestart", NULL, NULL, (char **)&args_ldrestart, NULL);
         waitpid(pd, NULL, 0);
-        //kill(backboardd_pid, SIGTERM);
     }
     return 0;
 }

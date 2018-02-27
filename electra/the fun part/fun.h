@@ -30,6 +30,7 @@
 
 #include "fun_objc.h"
 
+void snapshotWarningRead(void);
 int begin_fun(mach_port_t tfp0, mach_port_t user_client, bool enable_tweaks);
 
 int startprog(uint64_t kern_ucred, bool wait, const char *prog, const char* args[], const char* envp[]);
