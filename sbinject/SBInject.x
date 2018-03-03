@@ -111,15 +111,14 @@ int file_exist(char *filename) {
 @end
 
 %group SafeMode
-%hook SBLockScreenViewController
--(void)finishUIUnlockFromSource:(int)source {
+%hook SBLockScreenManager
+-(BOOL)_finishUIUnlockFromSource:(int)arg1 withOptions:(id)arg2 {
     %orig;
     [(SpringBoard *)[%c(UIApplication) sharedApplication] launchApplicationWithIdentifier:@"org.coolstar.SafeMode" suspended:NO];
 }
-%end
 
-%hook SBDashBoardViewController
--(void)finishUIUnlockFromSource:(int)source {
+// Necessary on iPhone X to show during after swipe unlock gesture
+-(void)lockScreenViewControllerDidDismiss {
     %orig;
     [(SpringBoard *)[%c(UIApplication) sharedApplication] launchApplicationWithIdentifier:@"org.coolstar.SafeMode" suspended:NO];
 }
