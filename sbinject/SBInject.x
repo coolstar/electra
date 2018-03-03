@@ -117,7 +117,7 @@ int file_exist(char *filename) {
     [(SpringBoard *)[%c(UIApplication) sharedApplication] launchApplicationWithIdentifier:@"org.coolstar.SafeMode" suspended:NO];
 }
 
-// Necessary on iPhone X to show during after swipe unlock gesture
+// Necessary on iPhone X to show after swipe unlock gesture
 -(void)lockScreenViewControllerDidDismiss {
     %orig;
     [(SpringBoard *)[%c(UIApplication) sharedApplication] launchApplicationWithIdentifier:@"org.coolstar.SafeMode" suspended:NO];
