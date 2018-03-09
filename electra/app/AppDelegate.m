@@ -22,6 +22,7 @@ typedef CFStringRef (*w)(int e);
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
     [self jailbreakShortcut];
     return YES;
 }
