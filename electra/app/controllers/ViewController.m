@@ -42,7 +42,8 @@
     
     BOOL enable3DTouch = YES;
     
-    if (kCFCoreFoundationVersionNumber < 1443 || kCFCoreFoundationVersionNumber > 1445.32){
+    //version_range=(1443, 1445.32)  11.0(15A5327g)=1438.0999999999999
+    if (kCFCoreFoundationVersionNumber < 1438.09 || kCFCoreFoundationVersionNumber > 1445.32){
         [jailbreak setEnabled:NO];
         [enableTweaks setEnabled:NO];
         [jailbreak setTitle:@"Version Error" forState:UIControlStateNormal];
